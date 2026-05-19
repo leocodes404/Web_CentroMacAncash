@@ -56,11 +56,11 @@ function handleNavbarScroll() {
 }
 
 function animateCounters() {
-  const counters = document.querySelectorAll('.kpi-card');
+  const counters = document.querySelectorAll('[data-count]');
   const observer = new IntersectionObserver((entries, obs) => {
     entries.forEach((entry) => {
       if (entry.isIntersecting) {
-        const valueElement = entry.target.querySelector('.kpi-card__value');
+        const valueElement = entry.target.closest('.kpi-value') || entry.target;
         const targetCount = Number(entry.target.dataset.count) || 0;
         let current = 0;
         const step = Math.max(1, Math.round(targetCount / 60));
@@ -71,7 +71,7 @@ function animateCounters() {
             current = targetCount;
             clearInterval(countInterval);
           }
-          valueElement.textContent = current;
+          valueElement.textContent = current.toLocaleString('es-PE');
         }, 22);
 
         obs.unobserve(entry.target);
@@ -83,68 +83,132 @@ function animateCounters() {
 
 function initCharts() {
   const barCanvas = document.getElementById('chartBar');
-  const lineCanvas = document.getElementById('chartLine');
+  const donutCanvas = document.getElementById('chartDonut');
 
-  if (!barCanvas || !lineCanvas || typeof Chart === 'undefined') {
+  if (typeof Chart === 'undefined') {
+    console.warn('Chart.js no está disponible');
     return;
   }
 
-  new Chart(barCanvas, {
-    type: 'bar',
-    data: {
-      labels: ['Banco de la Nacion', 'DRTC', 'DRTPE', 'EsSalud', 'Reniec', 'ONP', 'Migraciones', 'Poder Judicial', 'Sunafil'],
-      datasets: [{
-        label: 'Atenciones',
-        data: [145, 120, 95, 110, 90, 80, 75, 65, 55],
-        backgroundColor: 'rgba(0, 48, 130, 0.75)',
-        borderRadius: 12,
-        maxBarThickness: 32,
-      }]
-    },
-    options: {
-      responsive: true,
-      plugins: {
-        legend: { display: false },
-        tooltip: { callbacks: { label: (ctx) => `${ctx.parsed.y} atenciones` } }
-      },
-      scales: {
-        y: {
-          beginAtZero: true,
-          ticks: { stepSize: 30 }
-        }
-      }
-    }
-  });
+  // Configuración global de Chart.js para tema oscuro
+  Chart.defaults.color = 'rgba(255, 255, 255, 0.6)';
+  Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.1)';
 
-  new Chart(lineCanvas, {
-    type: 'line',
-    data: {
-      labels: ['Semana 1', 'Semana 2', 'Semana 3', 'Semana 4', 'Semana 5', 'Semana 6', 'Semana 7', 'Semana 8'],
-      datasets: [{
-        label: 'Tendencia',
-        data: [1120, 1180, 1250, 1320, 1390, 1440, 1485, 1530],
-        borderColor: '#E8001C',
-        backgroundColor: 'rgba(232, 0, 28, 0.18)',
-        tension: 0.35,
-        fill: true,
-        pointRadius: 4,
-        pointBackgroundColor: '#E8001C'
-      }]
-    },
-    options: {
-      responsive: true,
-      plugins: {
-        legend: { display: false }
+  // Gráfico de barras: Atenciones mensuales
+  if (barCanvas) {
+    const barCtx = barCanvas.getContext('2d');
+    new Chart(barCtx, {
+      type: 'bar',
+      data: {
+        labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May'],
+        datasets: [{
+          label: 'Atenciones',
+          data: [5850, 6320, 6890, 7120, 7204],
+          backgroundColor: '#3B82F6',
+          borderColor: '#3B82F6',
+          borderRadius: 12,
+          borderSkipped: false,
+          maxBarThickness: 45,
+        }]
       },
-      scales: {
-        y: {
-          beginAtZero: false,
-          suggestedMin: 1000,
-          suggestedMax: 1600
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { 
+            display: false
+          },
+          tooltip: {
+            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+            padding: 12,
+            titleColor: '#fff',
+            bodyColor: '#fff',
+            borderColor: 'rgba(255, 255, 255, 0.2)',
+            borderWidth: 1,
+            callbacks: {
+              label: (ctx) => `${ctx.parsed.y.toLocaleString('es-PE')} atenciones`
+            }
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: { 
+              stepSize: 1000,
+              color: 'rgba(255, 255, 255, 0.6)',
+              font: { size: 12 }
+            },
+            grid: {
+              color: 'rgba(255, 255, 255, 0.05)',
+              drawBorder: false
+            }
+          },
+          x: {
+            ticks: {
+              color: 'rgba(255, 255, 255, 0.6)',
+              font: { size: 12 }
+            },
+            grid: {
+              display: false,
+              drawBorder: false
+            }
+          }
         }
       }
-    }
-  });
+    });
+  }
+
+  // Gráfico donut: Distribución por entidad
+  if (donutCanvas) {
+    const donutCtx = donutCanvas.getContext('2d');
+    new Chart(donutCtx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Banco Nación', 'RENIEC', 'EsSalud', 'DRTC', 'Migraciones', 'Otros'],
+        datasets: [{
+          data: [28, 25, 18, 15, 12, 2],
+          backgroundColor: [
+            '#3B82F6',
+            '#6366F1',
+            '#8B5CF6',
+            '#EC4899',
+            '#F59E0B',
+            '#6B7280'
+          ],
+          borderColor: 'rgba(26, 26, 46, 0.8)',
+          borderWidth: 3,
+          borderRadius: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: {
+              padding: 15,
+              font: { size: 12 },
+              color: 'rgba(255, 255, 255, 0.8)',
+              usePointStyle: true,
+              pointStyle: 'circle'
+            }
+          },
+          tooltip: {
+            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+            padding: 12,
+            titleColor: '#fff',
+            bodyColor: '#fff',
+            borderColor: 'rgba(255, 255, 255, 0.2)',
+            borderWidth: 1,
+            callbacks: {
+              label: (ctx) => `${ctx.label}: ${ctx.parsed}%`
+            }
+          }
+        }
+      }
+    });
+  }
 }
 
 function handleFormSubmit(event) {

@@ -123,35 +123,88 @@
     </section>
 
     <section class="dashboard" id="dashboard" data-reveal>
-      <div class="container">
-        <span class="eyebrow">Dashboard</span>
-        <h2>Datos de atenci&oacute;n en tiempo estimado</h2>
-        <div class="dashboard__kpis">
-          <div class="card kpi-card" data-count="245">
-            <span class="kpi-card__label">Atenciones hoy</span>
-            <strong class="kpi-card__value">0</strong>
-          </div>
-          <div class="card kpi-card" data-count="1630">
-            <span class="kpi-card__label">Atenciones esta semana</span>
-            <strong class="kpi-card__value">0</strong>
-          </div>
-          <div class="card kpi-card" data-count="94">
-            <span class="kpi-card__label">Satisfacci&oacute;n %</span>
-            <strong class="kpi-card__value">0</strong>
-          </div>
-          <div class="card kpi-card" data-count="18">
-            <span class="kpi-card__label">Tiempo promedio (min)</span>
-            <strong class="kpi-card__value">0</strong>
+      <div class="container dashboard__container">
+        <div class="dashboard__header">
+          <div>
+            <h2 class="dashboard__title">MAC Chimbote — Panel de Atenci&oacute;n Ciudadana</h2>
+            <p class="dashboard__subtitle">Datos simulados · Mayo 2025</p>
           </div>
         </div>
+        
+        <!-- KPIs principales con comparativos -->
+        <div class="dashboard__kpis">
+          <div class="dashboard__kpi-card">
+            <div class="kpi-icon">👥</div>
+            <div class="kpi-content">
+              <span class="kpi-label">Atendidos hoy</span>
+              <div class="kpi-value-row">
+                <strong class="kpi-value" data-count="312">0</strong>
+                <span class="kpi-change positive" data-change="6">6% vs ayer</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="dashboard__kpi-card">
+            <div class="kpi-icon">📅</div>
+            <div class="kpi-content">
+              <span class="kpi-label">Esta semana</span>
+              <div class="kpi-value-row">
+                <strong class="kpi-value" data-count="1847">0</strong>
+                <span class="kpi-change positive" data-change="5">5% vs semana ant.</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="dashboard__kpi-card">
+            <div class="kpi-icon">📊</div>
+            <div class="kpi-content">
+              <span class="kpi-label">Este mes</span>
+              <div class="kpi-meta">
+                <strong class="kpi-value" data-count="7204">0</strong>
+                <small class="kpi-meta-text">Meta: 7,500</small>
+              </div>
+            </div>
+          </div>
+
+          <div class="dashboard__kpi-card">
+            <div class="kpi-icon">⏱️</div>
+            <div class="kpi-content">
+              <span class="kpi-label">Espera promedio</span>
+              <div class="kpi-value-row">
+                <strong class="kpi-value">14 min</strong>
+                <span class="kpi-change negative">2 min vs ayer</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Satisfacción -->
+        <div class="dashboard__satisfaction">
+          <div class="satisfaction-icon">⭐</div>
+          <div class="satisfaction-content">
+            <span class="satisfaction-label">Satisfacci&oacute;n</span>
+            <div class="satisfaction-value-row">
+              <strong class="satisfaction-value">4.3<span class="satisfaction-max">/5</span></strong>
+              <span class="satisfaction-change">0.2 este mes</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Charts principales -->
         <div class="dashboard__charts">
           <div class="chart-card">
-            <h3>Atenciones por entidad (&uacute;ltima semana)</h3>
-            <canvas id="chartBar" aria-label="Gr&aacute;fico de barras de atenciones por entidad" role="img"></canvas>
+            <h3>Atenciones mensuales</h3>
+            <small class="chart-period">Ene – May 2025</small>
+            <div class="chart-container">
+              <canvas id="chartBar" aria-label="Gráfico de barras de atenciones mensuales" role="img"></canvas>
+            </div>
           </div>
           <div class="chart-card">
-            <h3>Tendencia de atenciones (8 semanas)</h3>
-            <canvas id="chartLine" aria-label="Gr&aacute;fico de l&iacute;nea de tendencia de atenciones" role="img"></canvas>
+            <h3>Distribución por entidad</h3>
+            <small class="chart-period">Participación este mes</small>
+            <div class="chart-container">
+              <canvas id="chartDonut" aria-label="Gráfico de distribución de usuarios" role="img"></canvas>
+            </div>
           </div>
         </div>
       </div>
