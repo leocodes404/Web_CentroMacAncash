@@ -4,6 +4,82 @@ const navMenu = document.getElementById('navMenu');
 const navbar = document.getElementById('navbar');
 const contactForm = document.getElementById('contactForm');
 const formNotice = document.getElementById('formNotice');
+const servicioCardsGrid = document.getElementById('serviciosGrid');
+
+const serviciosMAC = [
+  {
+    name: 'Banco de la Nación',
+    img: 'images/LogoBN.png',
+    pdf: 'pdfs_info/BANCO-DE-LA-NACION.pdf',
+    description: 'Pagos, depósitos y consultas de beneficios sociales con atención confiable.',
+  },
+  {
+    name: 'DRTC Áncash',
+    img: 'images/LogoDRTC.jpg',
+    pdf: 'pdfs_info/DRTC-ANCASH.pdf',
+    description: 'Licencias, registro vehicular y gestión de transporte en la región.',
+  },
+  {
+    name: 'DRTPE Áncash',
+    img: 'images/LogoTRABAJO.png',
+    pdf: 'pdfs_info/DRTPE-ANCASH.pdf',
+    description: 'Trámites de educación superior tecnológica y servicios de titulación.',
+  },
+  {
+    name: 'EsSalud',
+    img: 'images/LogoESSALUD.png',
+    pdf: 'pdfs_info/ESSALUD.pdf',
+    description: 'Afiliaciones, prestaciones médicas y atención de salud pública.',
+  },
+  {
+    name: 'INPE',
+    img: 'images/LogoINP.png',
+    pdf: 'pdfs_info/INPE.pdf',
+    description: 'Información y asesoría sobre servicios penitenciarios y trámites internos.',
+  },
+  {
+    name: 'Migraciones',
+    img: 'images/LogoMIGRACIONES.png',
+    pdf: 'pdfs_info/migraciones-ancash.pdf',
+    description: 'Asesoría en pasaportes, certificados migratorios y regularización de estatus.',
+  },
+  {
+    name: 'ONP',
+    img: 'images/LogoONP.png',
+    pdf: 'pdfs_info/ONP.pdf',
+    description: 'Consultas de aportes, pensiones y derechos previsionales para afiliados.',
+  },
+  {
+    name: 'Poder Judicial',
+    img: 'images/LogoPODERJUDICIAL.jpg',
+    pdf: 'pdfs_info/PODER-JUDICIAL.pdf',
+    description: 'Información legal, seguimiento de causas y apoyo en procedimientos judiciales.',
+  },
+  {
+    name: 'RENIEC',
+    img: 'images/LogoRENIEC.png',
+    pdf: 'pdfs_info/RENIEC-PROVINCIAS.pdf',
+    description: 'Actualiza tu DNI, solicita certificaciones y gestiona documentos de identidad.',
+  },
+  {
+    name: 'SUNAFIL',
+    img: 'images/LogoSUNAFIL.jpg',
+    pdf: 'pdfs_info/SUNAFIL-1.pdf',
+    description: 'Orientación en supervisión laboral y derechos de los trabajadores.',
+  },
+  {
+    name: 'SUNARP',
+    img: 'images/LogoSUNARP.jpeg',
+    pdf: 'pdfs_info/SUNARP.pdf',
+    description: 'Trámites registrales de bienes inmuebles, derechos reales y anotaciones.',
+  },
+  {
+    name: 'SUNAT',
+    img: 'images/LogoSUNAT.png',
+    pdf: 'pdfs_info/SUNAT.pdf',
+    description: 'Información tributaria y servicios relacionados con impuestos y obligaciones fiscales.',
+  }
+];
 
 const heroText = 'Tramites simples. Atencion rapida. Chimbote.';
 const heroTarget = document.getElementById('heroTypewriter');
@@ -30,6 +106,44 @@ function typeWriter(text, element, speed = 70) {
       clearInterval(timer);
     }
   }, speed);
+}
+
+function triggerDownload(fileUrl, fileName) {
+  const link = document.createElement('a');
+  link.href = encodeURI(fileUrl);
+  link.download = fileName;
+  link.rel = 'noopener';
+  link.style.display = 'none';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+function renderServiceCards() {
+  if (!servicioCardsGrid) return;
+
+  servicioCardsGrid.innerHTML = serviciosMAC.map((service) => {
+    return `
+      <article class="card servicio-card">
+        <a class="servicio-card__link" href="${service.pdf}" download="${service.name}.pdf" aria-label="Descargar ${service.name}">
+          <div class="servicio-card__media">
+            <img src="${service.img}" alt="Logo de ${service.name}" loading="lazy" />
+          </div>
+          <div class="servicio-card__content">
+            <h3>${service.name}</h3>
+            <p>${service.description}</p>
+          </div>
+        </a>
+      </article>
+    `;
+  }).join('');
+
+  servicioCardsGrid.addEventListener('click', (event) => {
+    const cardLink = event.target.closest('.servicio-card__link');
+    if (!cardLink) return;
+    event.preventDefault();
+    triggerDownload(cardLink.href, cardLink.getAttribute('download'));
+  });
 }
 
 function handleScrollReveal() {
@@ -219,6 +333,7 @@ function handleFormSubmit(event) {
 
 function init() {
   typeWriter(heroText, heroTarget);
+  renderServiceCards();
   handleScrollReveal();
   handleNavbarScroll();
   animateCounters();
