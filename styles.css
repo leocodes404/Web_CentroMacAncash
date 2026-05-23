@@ -70,9 +70,9 @@ textarea:focus-visible {
   inset: 0 0 auto;
   z-index: 1000;
   width: 100%;
-  background: rgba(244, 246, 249, 0.8);
+  background: rgba(3, 60, 250, 0);
   backdrop-filter: blur(14px);
-  border-bottom: 1px solid rgba(26, 26, 46, 0.08);
+  border-bottom: 1px solid rgba(26, 26, 46, 0);
   transition: transform var(--transition), box-shadow var(--transition), background var(--transition);
 }
 
@@ -99,17 +99,12 @@ textarea:focus-visible {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 48px;
-  height: 48px;
+  width: 150px;
+  height: 50px;
   border-radius: 14px;
-  background: var(--color-primary);
-  color: white;
+  background: rgba(255, 255, 255, 0);
+  color: rgb(255, 255, 255);
   font-weight: 800;
-}
-
-.brand__text {
-  font-size: 1rem;
-  font-weight: 700;
 }
 
 .navbar__menu {
@@ -154,11 +149,12 @@ textarea:focus-visible {
   color: white;
   position: relative;
   overflow: hidden;
+  z-index: 1;
 }
 
 .hero__content {
   position: relative;
-  z-index: 1;
+  z-index: 3;
   padding-top: 5rem;
 }
 
@@ -168,7 +164,6 @@ textarea:focus-visible {
   margin: 0 0 1rem;
   line-height: 1.05;
 }
-
 .hero p {
   max-width: 680px;
   margin: 0 0 2rem;
@@ -354,10 +349,6 @@ textarea:focus-visible {
   font-size: 1.5rem;
   background: linear-gradient(135deg, rgba(232, 0, 28, 0.12), rgba(245, 166, 35, 0.12));
   margin-bottom: 1.2rem;
-}
-
-  padding: 2rem;
-  box-shadow: var(--shadow-card);
 }
 
 .servicio-card {
@@ -648,8 +639,12 @@ textarea:focus {
 }
 
 .footer__inner {
-  display: grid;
-  gap: 1.5rem;
+  display: flex;
+  flex-direction: column;  
+  align-items: center;      
+  text-align: center;
+  gap: 1.5rem;              
+  padding: 2rem 1rem;
 }
 
 .footer__logo {
@@ -662,7 +657,19 @@ textarea:focus {
 .footer__links {
   display: flex;
   flex-wrap: wrap;
-  gap: 1rem;
+  justify-content: center;
+  align-items: center;
+  gap: 1.2rem;   
+}
+
+.facebook_icon,
+.instagram_icon,
+.twitter_icon,
+.whatsapp_icon {
+  width: 2rem;
+  height: 2rem;
+  display: block;
+  object-fit: contain;      
 }
 
 .footer__links a {
@@ -675,25 +682,22 @@ textarea:focus {
 }
 
 .whatsapp-float {
-  position: fixed;
+    position: fixed;
   right: 1.5rem;
   bottom: 1.5rem;
   display: inline-flex;
   align-items: center;
   gap: 0.75rem;
   padding: 0.95rem 1.3rem;
-  border-radius: 999px;
-  background: var(--color-secondary);
-  color: white;
-  box-shadow: 0 22px 50px rgba(232, 0, 28, 0.28);
-  animation: pulse 2.8s ease-in-out infinite;
   z-index: 999;
+  animation: pulse 2.8s ease-in-out infinite;
+}
+.whatsapp_icon_float {
+  width: 5rem;
+  height: 5rem;
+  object-fit: contain;  
 }
 
-.whatsapp-float svg {
-  display: block;
-  fill: currentColor;
-}
 
 @keyframes pulse {
   0%, 100% { transform: scale(1); }
