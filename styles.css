@@ -269,10 +269,69 @@ textarea:focus-visible {
   color: var(--color-muted);
 }
 
+.slider-wrapper {
+  position: relative;
+  padding: 0 45px;
+}
+
 .servicios__grid {
-  display: grid;
-  gap: 1.5rem;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  display: flex;
+  gap: 24px;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.servicios__grid::-webkit-scrollbar {
+  display: none;
+}
+
+.slider-item {
+  flex: 0 0 calc((100% - 48px) / 3);
+  scroll-snap-align: start;
+  display: flex;
+  justify-content: center;
+}
+
+.nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: white;
+  border: 1px solid rgba(26, 26, 46, 0.12);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  color: var(--color-primary);
+  font-weight: 700;
+  transition: all var(--transition);
+  z-index: 10;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.nav-btn:hover {
+  background: var(--color-primary);
+  color: white;
+  box-shadow: 0 8px 24px rgba(0, 48, 130, 0.2);
+}
+
+.nav-btn:active {
+  transform: translateY(-50%) scale(0.95);
+}
+
+#prevBtn {
+  left: 0;
+}
+
+#nextBtn {
+  right: 0;
 }
 
 .card {
@@ -716,16 +775,22 @@ textarea:focus {
 }
 
 @media (max-width: 1024px) {
-  .hero {
-    padding-top: 8rem;
-  }
-
-  .dashboard__charts {
-    grid-template-columns: 1fr;
-  }
-
   .servicios__grid {
-    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .slider-item {
+    flex: 0 0 calc((100% - 40px) / 2);
+  }
+
+  .slider-wrapper {
+    padding: 0 40px;
+  }
+
+  .nav-btn {
+    width: 40px;
+    height: 40px;
+    font-size: 1.1rem;
   }
 }
 
@@ -761,7 +826,21 @@ textarea:focus {
   }
 
   .servicios__grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  .slider-item {
+    flex: 0 0 calc((100% - 32px) / 2);
+  }
+
+  .slider-wrapper {
+    padding: 0 36px;
+  }
+
+  .nav-btn {
+    width: 38px;
+    height: 38px;
+    font-size: 1rem;
   }
 
   .dashboard__kpis {
@@ -777,7 +856,7 @@ textarea:focus {
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 640px) {
   .hero {
     padding: 7rem 0 4rem;
   }
@@ -788,7 +867,19 @@ textarea:focus {
   }
 
   .servicios__grid {
-    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .slider-item {
+    flex: 0 0 100%;
+  }
+
+  .slider-wrapper {
+    padding: 0;
+  }
+
+  .nav-btn {
+    display: none;
   }
 
   .dashboard__title {
@@ -798,6 +889,7 @@ textarea:focus {
   .dashboard__kpis {
     grid-template-columns: 1fr;
   }
+
 
   .dashboard__kpi-card {
     padding: 1rem;

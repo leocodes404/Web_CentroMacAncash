@@ -124,8 +124,8 @@ function renderServiceCards() {
 
   servicioCardsGrid.innerHTML = serviciosMAC.map((service) => {
     return `
-      <article class="card servicio-card">
-        <a class="servicio-card__link" href="${service.pdf}" download="${service.name}.pdf" aria-label="Descargar ${service.name}">
+      <article class="card servicio-card slider-item">
+        <a class="servicio-card__link" href="${service.pdf}" target="_blank" rel="noopener noreferrer" aria-label="Descargar ${service.name}">
           <div class="servicio-card__media">
             <img src="${service.img}" alt="Logo de ${service.name}" loading="lazy" />
           </div>
@@ -142,8 +142,44 @@ function renderServiceCards() {
     const cardLink = event.target.closest('.servicio-card__link');
     if (!cardLink) return;
     event.preventDefault();
-    triggerDownload(cardLink.href, cardLink.getAttribute('download'));
+    
+    // Encontrar el índice del servicio basado en la posición en el grid
+    const cardIndex = Array.from(servicioCardsGrid.children).indexOf(
+      event.target.closest('.slider-item')
+    );
+    
+    if (cardIndex >= 0 && cardIndex < serviciosMAC.length) {
+      const service = serviciosMAC[cardIndex];
+      triggerDownload(service.pdf, `${service.name}.pdf`);
+    }
   });
+}
+
+function initCarouselNavigation() {
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+
+  if (!prevBtn || !nextBtn || !servicioCardsGrid) return;
+
+  const scroll = (direction) => {
+    const sliderItem = servicioCardsGrid.querySelector('.slider-item');
+    if (!sliderItem) return;
+
+    const computedStyle = window.getComputedStyle(servicioCardsGrid);
+    const gap = parseFloat(computedStyle.gap) || 0;
+    const itemWidth = sliderItem.offsetWidth;
+    const scrollAmount = itemWidth + gap;
+
+    const targetScroll = direction === 'next' ? scrollAmount : -scrollAmount;
+
+    servicioCardsGrid.scrollBy({
+      left: targetScroll,
+      behavior: 'smooth'
+    });
+  };
+
+  prevBtn.addEventListener('click', () => scroll('prev'));
+  nextBtn.addEventListener('click', () => scroll('next'));
 }
 
 function handleScrollReveal() {
@@ -334,6 +370,7 @@ function handleFormSubmit(event) {
 function init() {
   typeWriter(heroText, heroTarget);
   renderServiceCards();
+  initCarouselNavigation();
   handleScrollReveal();
   handleNavbarScroll();
   animateCounters();
