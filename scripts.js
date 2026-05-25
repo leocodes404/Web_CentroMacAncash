@@ -182,14 +182,33 @@ function initCarouselNavigation() {
   nextBtn.addEventListener('click', () => scroll('next'));
 }
 
+function animateDashboardReveal() {
+  const targets = [
+    document.querySelector('.dashboard__kpis'),
+    document.querySelector('.dashboard__satisfaction'),
+    document.querySelector('.dashboard__charts'),
+    document.getElementById('tableEntidades')
+  ];
+
+  targets.forEach((element, index) => {
+    if (!element) return;
+    setTimeout(() => {
+      element.classList.add('revealed');
+    }, index * 200);
+  });
+}
+
 function handleScrollReveal() {
   const sections = document.querySelectorAll('[data-reveal]');
   const observer = new IntersectionObserver((entries) => {
     entries.forEach((entry) => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('reveal');
-        observer.unobserve(entry.target);
+      if (!entry.isIntersecting) return;
+
+      if (entry.target.id === 'dashboard') {
+        animateDashboardReveal();
       }
+      entry.target.classList.add('reveal');
+      observer.unobserve(entry.target);
     });
   }, { threshold: 0.15 });
 
@@ -207,158 +226,467 @@ function handleNavbarScroll() {
 
 function animateCounters() {
   const counters = document.querySelectorAll('[data-count]');
+  const easeOutExpo = (t) => t === 1 ? 1 : 1 - Math.pow(2, -10 * t);
   const observer = new IntersectionObserver((entries, obs) => {
     entries.forEach((entry) => {
       if (entry.isIntersecting) {
         const valueElement = entry.target.closest('.kpi-value') || entry.target;
         const targetCount = Number(entry.target.dataset.count) || 0;
-        let current = 0;
-        const step = Math.max(1, Math.round(targetCount / 60));
+        const duration = 900;
+        const startTime = performance.now();
 
-        const countInterval = setInterval(() => {
-          current += step;
-          if (current >= targetCount) {
-            current = targetCount;
-            clearInterval(countInterval);
+        const updateCount = (now) => {
+          const progress = Math.min((now - startTime) / duration, 1);
+          valueElement.textContent = Math.round(targetCount * easeOutExpo(progress)).toLocaleString('es-PE');
+          if (progress < 1) {
+            requestAnimationFrame(updateCount);
+          } else {
+            valueElement.classList.add('count-pop');
           }
-          valueElement.textContent = current.toLocaleString('es-PE');
-        }, 22);
+        };
 
+        requestAnimationFrame(updateCount);
         obs.unobserve(entry.target);
       }
     });
-  }, { threshold: 0.3 });
+  }, { threshold: 0.35 });
   counters.forEach((counter) => observer.observe(counter));
 }
 
 function initCharts() {
   const barCanvas = document.getElementById('chartBar');
   const donutCanvas = document.getElementById('chartDonut');
+  const lineCanvas = document.getElementById('chartLine');
+  const barTooltipEl = document.getElementById('chartBarTooltip');
+  const donutLegendEl = document.getElementById('donutLegend');
 
   if (typeof Chart === 'undefined') {
     console.warn('Chart.js no está disponible');
     return;
   }
 
-  // Configuración global de Chart.js para tema oscuro
-  Chart.defaults.color = 'rgba(255, 255, 255, 0.6)';
-  Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.1)';
+  const textColor = getComputedStyle(document.documentElement).getPropertyValue('--color-text').trim() || '#0D1A3A';
+  const mutedColor = getComputedStyle(document.documentElement).getPropertyValue('--color-muted').trim() || '#6B7A9E';
+  const borderColor = getComputedStyle(document.documentElement).getPropertyValue('--color-border').trim() || 'rgba(0, 0, 0, 0.1)';
 
-  // Gráfico de barras: Atenciones mensuales
-  if (barCanvas) {
-    const barCtx = barCanvas.getContext('2d');
-    new Chart(barCtx, {
-      type: 'bar',
-      data: {
-        labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May'],
-        datasets: [{
-          label: 'Atenciones',
-          data: [5850, 6320, 6890, 7120, 7204],
-          backgroundColor: '#3B82F6',
-          borderColor: '#3B82F6',
-          borderRadius: 12,
-          borderSkipped: false,
-          maxBarThickness: 45,
-        }]
+  Chart.defaults.color = textColor;
+  Chart.defaults.borderColor = borderColor;
+  Chart.defaults.font.family = "'DM Sans', system-ui, sans-serif";
+
+  const setLoadingState = (canvas, isLoading) => {
+    if (!canvas) return;
+    const container = canvas.closest('.chart-container');
+    if (!container) return;
+    container.classList.toggle('loading', isLoading);
+  };
+
+  const getThemeColors = () => ({
+    text: getComputedStyle(document.documentElement).getPropertyValue('--color-text').trim() || '#0D1A3A',
+    muted: getComputedStyle(document.documentElement).getPropertyValue('--color-muted').trim() || '#6B7A9E',
+    border: getComputedStyle(document.documentElement).getPropertyValue('--color-border').trim() || 'rgba(0, 0, 0, 0.1)'
+  });
+
+  const syncChartTheme = () => {
+    const theme = getThemeColors();
+    if (barChart) {
+      barChart.options.scales.y.ticks.color = theme.muted;
+      barChart.options.scales.x.ticks.color = theme.muted;
+      barChart.options.plugins.tooltip.titleColor = theme.text;
+      barChart.options.plugins.tooltip.bodyColor = theme.text;
+      barChart.options.plugins.tooltip.borderColor = theme.border;
+      barChart.update('none');
+    }
+    if (donutChart) {
+      donutChart.options.plugins.legend.labels.color = theme.muted;
+      donutChart.options.plugins.tooltip.titleColor = theme.text;
+      donutChart.options.plugins.tooltip.bodyColor = theme.text;
+      donutChart.options.plugins.tooltip.borderColor = theme.border;
+      donutChart.update('none');
+    }
+    if (lineChart) {
+      lineChart.options.scales.y.ticks.color = theme.muted;
+      lineChart.options.scales.x.ticks.color = theme.muted;
+      lineChart.options.plugins.tooltip.titleColor = theme.text;
+      lineChart.options.plugins.tooltip.bodyColor = theme.text;
+      lineChart.options.plugins.tooltip.borderColor = theme.border;
+      lineChart.update('none');
+    }
+  };
+
+  const renderDonutLegend = () => {
+    if (!donutLegendEl || !donutChart) return;
+    const colors = donutChart.data.datasets[0].backgroundColor;
+    donutLegendEl.innerHTML = entidadesSummary.map((item, idx) => `
+      <button type="button" class="donut-legend-item${dashboardState.donutSelection === idx ? ' active' : ''}" data-index="${idx}">
+        <span style="background: ${colors[idx]};"></span>
+        <div>
+          <strong>${item.entidad}</strong>
+          <div>${item.porcentaje}%</div>
+        </div>
+      </button>
+    `).join('');
+    donutLegendEl.querySelectorAll('button').forEach((button) => {
+      button.addEventListener('click', () => {
+        const index = Number(button.dataset.index);
+        selectDonutSegment(index);
+      });
+    });
+  };
+
+  const selectDonutSegment = (index) => {
+    if (!donutChart) return;
+    dashboardState.donutSelection = index;
+    donutChart.data.datasets[0].borderColor = donutChart.data.labels.map((_, idx) => idx === index ? 'rgba(255, 255, 255, 1)' : 'rgba(255, 255, 255, 0.9)');
+    donutChart.update();
+    const centerLabel = document.getElementById('donutCenterLabel');
+    if (centerLabel) {
+      centerLabel.querySelector('.donut-center-label__name').textContent = entidadesSummary[index].entidad;
+      centerLabel.querySelector('.donut-center-label__value').textContent = `${entidadesSummary[index].porcentaje}%`;
+    }
+    donutLegendEl?.querySelectorAll('button').forEach((button) => button.classList.remove('active'));
+    donutLegendEl?.querySelector(`button[data-index="${index}"]`)?.classList.add('active');
+  };
+
+  const barTooltipExternal = (context) => {
+    if (!barTooltipEl) return;
+    const tooltip = context.tooltip;
+    if (tooltip.opacity === 0) {
+      barTooltipEl.classList.remove('active');
+      return;
+    }
+    barTooltipEl.innerHTML = `
+      <div class="tooltip-title">${Array.isArray(tooltip.title) ? tooltip.title.join(' ') : tooltip.title}</div>
+      <div class="tooltip-body">${tooltip.body?.[0]?.lines?.[0] || ''}</div>
+    `;
+    const left = (tooltip.caretX || 0) - 12;
+    const top = (tooltip.caretY || 0) - 16;
+    barTooltipEl.style.left = `${left}px`;
+    barTooltipEl.style.top = `${top}px`;
+    barTooltipEl.classList.add('active');
+  };
+
+  const satisfyThemeObserver = new MutationObserver(() => {
+    syncChartTheme();
+  });
+  satisfyThemeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+  const gradientBackground = (ctx, chartArea) => {
+    const gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
+    gradient.addColorStop(0, 'rgba(59, 130, 246, 0.04)');
+    gradient.addColorStop(0.6, 'rgba(59, 130, 246, 0.16)');
+    gradient.addColorStop(1, 'rgba(59, 130, 246, 0.28)');
+    return gradient;
+  };
+
+  const chartBarDefaults = {
+    type: 'bar',
+    data: {
+      labels: barRangeData['3M'].labels,
+      datasets: [{
+        label: 'Atenciones',
+        data: barRangeData['3M'].values,
+        backgroundColor: 'rgba(59, 130, 246, 0.95)',
+        borderColor: 'rgba(59, 130, 246, 0.95)',
+        borderRadius: 16,
+        borderSkipped: false,
+        maxBarThickness: 54
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 900, easing: 'easeOutQuart' },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          enabled: false,
+          external: barTooltipExternal,
+          backgroundColor: 'rgba(15, 23, 42, 0.92)',
+          padding: 12,
+          titleColor: '#ffffff',
+          bodyColor: '#f8fafc',
+          borderColor: 'rgba(255, 255, 255, 0.12)',
+          borderWidth: 1,
+          callbacks: {
+            label: (ctx) => `${ctx.parsed.y.toLocaleString('es-PE')} atenciones`
+          }
+        }
       },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { 
-            display: false
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            stepSize: 1000,
+            color: mutedColor,
+            font: { size: 12 }
           },
-          tooltip: {
-            backgroundColor: 'rgba(0, 0, 0, 0.8)',
-            padding: 12,
-            titleColor: '#fff',
-            bodyColor: '#fff',
-            borderColor: 'rgba(255, 255, 255, 0.2)',
-            borderWidth: 1,
-            callbacks: {
-              label: (ctx) => `${ctx.parsed.y.toLocaleString('es-PE')} atenciones`
-            }
+          grid: {
+            color: 'rgba(79, 70, 229, 0.08)',
+            drawBorder: false
           }
         },
-        scales: {
-          y: {
-            beginAtZero: true,
-            ticks: { 
-              stepSize: 1000,
-              color: 'rgba(255, 255, 255, 0.6)',
-              font: { size: 12 }
-            },
-            grid: {
-              color: 'rgba(255, 255, 255, 0.05)',
-              drawBorder: false
-            }
+        x: {
+          ticks: {
+            color: mutedColor,
+            font: { size: 12 }
           },
-          x: {
-            ticks: {
-              color: 'rgba(255, 255, 255, 0.6)',
-              font: { size: 12 }
-            },
-            grid: {
-              display: false,
-              drawBorder: false
-            }
+          grid: {
+            display: false,
+            drawBorder: false
           }
         }
       }
-    });
-  }
+    }
+  };
 
-  // Gráfico donut: Distribución por entidad
-  if (donutCanvas) {
-    const donutCtx = donutCanvas.getContext('2d');
-    new Chart(donutCtx, {
-      type: 'doughnut',
+  if (barCanvas) setLoadingState(barCanvas, true);
+  if (donutCanvas) setLoadingState(donutCanvas, true);
+  if (lineCanvas) setLoadingState(lineCanvas, true);
+
+  const barChart = barCanvas ? new Chart(barCanvas.getContext('2d'), chartBarDefaults) : null;
+
+  const donutConfig = donutCanvas ? {
+    type: 'doughnut',
+    data: {
+      labels: entidadesSummary.map(item => item.entidad),
+      datasets: [{
+        data: entidadesSummary.map(item => item.porcentaje),
+        backgroundColor: ['#3B82F6', '#6366F1', '#8B5CF6', '#EC4899', '#F59E0B', '#6B7280'],
+        borderColor: Array(entidadesSummary.length).fill('rgba(255, 255, 255, 0.9)'),
+        borderWidth: 2,
+        borderRadius: 8,
+        spacing: 6,
+        cutout: '62%',
+        hoverOffset: 14
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 900, easing: 'easeOutQuart' },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: 'rgba(15, 23, 42, 0.92)',
+          padding: 12,
+          titleColor: '#ffffff',
+          bodyColor: '#f8fafc',
+          borderColor: 'rgba(255, 255, 255, 0.12)',
+          borderWidth: 1,
+          callbacks: {
+            label: (ctx) => `${ctx.label}: ${ctx.parsed}%`
+          }
+        }
+      }
+    }
+  } : null;
+
+  const donutChart = donutCanvas ? new Chart(donutCanvas.getContext('2d'), donutConfig) : null;
+
+  const lineConfig = lineCanvas ? {
+    type: 'line',
+    data: {
+      labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May'],
+      datasets: [{
+        label: 'Espera promedio',
+        data: [18, 16, 15, 14, 14],
+        fill: true,
+        backgroundColor: (context) => {
+          const chart = context.chart;
+          const { ctx, chartArea } = chart;
+          if (!chartArea) return 'rgba(59, 130, 246, 0.12)';
+          return gradientBackground(ctx, chartArea);
+        },
+        borderColor: 'rgba(59, 130, 246, 0.95)',
+        pointBackgroundColor: '#fff',
+        pointBorderColor: 'rgba(59, 130, 246, 0.95)',
+        pointRadius: 4,
+        tension: 0.38,
+        borderWidth: 3
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 1000, easing: 'easeOutQuad' },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: 'rgba(15, 23, 42, 0.92)',
+          padding: 12,
+          titleColor: '#ffffff',
+          bodyColor: '#f8fafc',
+          borderColor: 'rgba(255, 255, 255, 0.12)',
+          borderWidth: 1,
+          callbacks: {
+            label: (ctx) => `${ctx.parsed.y} min`,
+            title: () => 'Espera promedio'
+          }
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            callback: (value) => `${value} min`,
+            color: mutedColor,
+            font: { size: 12 }
+          },
+          grid: {
+            color: 'rgba(79, 70, 229, 0.08)'
+          }
+        },
+        x: {
+          ticks: {
+            color: mutedColor,
+            font: { size: 12 }
+          },
+          grid: {
+            display: false
+          }
+        }
+      }
+    }
+  } : null;
+
+  const lineChart = lineCanvas ? new Chart(lineCanvas.getContext('2d'), lineConfig) : null;
+
+  const refreshCharts = () => {
+    [barCanvas, donutCanvas, lineCanvas].forEach((canvas) => setLoadingState(canvas, true));
+    setTimeout(() => {
+      barChart?.update();
+      donutChart?.update();
+      lineChart?.update();
+      [barCanvas, donutCanvas, lineCanvas].forEach((canvas) => setLoadingState(canvas, false));
+    }, 420);
+  };
+
+  document.querySelectorAll('.chart-refresh').forEach((button) => {
+    button.addEventListener('click', refreshCharts);
+  });
+
+  renderDonutLegend();
+  selectDonutSegment(dashboardState.donutSelection ?? 0);
+
+  setTimeout(() => {
+    [barCanvas, donutCanvas, lineCanvas].forEach((canvas) => setLoadingState(canvas, false));
+    syncChartTheme();
+  }, 400);
+
+  const renderSparkline = (canvasId, data, color) => {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas || typeof Chart === 'undefined') return;
+    new Chart(canvas.getContext('2d'), {
+      type: 'line',
       data: {
-        labels: ['Banco Nación', 'RENIEC', 'EsSalud', 'DRTC', 'Migraciones', 'Otros'],
+        labels: data.map((_, index) => index + 1),
         datasets: [{
-          data: [28, 25, 18, 15, 12, 2],
-          backgroundColor: [
-            '#3B82F6',
-            '#6366F1',
-            '#8B5CF6',
-            '#EC4899',
-            '#F59E0B',
-            '#6B7280'
-          ],
-          borderColor: 'rgba(26, 26, 46, 0.8)',
-          borderWidth: 3,
-          borderRadius: 6
+          data,
+          borderColor: color,
+          backgroundColor: 'rgba(59, 130, 246, 0.12)',
+          fill: true,
+          pointRadius: 0,
+          tension: 0.35,
+          borderWidth: 2
         }]
       },
       options: {
-        responsive: true,
+        responsive: false,
         maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            position: 'bottom',
-            labels: {
-              padding: 15,
-              font: { size: 12 },
-              color: 'rgba(255, 255, 255, 0.8)',
-              usePointStyle: true,
-              pointStyle: 'circle'
-            }
-          },
-          tooltip: {
-            backgroundColor: 'rgba(0, 0, 0, 0.8)',
-            padding: 12,
-            titleColor: '#fff',
-            bodyColor: '#fff',
-            borderColor: 'rgba(255, 255, 255, 0.2)',
-            borderWidth: 1,
-            callbacks: {
-              label: (ctx) => `${ctx.label}: ${ctx.parsed}%`
-            }
-          }
+        plugins: { legend: { display: false }, tooltip: { enabled: false } },
+        scales: {
+          x: { display: false },
+          y: { display: false }
         }
       }
     });
+  };
+
+  renderSparkline('sparklineHoy', sparklineSeries.sparklineHoy, '#3B82F6');
+  renderSparkline('sparklineSemana', sparklineSeries.sparklineSemana, '#6366F1');
+  renderSparkline('sparklineMes', sparklineSeries.sparklineMes, '#8B5CF6');
+  renderSparkline('sparklineEspera', sparklineSeries.sparklineEspera, '#EC4899');
+
+  const updateBarChart = (rangeKey) => {
+    const range = barRangeData[rangeKey];
+    if (!barChart || !range) return;
+    dashboardState.currentBarRange = rangeKey;
+    const canvas = document.getElementById('chartBar');
+    setLoadingState(canvas, true);
+    barChart.data.labels = range.labels;
+    barChart.data.datasets[0].data = range.values;
+    barChart.update();
+    document.getElementById('chartBarPeriod').textContent = range.period;
+    setTimeout(() => setLoadingState(canvas, false), 420);
+  };
+
+  document.querySelectorAll('.chart-btn').forEach((button) => {
+    button.addEventListener('click', () => {
+      document.querySelectorAll('.chart-btn').forEach((btn) => btn.classList.remove('chart-btn--active'));
+      button.classList.add('chart-btn--active');
+      const selectedRange = button.dataset.range;
+      if (selectedRange === '3M') updateBarChart('3M');
+      if (selectedRange === '6M') updateBarChart('6M');
+      if (selectedRange === '1A') updateBarChart('1A');
+    });
+  });
+
+  const buildEntitiesTable = () => {
+    const tbody = document.querySelector('#tableEntidades tbody');
+    if (!tbody) return;
+    const sortedData = [...entidadesSummary].sort((a, b) => {
+      const key = dashboardState.tableSort.key;
+      const order = dashboardState.tableSort.order === 'asc' ? 1 : -1;
+      if (key === 'entidad') return a.entidad.localeCompare(b.entidad) * order;
+      if (key === 'tendencia') return a.tendencia.localeCompare(b.tendencia) * order;
+      if (key === 'satisfaccion') return (a.satisfaccion - b.satisfaccion) * order;
+      return (a[key] - b[key]) * order;
+    });
+
+    tbody.innerHTML = sortedData.map((item) => {
+      const trend = item.tendencia === 'up' ? '▲' : '▼';
+      const stars = '★'.repeat(Math.round(item.satisfaccion)) + '☆'.repeat(5 - Math.round(item.satisfaccion));
+      return `
+        <tr>
+          <td>${item.entidad}</td>
+          <td>${item.atenciones.toLocaleString('es-PE')}</td>
+          <td>${item.porcentaje}%</td>
+          <td class="table-trend ${item.tendencia}">${trend}</td>
+          <td>${stars}</td>
+        </tr>
+      `;
+    }).join('');
+  };
+
+  const tableHeaders = document.querySelectorAll('#tableEntidades th');
+  tableHeaders.forEach((th) => {
+    th.style.cursor = 'pointer';
+    th.addEventListener('click', () => {
+      const key = th.dataset.key;
+      if (!key) return;
+      if (dashboardState.tableSort.key === key) {
+        dashboardState.tableSort.order = dashboardState.tableSort.order === 'asc' ? 'desc' : 'asc';
+      } else {
+        dashboardState.tableSort.key = key;
+        dashboardState.tableSort.order = 'desc';
+      }
+      tableHeaders.forEach((header) => header.classList.remove('sort-asc', 'sort-desc'));
+      th.classList.add(dashboardState.tableSort.order === 'asc' ? 'sort-asc' : 'sort-desc');
+      buildEntitiesTable();
+    });
+  });
+
+  buildEntitiesTable();
+
+  if (donutCanvas && donutChart) {
+    donutCanvas.addEventListener('click', (event) => {
+      const points = donutChart.getElementsAtEventForMode(event, 'nearest', { intersect: true }, false);
+      if (!points.length) return;
+      selectDonutSegment(points[0].index);
+    });
   }
+
+  updateBarChart('3M');
 }
 
 function handleFormSubmit(event) {
@@ -445,6 +773,47 @@ let reservasState = {
   dni: '',
   telefono: '',
   motivo: ''
+};
+
+// Estado del dashboard
+const dashboardState = {
+  currentBarRange: '3M',
+  donutSelection: null,
+  tableSort: { key: 'atenciones', order: 'desc' }
+};
+
+const barRangeData = {
+  '3M': {
+    labels: ['Mar', 'Abr', 'May'],
+    values: [6890, 7120, 7204],
+    period: 'Mar – May 2025'
+  },
+  '6M': {
+    labels: ['Dic', 'Ene', 'Feb', 'Mar', 'Abr', 'May'],
+    values: [6120, 5850, 6320, 6890, 7120, 7204],
+    period: 'Dic 2024 – May 2025'
+  },
+  '1A': {
+    labels: ['Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic', 'Ene', 'Feb', 'Mar', 'Abr', 'May'],
+    values: [5140, 5390, 5540, 5960, 6280, 6510, 6120, 5850, 6320, 6890, 7120, 7204],
+    period: 'Jun 2024 – May 2025'
+  }
+};
+
+const entidadesSummary = [
+  { entidad: 'Banco Nación', atenciones: 1680, porcentaje: 28, tendencia: 'up', satisfaccion: 4.9 },
+  { entidad: 'RENIEC', atenciones: 1500, porcentaje: 25, tendencia: 'up', satisfaccion: 4.7 },
+  { entidad: 'EsSalud', atenciones: 1080, porcentaje: 18, tendencia: 'down', satisfaccion: 4.5 },
+  { entidad: 'DRTC', atenciones: 900, porcentaje: 15, tendencia: 'up', satisfaccion: 4.2 },
+  { entidad: 'Migraciones', atenciones: 720, porcentaje: 12, tendencia: 'down', satisfaccion: 4.3 },
+  { entidad: 'Otros', atenciones: 120, porcentaje: 2, tendencia: 'up', satisfaccion: 4.1 }
+];
+
+const sparklineSeries = {
+  sparklineHoy: [42, 48, 40, 55, 52, 60, 58],
+  sparklineSemana: [268, 292, 310, 315, 330, 348, 362],
+  sparklineMes: [6500, 6680, 6800, 7000, 7120, 7204, 7204],
+  sparklineEspera: [18, 16, 15, 14, 14, 13, 14]
 };
 
 // Funciones auxiliares para fechas
