@@ -52,76 +52,76 @@
 /* ── MODO CLARO (default) ──────────────────────────────── */
 :root,
 [data-theme="light"] {
-  --color-bg:        #F5F7FC;
-  --color-bg-2:      #ECEEF6;
+  --color-bg:        rgb(240, 235, 253);
+  --color-bg-2:      rgb(225, 215, 245);
   --color-surface:   #FFFFFF;
-  --color-surface-2: #F0F3FB;
-  --color-border:    rgba(0, 48, 130, 0.10);
-  --color-border-strong: rgba(0, 48, 130, 0.20);
+  --color-surface-2: rgba(54, 163, 114, 0.08);
+  --color-border:    rgba(54, 163, 114, 0.15);
+  --color-border-strong: rgba(54, 163, 114, 0.25);
 
-  --color-text:      #0D1A3A;
-  --color-text-2:    #3A4A6B;
-  --color-muted:     #6B7A9E;
+  --color-text:      rgb(54, 163, 114);
+  --color-text-2:    rgb(54, 163, 114);
+  --color-muted:     rgba(54, 163, 114, 0.70);
 
-  --color-primary:   var(--mac-blue-700);
-  --color-primary-light: var(--mac-blue-100);
-  --color-primary-hover: var(--mac-blue-600);
-  --color-secondary: var(--mac-red-500);
-  --color-secondary-light: var(--mac-red-100);
-  --color-accent:    var(--mac-gold-400);
-  --color-accent-light: var(--mac-gold-100);
+  --color-primary:   rgb(54, 163, 114);
+  --color-primary-light: rgba(54, 163, 114, 0.12);
+  --color-primary-hover: rgb(40, 140, 95);
+  --color-secondary: var(--mac-red-600);
+  --color-secondary-light: rgba(212, 0, 26, 0.12);
+  --color-accent:    rgb(54, 163, 114);
+  --color-accent-light: rgba(54, 163, 114, 0.10);
 
-  --shadow-sm:   0 2px 8px rgba(0, 48, 130, 0.07);
-  --shadow-md:   0 8px 24px rgba(0, 48, 130, 0.10);
-  --shadow-lg:   0 20px 60px rgba(0, 48, 130, 0.12);
-  --shadow-card: 0 4px 16px rgba(0, 48, 130, 0.08);
+  --shadow-sm:   0 2px 8px rgba(54, 163, 114, 0.10);
+  --shadow-md:   0 8px 24px rgba(54, 163, 114, 0.12);
+  --shadow-lg:   0 20px 60px rgba(54, 163, 114, 0.15);
+  --shadow-card: 0 4px 16px rgba(54, 163, 114, 0.10);
 
-  --nav-bg-scrolled: rgba(255, 255, 255, 0.96);
-  --nav-text: var(--color-text);
+  --nav-bg-scrolled: rgba(240, 235, 253, 0.98);
+  --nav-text: rgb(54, 163, 114);
   --nav-blur: blur(20px);
 
-  --hero-from: #001A5C;
-  --hero-to:   #002680;
+  --hero-from: rgb(54, 163, 114);
+  --hero-to:   rgb(40, 140, 95);
 
-  --toggle-track: #D0D8EE;
-  --toggle-thumb: white;
+  --toggle-track: rgba(54, 163, 114, 0.3);
+  --toggle-thumb: rgb(54, 163, 114);
 }
 
 /* ── MODO OSCURO ───────────────────────────────────────── */
 [data-theme="dark"] {
-  --color-bg:        #080E22;
-  --color-bg-2:      #0D1530;
-  --color-surface:   #111C3A;
-  --color-surface-2: #162040;
-  --color-border:    rgba(255, 255, 255, 0.08);
-  --color-border-strong: rgba(255, 255, 255, 0.16);
+  --color-bg:        rgb(0, 11, 88);
+  --color-bg-2:      rgb(0, 49, 97);
+  --color-surface:   rgb(0, 49, 97);
+  --color-surface-2: rgba(0, 106, 103, 0.15);
+  --color-border:    rgba(0, 106, 103, 0.20);
+  --color-border-strong: rgba(0, 106, 103, 0.35);
 
-  --color-text:      #EBF0FF;
-  --color-text-2:    #A8B8DC;
-  --color-muted:     #6E80AA;
+  --color-text:      rgb(255, 244, 183);
+  --color-text-2:    rgb(255, 244, 183);
+  --color-muted:     rgba(255, 244, 183, 0.75);
 
-  --color-primary:   var(--mac-blue-400);
-  --color-primary-light: rgba(72, 128, 224, 0.15);
-  --color-primary-hover: var(--mac-blue-300);
-  --color-secondary: var(--mac-red-400);
-  --color-secondary-light: rgba(255, 40, 64, 0.15);
-  --color-accent:    var(--mac-gold-400);
-  --color-accent-light: rgba(245, 184, 32, 0.15);
+  --color-primary:   rgb(0, 106, 103);
+  --color-primary-light: rgba(0, 106, 103, 0.15);
+  --color-primary-hover: rgb(0, 106, 103);
+  --color-secondary: var(--mac-red-600);
+  --color-secondary-light: rgba(212, 0, 26, 0.12);
+  --color-accent:    rgb(255, 244, 183);
+  --color-accent-light: rgba(255, 244, 183, 0.10);
 
   --shadow-sm:   0 2px 8px rgba(0, 0, 0, 0.30);
   --shadow-md:   0 8px 24px rgba(0, 0, 0, 0.40);
   --shadow-lg:   0 20px 60px rgba(0, 0, 0, 0.50);
-  --shadow-card: 0 4px 16px rgba(0, 0, 0, 0.30);
+  --shadow-card: 0 4px 16px rgba(0, 0, 0, 0.35);
 
-  --nav-bg-scrolled: rgba(8, 14, 34, 0.97);
-  --nav-text: var(--color-text);
+  --nav-bg-scrolled: rgba(0, 11, 88, 0.98);
+  --nav-text: #FFFFFF;
   --nav-blur: blur(20px);
 
-  --hero-from: #000C2A;
-  --hero-to:   #001A5C;
+  --hero-from: rgb(0, 11, 88);
+  --hero-to:   rgb(0, 49, 97);
 
-  --toggle-track: var(--mac-blue-600);
-  --toggle-thumb: white;
+  --toggle-track: rgb(0, 106, 103);
+  --toggle-thumb: rgb(255, 244, 183);
 }
 
 /* ── RESET & BASE ──────────────────────────────────────── */
@@ -310,7 +310,7 @@ textarea:focus-visible {
   border-radius: var(--radius-full);
   font-size: 0.9rem;
   font-weight: 600;
-  color: rgba(255,255,255,0.9);
+  color: rgba(255, 255, 255, 0.9);
   transition: background var(--transition-fast), color var(--transition-fast);
 }
 
@@ -320,12 +320,12 @@ textarea:focus-visible {
 }
 
 .navbar.scrolled .navbar__menu a {
-  color: var(--color-text-2);
+  color: var(--nav-text);
 }
 
 .navbar.scrolled .navbar__menu a:hover {
   background: var(--color-primary-light);
-  color: var(--color-primary);
+  color: var(--nav-text);
 }
 
 .navbar__right {
@@ -1968,7 +1968,7 @@ input[type="date"]:disabled {
 }
 
 .contacto__map {
-  widht: 100%;
+  width: 100%;
   min-height: 300px;
   border-radius: var(--radius-lg);
   overflow: hidden;
