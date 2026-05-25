@@ -7,8 +7,15 @@
   <meta name="description" content="Centro MAC Chimbote - Atenci&oacute;n r&aacute;pida y tr&aacute;mites simples en Megaplaza Chimbote.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
+  <script>
+    // Aplica tema antes de renderizar para evitar flash
+    (function() {
+      var saved = localStorage.getItem('mac-theme') || 'light';
+      document.documentElement.setAttribute('data-theme', saved);
+    })();
+  </script>
 </head>
 <body>
   <header class="navbar" id="navbar">
@@ -18,18 +25,24 @@
           <img src="icon\MAC-LOGO.png" alt="mac_logo" class="brand__logo">
         </div>
       </a>
-      <button class="navbar__toggle" id="navToggle" aria-label="Abrir men&uacute;" aria-expanded="false">
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
-      <nav class="navbar__menu" id="navMenu" aria-label="Men&uacute; principal">
+      <nav class="navbar__menu" id="navMenu" aria-label="Menú principal">
         <a href="#inicio">Inicio</a>
         <a href="#sobre-nosotros">Sobre Nosotros</a>
-        <a href="#servicios">Servicios</a>
-        <a href="#dashboard">Dashboard</a>
+        <a href="#servicios">Servicios</a>        <a href="#reservas">Reservar Turno</a>        <a href="#dashboard">Dashboard</a>
         <a href="#contacto">Contacto</a>
       </nav>
+      <div class="navbar__right">
+        <label class="theme-toggle" aria-label="Cambiar modo claro/oscuro" title="Modo claro/oscuro">
+          <input type="checkbox" id="themeToggleInput">
+          <span class="theme-toggle__track"></span>
+          <span class="theme-toggle__thumb" id="themeIcon">☀️</span>
+        </label>
+        <button class="navbar__toggle" id="navToggle" aria-label="Abrir menú" aria-expanded="false">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+      </div>
     </div>
   </header>
 
@@ -80,6 +93,172 @@
           <button class="nav-btn" id="prevBtn" aria-label="Servicio anterior">&larr;</button>
           <div class="servicios__grid" id="serviciosGrid" aria-live="polite"></div>
           <button class="nav-btn" id="nextBtn" aria-label="Siguiente servicio">&rarr;</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- SISTEMA DE RESERVAS DE TICKETS VIRTUALES -->
+    <section class="reservas" id="reservas" data-reveal>
+      <div class="container reservas__container">
+        <div class="reservas__header">
+          <span class="eyebrow">Tramitología Digital</span>
+          <h2>Reserva tu turno virtual</h2>
+          <p>Selecciona la entidad, fecha y hora que mejor se adapte a tu disponibilidad. Recibirás un código QR único para tu turno.</p>
+        </div>
+
+        <!-- Formulario de 3 pasos -->
+        <div class="reservas__form-wrapper">
+          <div class="reservas__progress-bar">
+            <div class="progress-bar__track">
+              <div class="progress-bar__fill" id="progressFill"></div>
+            </div>
+            <div class="progress-bar__steps">
+              <div class="progress-step active" data-step="1">
+                <span class="progress-step__number">1</span>
+                <span class="progress-step__label">Entidad</span>
+              </div>
+              <div class="progress-step" data-step="2">
+                <span class="progress-step__number">2</span>
+                <span class="progress-step__label">Fecha y Hora</span>
+              </div>
+              <div class="progress-step" data-step="3">
+                <span class="progress-step__number">3</span>
+                <span class="progress-step__label">Datos</span>
+              </div>
+            </div>
+          </div>
+
+          <form id="reservasForm" class="reservas__form" novalidate>
+            <!-- PASO 1: Seleccionar Entidad -->
+            <div class="form-step active" data-step="1">
+              <h3>Selecciona la entidad</h3>
+              <div class="entities-grid" id="entitiesGrid">
+                <!-- Se llena dinámicamente con JS -->
+              </div>
+            </div>
+
+            <!-- PASO 2: Seleccionar Fecha y Hora -->
+            <div class="form-step" data-step="2">
+              <h3>Elige fecha y hora</h3>
+              
+              <div class="form-group">
+                <label for="reservaDate">Fecha (L-V hábil)</label>
+                <input type="date" id="reservaDate" name="fecha" required>
+                <small class="form__help">Solo se permiten días laborales sin feriados</small>
+              </div>
+
+              <div class="form-group">
+                <label>Horarios disponibles (bloques de 30 min)</label>
+                <div class="time-slots" id="timeSlotsContainer">
+                  <!-- Se llena dinámicamente con JS -->
+                </div>
+              </div>
+
+              <input type="hidden" id="selectedTime" name="hora" value="">
+            </div>
+
+            <!-- PASO 3: Datos Personales -->
+            <div class="form-step" data-step="3">
+              <h3>Completa tus datos</h3>
+              
+              <div class="form-group">
+                <label for="reservaNombre">Nombre Completo *</label>
+                <input type="text" id="reservaNombre" name="nombre" placeholder="Ej: Juan Carlos García Rodríguez" required>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="reservaDni">DNI (8 dígitos) *</label>
+                  <input type="text" id="reservaDni" name="dni" placeholder="12345678" maxlength="8" required pattern="\d{8}">
+                  <small class="form__help">Solo números, 8 dígitos</small>
+                </div>
+                <div class="form-group">
+                  <label for="reservaTelefono">Teléfono *</label>
+                  <input type="tel" id="reservaTelefono" name="telefono" placeholder="+51 987 654 321" required>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="reservaMotivo">Motivo del trámite *</label>
+                <textarea id="reservaMotivo" name="motivo" rows="3" placeholder="Describe brevemente el motivo de tu visita..." required></textarea>
+              </div>
+            </div>
+
+            <!-- Controles del Formulario -->
+            <div class="form-controls">
+              <button type="button" class="btn btn--secondary" id="prevReservasBtn" style="display: none;">← Atrás</button>
+              <button type="button" class="btn btn--primary" id="nextReservasBtn">Siguiente →</button>
+              <button type="submit" class="btn btn--primary" id="submitReservasBtn" style="display: none;">Confirmar Reserva</button>
+            </div>
+
+            <p class="form__error" id="formError" aria-live="polite"></p>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- PANTALLA DE CONFIRMACIÓN -->
+    <section class="reservas-confirmation" id="reservasConfirmation" style="display: none;">
+      <div class="container">
+        <div class="confirmation__wrapper">
+          <div class="confirmation__header">
+            <div class="confirmation__icon">✓</div>
+            <h2>¡Turno Reservado Exitosamente!</h2>
+            <p>Tu código de ticket ha sido generado. Guárdalo para tu presentación.</p>
+          </div>
+
+          <div class="ticket-card">
+            <div class="ticket__header">
+              <div class="ticket__logo">MAC</div>
+              <div class="ticket__info">
+                <h3 id="ticketCode">MAC-ANCASH-0000</h3>
+                <p id="ticketEntity">Entidad</p>
+              </div>
+            </div>
+
+            <div class="ticket__divider"></div>
+
+            <div class="ticket__details">
+              <div class="ticket-detail">
+                <span class="detail-label">Nombre:</span>
+                <span class="detail-value" id="ticketNombre">-</span>
+              </div>
+              <div class="ticket-detail">
+                <span class="detail-label">DNI:</span>
+                <span class="detail-value" id="ticketDni">-</span>
+              </div>
+              <div class="ticket-detail">
+                <span class="detail-label">Fecha:</span>
+                <span class="detail-value" id="ticketFecha">-</span>
+              </div>
+              <div class="ticket-detail">
+                <span class="detail-label">Hora:</span>
+                <span class="detail-value" id="ticketHora">-</span>
+              </div>
+              <div class="ticket-detail">
+                <span class="detail-label">Motivo:</span>
+                <span class="detail-value" id="ticketMotivo">-</span>
+              </div>
+            </div>
+
+            <div class="ticket__divider"></div>
+
+            <div class="ticket__qr">
+              <div id="qrCode" class="qr-container"></div>
+              <p class="qr-note">Escanea este código en tu presentación</p>
+            </div>
+
+            <div class="ticket__footer">
+              <p>Centro MAC Chimbote • Megaplaza Chimbote</p>
+              <small id="ticketTimestamp">Creado: -</small>
+            </div>
+          </div>
+
+          <div class="confirmation__actions">
+            <button class="btn btn--primary" id="printBtn">🖨️ Imprimir Ticket</button>
+            <button class="btn btn--secondary" id="newReservationBtn">Hacer otra reserva</button>
+            <button class="btn btn--secondary" id="backHomeBtn">Volver al inicio</button>
+          </div>
         </div>
       </div>
     </section>
@@ -175,7 +354,12 @@
     <section class="contacto" id="contacto" data-reveal>
       <div class="container contacto__grid">
         <div class="contacto__map">
-          <iframe title="Mapa Megaplaza Chimbote" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3912.752286869205!2d-78.60131008466417!3d-9.07422639127735!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x91ad44b3c7069bdd%3A0xa33d7c6921781a47!2sMegaplaza%20Chimbote!5e0!3m2!1ses-419!2spe!4v1711234567890!5m2!1ses-419!2spe" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+          <iframe
+            title="Mapa Centro MAC Chimbote – Megaplaza Nivel 2"
+            src="https://maps.google.com/maps?q=Centro+MAC+Chimbote+Megaplaza+Av+Victor+Raul+Haya+de+la+Torre+2964+Chimbote&t=&z=17&ie=UTF8&iwloc=&output=embed"
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"
+            allowfullscreen></iframe>
         </div>
         <div class="contacto__formulario">
           <span class="eyebrow">Contacto</span>
@@ -206,17 +390,29 @@
         <p>Mejor Atenci&oacute;n al Ciudadano &middot; Megaplaza Chimbote</p>
       </div>
       <div class="footer__links">
+        <!-- Facebook -->
         <a href="https://www.facebook.com/CentrosMAC/" target="_blank" rel="noopener noreferrer" aria-label="Facebook de Centro MAC">
-          <img src="icon\facebook.png" class="facebook_icon" alt="Facebook">
+          <svg class="social-icon" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073C0 18.1 4.388 23.094 10.125 24v-8.437H7.078v-3.49h3.047V9.41c0-3.025 1.792-4.697 4.533-4.697 1.312 0 2.686.235 2.686.235v2.97h-1.513c-1.491 0-1.956.93-1.956 1.886v2.267h3.328l-.532 3.49h-2.796V24C19.612 23.094 24 18.1 24 12.073z"/>
+          </svg>
         </a>
+        <!-- Instagram -->
         <a href="https://www.instagram.com/centrosMAC/" target="_blank" rel="noopener noreferrer" aria-label="Instagram de Centro MAC">
-          <img src="icon\ig.png" class="instagram_icon" alt="Instagram">
+          <svg class="social-icon" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/>
+          </svg>
         </a>
+        <!-- X / Twitter -->
         <a href="https://x.com/CentrosMAC" target="_blank" rel="noopener noreferrer" aria-label="X de Centro MAC">
-          <img src="icon\twitter-x-logo-png_seeklogo-492397.png" class="twitter_icon" alt="X">
+          <svg class="social-icon" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.261 5.632 5.903-5.632zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+          </svg>
         </a>
+        <!-- WhatsApp -->
         <a href="https://api.whatsapp.com/send?phone=51981317379" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp de Centro MAC">
-          <img src="icon\whatsapp.png" class="whatsapp_icon" alt="WhatsApp">
+          <svg class="social-icon" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/>
+          </svg>
         </a>
       </div>
       <p class="footer__copyright">&copy; 2025 MAC &Aacute;ncash. Todos los derechos reservados.</p>
@@ -224,10 +420,42 @@
   </footer>
 
   <a href="https://api.whatsapp.com/send?phone=51981317379" class="whatsapp-float" aria-label="Chatear por WhatsApp" target="_blank" rel="noopener">
-    <span><img src="icon\whatsapp.png" class="whatsapp_icon_float" alt="WhatsApp"></span>
+    <svg class="whatsapp_icon_float" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
+      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/>
+    </svg>
   </a>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js" integrity="sha512-vgZZF5e/ohjsuWfE/r94MUtBvDBWC/21YqxhP+EM5OeCltG3D1+E58kBXj8eOL7cpU4i3p3pZLW+wj9X0OP1bA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  
+  <!-- Firebase CDN (compat version for vanilla JS) -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  
+  <!-- QR Code library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  
   <script src="scripts.js" defer></script>
+  <script>
+    // ── Dark/Light Mode Toggle ──────────────────────────
+    (function() {
+      var toggle = document.getElementById('themeToggleInput');
+      var icon   = document.getElementById('themeIcon');
+      var root   = document.documentElement;
+
+      function applyTheme(theme) {
+        root.setAttribute('data-theme', theme);
+        localStorage.setItem('mac-theme', theme);
+        toggle.checked = (theme === 'dark');
+        icon.textContent = (theme === 'dark') ? '🌙' : '☀️';
+      }
+
+      // Init from saved preference
+      applyTheme(localStorage.getItem('mac-theme') || 'light');
+
+      toggle.addEventListener('change', function() {
+        applyTheme(this.checked ? 'dark' : 'light');
+      });
+    })();
+  </script>
 </body>
 </html>
