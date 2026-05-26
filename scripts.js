@@ -175,7 +175,7 @@ const noticiasMAC = [
     categoria: 'MAC Express',
     fecha: '2026-01-27',
     resumen: 'Se inauguró un módulo MAC Express en la Municipalidad Distrital de Cochorco, en Jr. Sánchez Carrión S/N – Aricapampa, provincia Sánchez Carrión, La Libertad. Una nueva plataforma de atención ciudadana acercándose a más peruanos.',
-    imagen: 'images/noticia-placeholder.jpg',
+    imagen: 'https://images.pexels.com/photos/33559337/pexels-photo-33559337.jpeg?auto=compress&cs=tinysrgb&w=800',
     url: 'https://mac.pe/inauguracion-mac-express-en-la-municipalidad-distrital-de-cochorco/'
   },
   {
@@ -184,7 +184,7 @@ const noticiasMAC = [
     categoria: 'MAC Express',
     fecha: '2026-01-23',
     resumen: 'Nuevo módulo MAC Express en la Municipalidad Distrital de José Leonardo Ortiz, Av. Sáenz Peña N° 2151, provincia de Chiclayo, Lambayeque. La plataforma sigue expandiéndose a nivel nacional.',
-    imagen: 'images/noticia-placeholder.jpg',
+    imagen: 'https://images.pexels.com/photos/14128895/pexels-photo-14128895.jpeg?auto=compress&cs=tinysrgb&w=800',
     url: 'https://mac.pe/inauguracion-mac-express-en-la-municipalidad-distrital-de-jose-leonardo-ortiz/'
   },
   {
@@ -193,7 +193,7 @@ const noticiasMAC = [
     categoria: 'MAC Express',
     fecha: '2026-01-22',
     resumen: 'Inauguración de módulo MAC Express en la Municipalidad Distrital de Pacora, Calle 28 de Julio N°108, provincia de Pacora, Lambayeque. Nuevos servicios del Estado al alcance del ciudadano.',
-    imagen: 'images/noticia-placeholder.jpg',
+    imagen: 'https://images.pexels.com/photos/15501423/pexels-photo-15501423.jpeg?auto=compress&cs=tinysrgb&w=800',
     url: 'https://mac.pe/inauguracion-mac-express-en-la-municipalidad-distrital-de-pacora/'
   },
   {
@@ -202,7 +202,7 @@ const noticiasMAC = [
     categoria: 'MAC Express',
     fecha: '2025-12-29',
     resumen: 'Nuevo módulo MAC Express inaugurado en la Municipalidad Distrital de Ichuña, Provincia General Sánchez Cerro, Moquegua. La red de atención ciudadana continúa creciendo.',
-    imagen: 'images/noticia-placeholder.jpg',
+    imagen: 'https://images.pexels.com/photos/36500938/pexels-photo-36500938.jpeg?auto=compress&cs=tinysrgb&w=800',
     url: 'https://mac.pe/inauguracion-mac-express-en-la-municipalidad-distrital-de-ichuna/'
   },
   {
@@ -211,7 +211,7 @@ const noticiasMAC = [
     categoria: 'Institucional',
     fecha: '2025-11-28',
     resumen: 'Se lanzó el Aplicativo MAC Express Perú, herramienta digital que permite realizar más de 80 procedimientos del Estado y fortalece la cobertura de la Plataforma MAC a nivel nacional.',
-    imagen: 'images/noticia-placeholder.jpg',
+    imagen: 'https://images.pexels.com/photos/29947625/pexels-photo-29947625.jpeg?auto=compress&cs=tinysrgb&w=800',
     url: 'https://mac.pe/lanzamiento-del-aplicativo-mac-express-peru/'
   },
   {
@@ -220,7 +220,7 @@ const noticiasMAC = [
     categoria: 'MAC Express',
     fecha: '2025-11-14',
     resumen: 'Nuevo módulo MAC Express inaugurado en la Municipalidad Distrital de Uchumayo, provincia de Arequipa. La plataforma MAC sigue llegando a más distritos del país.',
-    imagen: 'images/noticia-placeholder.jpg',
+    imagen: 'https://images.pexels.com/photos/20934324/pexels-photo-20934324.jpeg?auto=compress&cs=tinysrgb&w=800',
     url: 'https://mac.pe/inauguracion-mac-express-en-la-municipalidad-distrital-de-uchumayo/'
   },
   {
@@ -229,7 +229,7 @@ const noticiasMAC = [
     categoria: 'MAC Express',
     fecha: '2025-11-06',
     resumen: 'Inauguración del módulo MAC Express en la Municipalidad Distrital de Samegua, Provincia de Mariscal Nieto, Moquegua. Nuevo paso en la expansión de servicios al ciudadano.',
-    imagen: 'images/noticia-placeholder.jpg',
+    imagen: 'https://images.pexels.com/photos/16198285/pexels-photo-16198285.jpeg?auto=compress&cs=tinysrgb&w=800',
     url: 'https://mac.pe/inauguracion-mac-express-en-la-municipalidad-distrital-de-samegua/'
   },
   {
@@ -238,7 +238,7 @@ const noticiasMAC = [
     categoria: 'MAC Express',
     fecha: '2025-10-28',
     resumen: 'Nuevo módulo MAC Express en la Municipalidad Distrital de Mala, Provincia de Cañete, Lima. La red de Centros MAC continúa acercando los servicios del Estado a la ciudadanía.',
-    imagen: 'images/noticia-placeholder.jpg',
+    imagen: 'https://images.pexels.com/photos/29737441/pexels-photo-29737441.jpeg?auto=compress&cs=tinysrgb&w=800',
     url: 'https://mac.pe/inauguracion-mac-express-en-la-municipalidad-distrital-de-mala/'
   },
   {
@@ -247,7 +247,7 @@ const noticiasMAC = [
     categoria: 'MAC Express',
     fecha: '2025-10-03',
     resumen: 'Inauguración del módulo MAC Express en la Municipalidad Distrital de La Esperanza, La Libertad. Un logro para la atención ciudadana en la región.',
-    imagen: 'images/noticia-placeholder.jpg',
+    imagen: 'https://images.pexels.com/photos/35805339/pexels-photo-35805339.jpeg?auto=compress&cs=tinysrgb&w=800',
     url: 'https://mac.pe/inauguracion-mac-express-en-la-municipalidad-distrital-de-la-esperanza/'
   },
   {
@@ -256,7 +256,7 @@ const noticiasMAC = [
     categoria: 'MAC Express',
     fecha: '2025-10-03',
     resumen: 'Nuevo módulo MAC Express inaugurado en la Municipalidad Provincial de Sánchez Carrión, La Libertad. La plataforma MAC fortalece su presencia en el norte del país.',
-    imagen: 'images/noticia-placeholder.jpg',
+    imagen: 'https://images.pexels.com/photos/33788647/pexels-photo-33788647.jpeg?auto=compress&cs=tinysrgb&w=800',
     url: 'https://mac.pe/inauguracion-mac-express-en-la-municipalidad-provincial-de-sanchez-carrion/'
   }
 ];
@@ -271,7 +271,9 @@ const publicacionesMAC = {
       año: '2025',
       fecha: '2025-12-31',
       descripcion: 'Resumen anual de gestión, atenciones, indicadores de calidad y logros del Centro MAC Chimbote durante el año 2025.',
-      url: 'boletines/anuales/Boletin-Anual-2025.pdf'
+      url: 'boletines/anuales/Boletin-2025-Plataforma-MACv1_compressed.pdf',
+      download: 'Boletin-Anual-MAC-Chimbote-2025.pdf',
+      ariaLabel: 'Descargar Boletín Anual MAC Chimbote 2025'
     },
     {
       id: 'anual-2024',
@@ -280,7 +282,9 @@ const publicacionesMAC = {
       año: '2024',
       fecha: '2024-12-31',
       descripcion: 'Resumen anual de gestión, atenciones, indicadores de calidad y logros del Centro MAC Chimbote durante el año 2024.',
-      url: 'boletines/anuales/Boletin-Anual-2024.pdf'
+      url: 'boletines/anuales/BOLETIN-2024-PDF_compressed-1.pdf',
+      download: 'Boletin-Anual-MAC-Chimbote-2024.pdf',
+      ariaLabel: 'Descargar Boletín Anual MAC Chimbote 2024'
     },
     {
       id: 'anual-2023',
@@ -289,7 +293,9 @@ const publicacionesMAC = {
       año: '2023',
       fecha: '2023-12-31',
       descripcion: 'Resumen anual de gestión, atenciones, indicadores de calidad y logros del Centro MAC Chimbote durante el año 2023.',
-      url: 'boletines/anuales/Boletin-Anual-2023.pdf'
+      url: 'boletines/anuales/Boletín-Anual-2023_CMAC-VF-1.pdf',
+      download: 'Boletin-Anual-MAC-Chimbote-2023.pdf',
+      ariaLabel: 'Descargar Boletín Anual MAC Chimbote 2023'
     },
     {
       id: 'anual-2022',
@@ -298,49 +304,59 @@ const publicacionesMAC = {
       año: '2022',
       fecha: '2022-12-31',
       descripcion: 'Resumen anual de gestión, atenciones, indicadores de calidad y logros del Centro MAC Chimbote durante el año 2022.',
-      url: 'boletines/anuales/Boletin-Anual-2022.pdf'
+      url: 'boletines/anuales/Boletín-Anual-2022_CMAC-VF-1.pdf',
+      download: 'Boletin-Anual-MAC-Chimbote-2022.pdf',
+      ariaLabel: 'Descargar Boletín Anual MAC Chimbote 2022'
     }
   ],
   boletinesMensuales: [
     {
-      id: 'mensual-2025-04',
-      titulo: 'Boletín Mensual — Abril 2025',
+      id: 'mensual-2026-04',
+      titulo: 'Boletín Mensual — Abril 2026',
       tipo: 'Boletín Mensual',
       mes: 'Abril',
-      año: '2025',
-      fecha: '2025-04-30',
-      descripcion: 'Estadísticas de atención, trámites procesados e indicadores de satisfacción del mes de abril de 2025 en el Centro MAC Chimbote.',
-      url: 'boletines/mensuales/Boletin-Mensual-Abril-2025.pdf'
+      año: '2026',
+      fecha: '2026-04-30',
+      descripcion: 'Estadísticas de atención, trámites procesados e indicadores de satisfacción del mes de abril de 2026 en el Centro MAC Chimbote.',
+      url: 'boletines/mensuales/Reporte-mensual-N04-Abril-20262.pdf',
+      download: 'Boletin-Mensual-Abril-2026.pdf',
+      ariaLabel: 'Descargar Boletín Mensual Abril 2026'
     },
     {
-      id: 'mensual-2025-03',
-      titulo: 'Boletín Mensual — Marzo 2025',
+      id: 'mensual-2026-03',
+      titulo: 'Boletín Mensual — Marzo 2026',
       tipo: 'Boletín Mensual',
       mes: 'Marzo',
-      año: '2025',
-      fecha: '2025-03-31',
-      descripcion: 'Estadísticas de atención, trámites procesados e indicadores de satisfacción del mes de marzo de 2025 en el Centro MAC Chimbote.',
-      url: 'boletines/mensuales/Boletin-Mensual-Marzo-2025.pdf'
+      año: '2026',
+      fecha: '2026-03-31',
+      descripcion: 'Estadísticas de atención, trámites procesados e indicadores de satisfacción del mes de marzo de 2026 en el Centro MAC Chimbote.',
+      url: 'boletines/mensuales/Reporte-mensual-Nro.3-Marzo-2026-1.pdf',
+      download: 'Boletin-Mensual-Marzo-2026.pdf',
+      ariaLabel: 'Descargar Boletín Mensual Marzo 2026'
     },
     {
-      id: 'mensual-2025-02',
-      titulo: 'Boletín Mensual — Febrero 2025',
+      id: 'mensual-2026-02',
+      titulo: 'Boletín Mensual — Febrero 2026',
       tipo: 'Boletín Mensual',
       mes: 'Febrero',
-      año: '2025',
-      fecha: '2025-02-28',
-      descripcion: 'Estadísticas de atención, trámites procesados e indicadores de satisfacción del mes de febrero de 2025 en el Centro MAC Chimbote.',
-      url: 'boletines/mensuales/Boletin-Mensual-Febrero-2025.pdf'
+      año: '2026',
+      fecha: '2026-02-28',
+      descripcion: 'Estadísticas de atención, trámites procesados e indicadores de satisfacción del mes de febrero de 2026 en el Centro MAC Chimbote.',
+      url: 'boletines/mensuales/reporte-mensual-febrero-2026-.pdf',
+      download: 'Boletin-Mensual-Febrero-2026.pdf',
+      ariaLabel: 'Descargar Boletín Mensual Febrero 2026'
     },
     {
-      id: 'mensual-2025-01',
-      titulo: 'Boletín Mensual — Enero 2025',
+      id: 'mensual-2026-01',
+      titulo: 'Boletín Mensual — Enero 2026',
       tipo: 'Boletín Mensual',
       mes: 'Enero',
-      año: '2025',
-      fecha: '2025-01-31',
-      descripcion: 'Estadísticas de atención, trámites procesados e indicadores de satisfacción del mes de enero de 2025 en el Centro MAC Chimbote.',
-      url: 'boletines/mensuales/Boletin-Mensual-Enero-2025.pdf'
+      año: '2026',
+      fecha: '2026-01-31',
+      descripcion: 'Estadísticas de atención, trámites procesados e indicadores de satisfacción del mes de enero de 2026 en el Centro MAC Chimbote.',
+      url: 'boletines/mensuales/reporte-mensual-enero-2026.pdf',
+      download: 'Boletin-Mensual-Enero-2026.pdf',
+      ariaLabel: 'Descargar Boletín Mensual Enero 2026'
     }
   ],
   manuales: [
@@ -1389,7 +1405,7 @@ async function renderTimeSlots(date) {
   if (!container || !reservasState.selectedEntity) return;
 
   // Mostrar loading mientras consulta Firebase
-  container.innerHTML = '<p style="color:rgba(255,255,255,0.6);text-align:center;">Cargando horarios...</p>';
+  container.innerHTML = '<p class="time-slots__loading">Cargando horarios...</p>';
 
   const slots = generateTimeSlots();
   const entity = reservasState.selectedEntity;
@@ -1638,8 +1654,8 @@ function printTicket() {
   const motivo  = document.getElementById('ticketMotivo')?.textContent || '';
   const ts      = document.getElementById('ticketTimestamp')?.textContent || '';
 
-  // Capturar el QR como imagen base64
-  const qrCanvas = document.querySelector('#qrContainer canvas');
+  // Capturar el QR como imagen base64 desde el contenedor real del QR
+  const qrCanvas = document.querySelector('#qrCode canvas');
   const qrImg = qrCanvas ? qrCanvas.toDataURL('image/png') : '';
 
   const printWin = window.open('', '_blank', 'width=650,height=800');
@@ -1754,6 +1770,11 @@ function printTicket() {
       padding: 20px;
       text-align: center;
       border-top: 1px solid #E4EAFF;
+      display: block !important;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    img {
       -webkit-print-color-adjust: exact;
       print-color-adjust: exact;
     }
@@ -2022,8 +2043,12 @@ function renderNoticias(categoriaActiva) {
   grid.innerHTML = filtradas.map(n => `
     <article class="noticia-card card">
       <div class="noticia-card__img-wrap">
-        <img src="${n.imagen}" alt="${n.titulo}" loading="lazy"
-             onerror="this.src='images/noticia-placeholder.jpg'">
+        <img
+          src="${n.imagen}"
+          alt="${n.titulo}"
+          loading="lazy"
+          onerror="this.style.display='none'"
+        >
         <span class="noticia-card__badge">${n.categoria}</span>
       </div>
       <div class="noticia-card__body">
@@ -2081,13 +2106,13 @@ function renderPublicaciones() {
       <div class="pub-section__header">
         <div class="pub-section__icon">📊</div>
         <div>
-          <h2 class="pub-section__title">Boletines Mensuales 2025</h2>
-          <p class="pub-section__desc">Estadísticas e indicadores de atención por mes</p>
+          <h2 class="pub-section__title">Boletines Mensuales 2026</h2>
+          <p class="pub-section__desc">Estadísticas e indicadores de atención por mes — 2026</p>
         </div>
       </div>
       <div class="pub-grid pub-grid--mensual">
         ${boletinesMensuales.map(b => `
-          <a href="${b.url}" target="_blank" rel="noopener" class="pub-card pub-card--mensual">
+          <a href="${b.url}" target="_blank" rel="noopener noreferrer" download="${b.download}" aria-label="${b.ariaLabel}" class="pub-card pub-card--mensual">
             <div class="pub-card__mes-label">${b.mes}</div>
             <div class="pub-card__body">
               <span class="pub-badge pub-badge--mensual">Boletín Mensual</span>
@@ -2111,7 +2136,7 @@ function renderPublicaciones() {
       </div>
       <div class="pub-grid pub-grid--anual">
         ${boletinesAnuales.map(b => `
-          <a href="${b.url}" target="_blank" rel="noopener" class="pub-card pub-card--anual">
+          <a href="${b.url}" target="_blank" rel="noopener noreferrer" download="${b.download}" aria-label="${b.ariaLabel}" class="pub-card pub-card--anual">
             <div class="pub-card__año-label">${b.año}</div>
             <div class="pub-card__body">
               <span class="pub-badge pub-badge--anual">Boletín Anual</span>
