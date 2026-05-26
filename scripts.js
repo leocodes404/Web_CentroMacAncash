@@ -84,6 +84,11 @@ const serviciosMAC = [
 const heroText = 'Tramites simples. Atencion rapida. Chimbote.';
 const heroTarget = document.getElementById('heroTypewriter');
 
+// ID del video de YouTube para la sección Sobre Nosotros
+const YOUTUBE_VIDEO_ID = 'ulPsCt7tXG8';
+let youTubePlayer = null;
+let youTubeApiLoaded = false;
+
 function toggleMenu() {
   const expanded = navToggle.getAttribute('aria-expanded') === 'true';
   navToggle.setAttribute('aria-expanded', String(!expanded));
@@ -213,6 +218,95 @@ function handleScrollReveal() {
   }, { threshold: 0.15 });
 
   sections.forEach((section) => observer.observe(section));
+}
+
+function initHeroBackgroundVideo() {
+  const heroVideo = document.getElementById('heroBackgroundVideo');
+  const heroSection = document.getElementById('inicio');
+  if (!heroVideo || !heroSection) return;
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        heroVideo.currentTime = 0;
+        heroVideo.play().catch(() => {});
+      } else {
+        heroVideo.pause();
+      }
+    });
+  }, { threshold: 0.5 });
+
+  observer.observe(heroSection);
+}
+
+function loadYouTubeIframeAPI() {
+  if (youTubeApiLoaded) return;
+  youTubeApiLoaded = true;
+  const tag = document.createElement('script');
+  tag.src = 'https://www.youtube.com/iframe_api';
+  tag.async = true;
+  document.head.appendChild(tag);
+}
+
+// Lógica de reproducción/pausa del video de Sobre Nosotros
+window.onYouTubeIframeAPIReady = function() {
+  const container = document.getElementById('sobreUsVideo');
+  if (!container) return;
+
+  youTubePlayer = new YT.Player('sobreUsVideo', {
+    videoId: YOUTUBE_VIDEO_ID,
+    playerVars: {
+      autoplay: 0,
+      controls: 1,
+      modestbranding: 1,
+      rel: 0,
+      playsinline: 1,
+      disablekb: 0
+    },
+    events: {
+      onReady() {
+        const toggleButton = document.getElementById('sobreUsVideoToggle');
+        if (toggleButton) {
+          toggleButton.addEventListener('click', toggleYouTubeVideoPlayback);
+        }
+      }
+    }
+  });
+};
+
+function toggleYouTubeVideoPlayback() {
+  if (!youTubePlayer || typeof youTubePlayer.getPlayerState !== 'function') return;
+
+  const state = youTubePlayer.getPlayerState();
+  if (state === YT.PlayerState.PLAYING || state === YT.PlayerState.BUFFERING) {
+    youTubePlayer.pauseVideo();
+  } else {
+    youTubePlayer.playVideo();
+  }
+}
+
+function pauseYouTubeVideoIfHidden(entries) {
+  entries.forEach((entry) => {
+    if (!entry.isIntersecting && youTubePlayer && typeof youTubePlayer.getPlayerState === 'function') {
+      const state = youTubePlayer.getPlayerState();
+      if (state === YT.PlayerState.PLAYING || state === YT.PlayerState.BUFFERING) {
+        youTubePlayer.pauseVideo();
+      }
+    }
+  });
+}
+
+function initYouTubeSection() {
+  loadYouTubeIframeAPI();
+  const aboutSection = document.getElementById('sobre-nosotros');
+  const videoWrapper = document.getElementById('sobreUsVideoWrapper');
+  if (!aboutSection || !videoWrapper) return;
+
+  const observer = new IntersectionObserver(pauseYouTubeVideoIfHidden, {
+    threshold: 0.3
+  });
+  observer.observe(aboutSection);
+  observer.observe(videoWrapper);
 }
 
 function handleNavbarScroll() {
@@ -703,6 +797,8 @@ function init() {
   handleNavbarScroll();
   animateCounters();
   initCharts();
+  initYouTubeSection();
+  initHeroBackgroundVideo();
   initReservasSystem();
 
   navToggle.addEventListener('click', toggleMenu);

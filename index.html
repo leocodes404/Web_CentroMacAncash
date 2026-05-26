@@ -48,15 +48,16 @@
 
   <main>
     <section class="hero" id="inicio">
+      <video id="heroBackgroundVideo" class="hero__background-video" autoplay muted loop playsinline preload="auto" src="videos/Presentacion.mp4" aria-hidden="true"></video>
+      <div class="hero__video-overlay" aria-hidden="true"></div>
       <div class="container hero__content">
-        
         <div class="hero__text" data-reveal>
-          <span class="eyebrow">Mejor Atenci&oacute;n al Ciudadano</span>
+          <span class="eyebrow">Mejor Atención al Ciudadano</span>
           <h1> <span id="heroTypewriter"></span></h1>
-          <p>Tr&aacute;mites integrados en Megaplaza Chimbote para una experiencia &aacute;gil, segura y cercana.</p>
+          <p>Trámites integrados en Megaplaza Chimbote para una experiencia ágil, segura y cercana.</p>
           <div class="hero__actions">
             <a href="#servicios" class="btn btn--primary">Ver servicios</a>
-            <a href="https://api.whatsapp.com/send?phone=51981317379" class="btn btn--secondary" target="_blank" rel="noopener" aria-label="Contactar por WhatsApp">Escr&iacute;benos</a>
+            <a href="https://api.whatsapp.com/send?phone=51981317379" class="btn btn--secondary" target="_blank" rel="noopener" aria-label="Contactar por WhatsApp">Escríbenos</a>
           </div>
         </div>
       </div>
@@ -73,8 +74,20 @@
           <p>Somos el punto de atenci&oacute;n ciudadana de referencia en &Aacute;ncash. Brindamos servicios de entidades p&uacute;blicas clave en un solo lugar para reducir tiempos y mejorar el acceso a la informaci&oacute;n.</p>
           <p>Atendemos a familias, emprendedores y personas con necesidades de tr&aacute;mites municipales, laborales, migratorios y pensiones con acompañamiento profesional.</p>
         </div>
-
-      </div>
+        <div class="sobre__media">
+          <!-- Inicio sección del video en Sobre Nosotros -->
+          <div class="video-card">
+            <div class="video-card__header">
+              <span class="eyebrow">Video</span>
+              <p class="video-card__label">Presentación oficial del Centro MAC Chimbote en Megaplaza.</p>
+            </div>
+            <div id="sobreUsVideoWrapper" class="youtube-player" aria-label="Video de YouTube sobre Centro MAC Chimbote">
+              <div id="sobreUsVideo"></div>
+            </div>
+            <button id="sobreUsVideoToggle" class="btn btn--secondary video-card__action" type="button">Reproducir / Pausar</button>
+          </div>
+          <!-- Fin sección del video en Sobre Nosotros -->
+        </div>      </div>
     </section>
 
     <section class="servicios" id="servicios">
