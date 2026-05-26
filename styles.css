@@ -152,6 +152,7 @@ body {
   color: var(--color-text);
   transition: background var(--transition), color var(--transition);
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
 }
 
 img, iframe, video {
@@ -2568,6 +2569,50 @@ form {
 }
 
 @media (max-width: 768px) {
+  html,
+  body {
+    overflow-x: hidden;
+    overflow-y: auto;
+    height: auto;
+    min-height: 100%;
+  }
+
+  .wrapper,
+  .page-wrapper,
+  .site-wrapper,
+  #app,
+  main {
+    overflow: visible !important;
+    clip: unset !important;
+    clip-path: none !important;
+    transform: none !important;
+  }
+
+  header,
+  .navbar,
+  #navbar {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    height: 64px !important;
+    min-height: 64px !important;
+    overflow: visible !important;
+    clip: unset !important;
+    clip-path: none !important;
+    z-index: 9999 !important;
+    transform: translateZ(0) !important;
+  }
+
+  .navbar__inner {
+    width: 100% !important;
+    height: 64px !important;
+    display: flex !important;
+    align-items: center !important;
+    overflow: visible !important;
+  }
+
   .navbar__menu {
     position: fixed;
     inset: 72px 0 auto;
@@ -2654,6 +2699,345 @@ form {
   .kpi-value { font-size: 1.6rem; }
   .dashboard__title { font-size: 1.35rem; }
   .chart-container { height: 240px; }
+}
+
+@media (max-width: 768px) {
+  .container {
+    width: min(1140px, calc(100% - 1.25rem));
+  }
+
+  .navbar,
+  #navbar {
+    isolation: isolate;
+    z-index: 9999 !important;
+    border-bottom: 0 !important;
+    box-shadow: none !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    height: 64px !important;
+    min-height: 64px !important;
+    overflow: visible !important;
+  }
+
+  .navbar::after,
+  .navbar::before {
+    display: none !important;
+  }
+
+  .navbar__inner {
+    height: 64px;
+    min-height: 64px;
+    display: flex;
+    align-items: center;
+    padding: 0 1.25rem;
+    overflow: visible;
+  }
+
+  .hero,
+  #inicio,
+  .hero__bg,
+  .hero__image,
+  .hero img,
+  section:first-of-type {
+    margin-top: 0;
+    position: relative;
+    z-index: 1;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    overflow: visible;
+  }
+
+  .brand__mark {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    overflow: visible;
+  }
+
+  .brand__logo {
+    height: 36px;
+    width: auto;
+    max-height: 36px;
+    display: block;
+    object-fit: contain;
+    overflow: visible;
+  }
+
+  main > section:first-child,
+  .hero,
+  #inicio {
+    padding-top: 80px;
+  }
+
+  .hero {
+    padding: 7rem 0 4.5rem;
+  }
+
+  .hero h1 {
+    font-size: clamp(2.2rem, 8vw, 3.1rem);
+  }
+
+  .hero > .hero__content > .hero__text > p,
+  .hero p {
+    font-size: 1rem;
+  }
+
+  .sobre__media,
+  .video-card {
+    justify-content: stretch;
+  }
+
+  .video-card {
+    left: 0;
+    padding: 1.25rem;
+  }
+
+  .video-card__header {
+    flex-direction: column;
+  }
+
+  .youtube-player {
+    min-height: 220px;
+  }
+
+  .servicios,
+  .sobre,
+  .reservas,
+  .dashboard,
+  .contacto,
+  .footer {
+    padding: 4.5rem 0;
+  }
+
+  .servicios__grid-full {
+    grid-template-columns: 1fr;
+  }
+
+  .reservas__form-wrapper {
+    padding: 1.5rem;
+  }
+
+  .progress-bar__steps {
+    gap: 0.5rem;
+  }
+
+  .dashboard__kpis {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard__satisfaction {
+    max-width: 100%;
+    padding: 1.25rem;
+  }
+
+  .chart-container {
+    height: 240px;
+  }
+
+  .contacto__grid {
+    gap: 1.5rem;
+  }
+
+  .contacto__map {
+    min-height: 240px;
+  }
+
+  .sobre__card {
+    padding: 1.25rem;
+  }
+
+  .inner-page-hero {
+    padding: 5rem 0 3rem;
+  }
+
+  .inner-page-hero h1 {
+    font-size: clamp(2rem, 7vw, 2.5rem);
+  }
+
+  .filter-bar {
+    justify-content: flex-start;
+  }
+
+  .noticias-grid {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+
+  .noticia-card__img-wrap,
+  .noticia-card__img-wrap img {
+    height: 180px;
+  }
+
+  .publicaciones-section {
+    padding-top: 2.5rem;
+    padding-bottom: 2.5rem;
+  }
+
+  .publicacion-item {
+    padding: 1.5rem;
+  }
+
+  .pub-grid--anual,
+  .pub-grid--mensual,
+  .pub-grid--manuales {
+    grid-template-columns: 1fr;
+  }
+
+  .pub-card--manual {
+    flex-direction: column;
+  }
+
+  .seccion-dos-columnas,
+  .proceso-timeline {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+
+  .timeline-item {
+    gap: 0.85rem;
+  }
+
+  .faq-section {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+  }
+
+  .accordion-summary,
+  .accordion-content {
+    padding: 1rem;
+  }
+
+  .table-scroll,
+  #tableEntidades {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
+    border-radius: 12px;
+    position: relative;
+  }
+
+  .table-scroll::after,
+  #tableEntidades::after {
+    content: '';
+    display: block;
+    height: 3px;
+    background: linear-gradient(90deg, var(--color-primary) 0%, transparent 100%);
+    border-radius: 0 0 12px 12px;
+    opacity: 0.4;
+  }
+
+  .table-scroll table,
+  #tableEntidades table {
+    min-width: 520px;
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .table-scroll th,
+  .table-scroll td,
+  #tableEntidades th,
+  #tableEntidades td {
+    padding: 0.75rem 0.875rem;
+    font-size: 0.82rem;
+    white-space: nowrap;
+  }
+
+  .footer__links {
+    gap: 0.75rem;
+  }
+
+  .whatsapp-float {
+    right: 1rem;
+    bottom: 1rem;
+    width: 52px;
+    height: 52px;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    width: min(1140px, calc(100% - 1rem));
+  }
+
+  .navbar__inner {
+    gap: 0.75rem;
+  }
+
+  .brand__mark {
+    width: 96px;
+    height: 34px;
+  }
+
+  .theme-toggle {
+    width: 42px;
+  }
+
+  .hero {
+    padding: 6.25rem 0 3.25rem;
+  }
+
+  .hero h1 {
+    font-size: 2rem;
+  }
+
+  .hero > .hero__content > .hero__text > p,
+  .hero p {
+    font-size: 0.98rem;
+  }
+
+  .btn {
+    padding: 0.8rem 1.2rem;
+    font-size: 0.92rem;
+  }
+
+  .video-card {
+    padding: 1rem;
+  }
+
+  .youtube-player {
+    min-height: 180px;
+  }
+
+  .reservas__form-wrapper {
+    padding: 1.25rem;
+  }
+
+  .noticia-card__body {
+    padding: 1.25rem;
+  }
+
+  .publicacion-item {
+    padding: 1.25rem;
+  }
+
+  .dashboard__title {
+    font-size: 1.25rem;
+  }
+
+  .chart-container {
+    height: 200px;
+  }
+
+  .contacto__map {
+    min-height: 200px;
+  }
+
+  .footer__links a {
+    width: 36px;
+    height: 36px;
+  }
+
+  .whatsapp-float {
+    width: 48px;
+    height: 48px;
+  }
 }
 
 /* ── PAGE TRANSITIONS (SPA Router) ─────────────────────── */
