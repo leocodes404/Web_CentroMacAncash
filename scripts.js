@@ -1,4 +1,89 @@
-﻿// Logica de interaccion y animaciones para la landing page
+﻿// ── SPA ROUTER ──────────────────────────────────────────────
+const ROUTES = {
+  '': 'page-inicio',
+  'inicio': 'page-inicio',
+  'servicios': 'page-inicio',
+  'reservar': 'page-reservar',
+  'pasaporte': 'page-pasaporte',
+  'noticias': 'page-noticias',
+  'publicaciones': 'page-publicaciones',
+  'dashboard': 'page-inicio',
+};
+
+function getRoute() {
+  const hash = window.location.hash.replace('#/', '').split('?')[0];
+  return hash || '';
+}
+
+function navigateTo(route) {
+  window.location.hash = route ? `#/${route}` : '#/';
+}
+
+function renderRoute() {
+  const route = getRoute();
+  const pageId = ROUTES[route] || 'page-inicio';
+
+  // Ocultar todas las páginas
+  document.querySelectorAll('[data-page]').forEach(page => {
+    page.classList.remove('page--active');
+    page.setAttribute('aria-hidden', 'true');
+  });
+
+  // Mostrar la página activa
+  const activePage = document.getElementById(pageId);
+  if (activePage) {
+    activePage.classList.add('page--active');
+    activePage.removeAttribute('aria-hidden');
+    window.scrollTo(0, 0);
+  }
+
+  // Actualizar nav links activos
+  document.querySelectorAll('.navbar__menu a[data-route]').forEach(link => {
+    link.classList.toggle('active', link.dataset.route === route);
+  });
+
+  // Cerrar menú móvil después de navegar
+  const navMenu = document.getElementById('navMenu');
+  const navToggle = document.getElementById('navToggle');
+  if (navMenu && navToggle) {
+    navMenu.classList.remove('show');
+    navToggle.setAttribute('aria-expanded', 'false');
+  }
+
+  // Ejecutar init de cada página si es necesario
+  onRouteChange(route);
+}
+
+function onRouteChange(route) {
+  if (route === 'dashboard') {
+    initDashboardPage?.();
+    setTimeout(() => {
+      const dashSection = document.getElementById('dashboard');
+      if (dashSection) dashSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
+  }
+  if (route === 'servicios') {
+    // Servicios está en la página de inicio, hacer scroll a la sección
+    setTimeout(() => {
+      const svcSection = document.getElementById('servicios');
+      if (svcSection) svcSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
+    initHomePage?.();
+  }
+  if (route === '' || route === 'inicio') initHomePage?.();
+  if (route === 'noticias') initNoticiasPage?.();
+  if (route === 'reservar') initReservasPage?.();
+  if (route === 'pasaporte') initPasaportePage?.();
+  if (route === 'publicaciones') initPublicacionesPage?.();
+}
+
+// Event listeners para el router
+window.addEventListener('hashchange', renderRoute);
+window.addEventListener('DOMContentLoaded', () => {
+  renderRoute();
+});
+
+// Logica de interaccion y animaciones para la landing page
 const navToggle = document.getElementById('navToggle');
 const navMenu = document.getElementById('navMenu');
 const navbar = document.getElementById('navbar');
@@ -79,6 +164,233 @@ const serviciosMAC = [
     pdf: 'pdfs_info/SUNAT.pdf',
     description: 'Información tributaria y servicios relacionados con impuestos y obligaciones fiscales.',
   }
+];
+
+// ── NOTICIAS ────────────────────────────────────────────
+// Noticias oficiales de mac.pe/noticias-mac/
+const noticiasMAC = [
+  {
+    id: 1,
+    titulo: 'Inauguración MAC Express en la Municipalidad Distrital de Cochorco',
+    categoria: 'MAC Express',
+    fecha: '2026-01-27',
+    resumen: 'Se inauguró un módulo MAC Express en la Municipalidad Distrital de Cochorco, en Jr. Sánchez Carrión S/N – Aricapampa, provincia Sánchez Carrión, La Libertad. Una nueva plataforma de atención ciudadana acercándose a más peruanos.',
+    imagen: 'images/noticia-placeholder.jpg',
+    url: 'https://mac.pe/inauguracion-mac-express-en-la-municipalidad-distrital-de-cochorco/'
+  },
+  {
+    id: 2,
+    titulo: 'Inauguración MAC Express en la Municipalidad Distrital de José Leonardo Ortiz',
+    categoria: 'MAC Express',
+    fecha: '2026-01-23',
+    resumen: 'Nuevo módulo MAC Express en la Municipalidad Distrital de José Leonardo Ortiz, Av. Sáenz Peña N° 2151, provincia de Chiclayo, Lambayeque. La plataforma sigue expandiéndose a nivel nacional.',
+    imagen: 'images/noticia-placeholder.jpg',
+    url: 'https://mac.pe/inauguracion-mac-express-en-la-municipalidad-distrital-de-jose-leonardo-ortiz/'
+  },
+  {
+    id: 3,
+    titulo: 'Inauguración MAC Express en la Municipalidad Distrital de Pacora',
+    categoria: 'MAC Express',
+    fecha: '2026-01-22',
+    resumen: 'Inauguración de módulo MAC Express en la Municipalidad Distrital de Pacora, Calle 28 de Julio N°108, provincia de Pacora, Lambayeque. Nuevos servicios del Estado al alcance del ciudadano.',
+    imagen: 'images/noticia-placeholder.jpg',
+    url: 'https://mac.pe/inauguracion-mac-express-en-la-municipalidad-distrital-de-pacora/'
+  },
+  {
+    id: 4,
+    titulo: 'Inauguración MAC Express en la Municipalidad Distrital de Ichuña',
+    categoria: 'MAC Express',
+    fecha: '2025-12-29',
+    resumen: 'Nuevo módulo MAC Express inaugurado en la Municipalidad Distrital de Ichuña, Provincia General Sánchez Cerro, Moquegua. La red de atención ciudadana continúa creciendo.',
+    imagen: 'images/noticia-placeholder.jpg',
+    url: 'https://mac.pe/inauguracion-mac-express-en-la-municipalidad-distrital-de-ichuna/'
+  },
+  {
+    id: 5,
+    titulo: 'Lanzamiento del aplicativo MAC Express Perú',
+    categoria: 'Institucional',
+    fecha: '2025-11-28',
+    resumen: 'Se lanzó el Aplicativo MAC Express Perú, herramienta digital que permite realizar más de 80 procedimientos del Estado y fortalece la cobertura de la Plataforma MAC a nivel nacional.',
+    imagen: 'images/noticia-placeholder.jpg',
+    url: 'https://mac.pe/lanzamiento-del-aplicativo-mac-express-peru/'
+  },
+  {
+    id: 6,
+    titulo: 'Inauguración MAC Express en la Municipalidad Distrital de Uchumayo',
+    categoria: 'MAC Express',
+    fecha: '2025-11-14',
+    resumen: 'Nuevo módulo MAC Express inaugurado en la Municipalidad Distrital de Uchumayo, provincia de Arequipa. La plataforma MAC sigue llegando a más distritos del país.',
+    imagen: 'images/noticia-placeholder.jpg',
+    url: 'https://mac.pe/inauguracion-mac-express-en-la-municipalidad-distrital-de-uchumayo/'
+  },
+  {
+    id: 7,
+    titulo: 'Inauguración MAC Express en la Municipalidad Distrital de Samegua',
+    categoria: 'MAC Express',
+    fecha: '2025-11-06',
+    resumen: 'Inauguración del módulo MAC Express en la Municipalidad Distrital de Samegua, Provincia de Mariscal Nieto, Moquegua. Nuevo paso en la expansión de servicios al ciudadano.',
+    imagen: 'images/noticia-placeholder.jpg',
+    url: 'https://mac.pe/inauguracion-mac-express-en-la-municipalidad-distrital-de-samegua/'
+  },
+  {
+    id: 8,
+    titulo: 'Inauguración MAC Express en la Municipalidad Distrital de Mala',
+    categoria: 'MAC Express',
+    fecha: '2025-10-28',
+    resumen: 'Nuevo módulo MAC Express en la Municipalidad Distrital de Mala, Provincia de Cañete, Lima. La red de Centros MAC continúa acercando los servicios del Estado a la ciudadanía.',
+    imagen: 'images/noticia-placeholder.jpg',
+    url: 'https://mac.pe/inauguracion-mac-express-en-la-municipalidad-distrital-de-mala/'
+  },
+  {
+    id: 9,
+    titulo: 'Inauguración MAC Express en la Municipalidad Distrital de La Esperanza',
+    categoria: 'MAC Express',
+    fecha: '2025-10-03',
+    resumen: 'Inauguración del módulo MAC Express en la Municipalidad Distrital de La Esperanza, La Libertad. Un logro para la atención ciudadana en la región.',
+    imagen: 'images/noticia-placeholder.jpg',
+    url: 'https://mac.pe/inauguracion-mac-express-en-la-municipalidad-distrital-de-la-esperanza/'
+  },
+  {
+    id: 10,
+    titulo: 'Inauguración MAC Express en la Municipalidad Provincial de Sánchez Carrión',
+    categoria: 'MAC Express',
+    fecha: '2025-10-03',
+    resumen: 'Nuevo módulo MAC Express inaugurado en la Municipalidad Provincial de Sánchez Carrión, La Libertad. La plataforma MAC fortalece su presencia en el norte del país.',
+    imagen: 'images/noticia-placeholder.jpg',
+    url: 'https://mac.pe/inauguracion-mac-express-en-la-municipalidad-provincial-de-sanchez-carrion/'
+  }
+];
+
+// ── PUBLICACIONES ─────────────────────────────────────
+const publicacionesMAC = {
+  boletinesAnuales: [
+    {
+      id: 'anual-2025',
+      titulo: 'Boletín Anual MAC Chimbote 2025',
+      tipo: 'Boletín Anual',
+      año: '2025',
+      fecha: '2025-12-31',
+      descripcion: 'Resumen anual de gestión, atenciones, indicadores de calidad y logros del Centro MAC Chimbote durante el año 2025.',
+      url: 'boletines/anuales/Boletin-Anual-2025.pdf'
+    },
+    {
+      id: 'anual-2024',
+      titulo: 'Boletín Anual MAC Chimbote 2024',
+      tipo: 'Boletín Anual',
+      año: '2024',
+      fecha: '2024-12-31',
+      descripcion: 'Resumen anual de gestión, atenciones, indicadores de calidad y logros del Centro MAC Chimbote durante el año 2024.',
+      url: 'boletines/anuales/Boletin-Anual-2024.pdf'
+    },
+    {
+      id: 'anual-2023',
+      titulo: 'Boletín Anual MAC Chimbote 2023',
+      tipo: 'Boletín Anual',
+      año: '2023',
+      fecha: '2023-12-31',
+      descripcion: 'Resumen anual de gestión, atenciones, indicadores de calidad y logros del Centro MAC Chimbote durante el año 2023.',
+      url: 'boletines/anuales/Boletin-Anual-2023.pdf'
+    },
+    {
+      id: 'anual-2022',
+      titulo: 'Boletín Anual MAC Chimbote 2022',
+      tipo: 'Boletín Anual',
+      año: '2022',
+      fecha: '2022-12-31',
+      descripcion: 'Resumen anual de gestión, atenciones, indicadores de calidad y logros del Centro MAC Chimbote durante el año 2022.',
+      url: 'boletines/anuales/Boletin-Anual-2022.pdf'
+    }
+  ],
+  boletinesMensuales: [
+    {
+      id: 'mensual-2025-04',
+      titulo: 'Boletín Mensual — Abril 2025',
+      tipo: 'Boletín Mensual',
+      mes: 'Abril',
+      año: '2025',
+      fecha: '2025-04-30',
+      descripcion: 'Estadísticas de atención, trámites procesados e indicadores de satisfacción del mes de abril de 2025 en el Centro MAC Chimbote.',
+      url: 'boletines/mensuales/Boletin-Mensual-Abril-2025.pdf'
+    },
+    {
+      id: 'mensual-2025-03',
+      titulo: 'Boletín Mensual — Marzo 2025',
+      tipo: 'Boletín Mensual',
+      mes: 'Marzo',
+      año: '2025',
+      fecha: '2025-03-31',
+      descripcion: 'Estadísticas de atención, trámites procesados e indicadores de satisfacción del mes de marzo de 2025 en el Centro MAC Chimbote.',
+      url: 'boletines/mensuales/Boletin-Mensual-Marzo-2025.pdf'
+    },
+    {
+      id: 'mensual-2025-02',
+      titulo: 'Boletín Mensual — Febrero 2025',
+      tipo: 'Boletín Mensual',
+      mes: 'Febrero',
+      año: '2025',
+      fecha: '2025-02-28',
+      descripcion: 'Estadísticas de atención, trámites procesados e indicadores de satisfacción del mes de febrero de 2025 en el Centro MAC Chimbote.',
+      url: 'boletines/mensuales/Boletin-Mensual-Febrero-2025.pdf'
+    },
+    {
+      id: 'mensual-2025-01',
+      titulo: 'Boletín Mensual — Enero 2025',
+      tipo: 'Boletín Mensual',
+      mes: 'Enero',
+      año: '2025',
+      fecha: '2025-01-31',
+      descripcion: 'Estadísticas de atención, trámites procesados e indicadores de satisfacción del mes de enero de 2025 en el Centro MAC Chimbote.',
+      url: 'boletines/mensuales/Boletin-Mensual-Enero-2025.pdf'
+    }
+  ],
+  manuales: [
+    {
+      id: 'manual-funcionamiento',
+      titulo: 'Manual de Funcionamiento Centro de Mejor Atención al Ciudadano',
+      tipo: 'Manual',
+      fecha: '2025-01-01',
+      descripcion: 'Documento oficial que establece los lineamientos, protocolos y procedimientos de funcionamiento de los Centros MAC a nivel nacional. Aprobado mediante Resolución de Secretaría General N° 006-2025-PCM/SGP.',
+      url: 'https://www.gob.pe/institucion/pcm/normas-legales/6931638-006-2025-pcm-sgp',
+      externo: true,
+      icono: '📋'
+    },
+    {
+      id: 'manual-mac-express',
+      titulo: 'Manual MAC Express',
+      tipo: 'Manual',
+      fecha: '2024-01-01',
+      descripcion: 'Guía completa de implementación y operación de los módulos MAC Express en municipalidades. Incluye procedimientos, requisitos técnicos y estándares de atención al ciudadano.',
+      url: 'https://drive.google.com/file/d/1zcUQFum0VncJOCf9EknkF1A6gBELzsSs/view',
+      externo: true,
+      icono: '📘'
+    }
+  ]
+};
+// ── PASAPORTE (Timeline, Requisitos, FAQ) ──────────────────
+const procesosPasaporte = [
+  { paso: 1, titulo: 'Paga en el Banco de la Nación', desc: 'Realiza el pago del arancel con código 06512. Guarda el voucher original.', icono: '🏦' },
+  { paso: 2, titulo: 'Reserva tu cita en línea', desc: 'Ingresa a citaspasaporte.migraciones.gob.pe y programa tu cita en MAC Chimbote.', icono: '🖥️' },
+  { paso: 3, titulo: 'Preséntate en MAC Chimbote', desc: 'Acude al módulo de Migraciones en Megaplaza Nivel 2 con todos tus documentos.', icono: '🏢' },
+  { paso: 4, titulo: 'Registro biométrico', desc: 'El personal tomará tus huellas digitales, fotografía y firma digital.', icono: '👆' },
+  { paso: 5, titulo: 'Recibe tu pasaporte', desc: 'Tu pasaporte es emitido en el momento. ¡Listo para viajar!', icono: '✈️' }
+];
+
+const requisitosPasaporte = [
+  'DNI original vigente',
+  'Voucher de pago del Banco de la Nación (código 06512)',
+  'Para menores: partida de nacimiento original',
+  'Para menores: DNI de ambos padres',
+  'Para menores: presencia física de ambos padres o tutor legal',
+  'Pasaporte anterior (si ya tuviste uno)',
+  'Cita previa registrada en el sistema de Migraciones'
+];
+
+const faqPasaporte = [
+  { p: '¿Necesito cita previa?', r: 'Sí, es obligatorio reservar cita previa en el portal de Migraciones antes de acudir a MAC Chimbote.' },
+  { p: '¿Puedo tramitar el pasaporte de mi hijo sin el otro padre?', r: 'No. Para menores de edad se requiere la presencia de ambos padres o, en casos especiales, una autorización notarial del padre ausente.' },
+  { p: '¿El pasaporte se entrega en el momento?', r: 'Sí, el pasaporte electrónico biométrico se entrega inmediatamente después de completar el proceso en ventanilla.' },
+  { p: '¿Qué pasa si mi DNI está vencido?', r: 'Debes renovar primero tu DNI en el módulo de RENIEC dentro de MAC Chimbote antes de tramitar el pasaporte.' },
+  { p: '¿Puedo pagar con tarjeta en el Banco de la Nación?', r: 'Depende de la agencia. Se recomienda llevar efectivo. También puedes pagar en Agentes BN o plataforma web del Banco de la Nación.' }
 ];
 
 const heroText = 'Tramites simples. Atencion rapida. Chimbote.';
@@ -795,11 +1107,9 @@ function init() {
   initCarouselNavigation();
   handleScrollReveal();
   handleNavbarScroll();
-  animateCounters();
-  initCharts();
+  initStatsAnimation();
   initYouTubeSection();
   initHeroBackgroundVideo();
-  initReservasSystem();
 
   navToggle.addEventListener('click', toggleMenu);
   navMenu.querySelectorAll('a').forEach((link) => {
@@ -1672,6 +1982,284 @@ function initReservasSystem() {
     location.hash = '#inicio';
     resetReservation();
   });
+}
+
+
+// ── NOTICIAS PAGE ─────────────────────────────────────────
+const NOTICIAS_CATEGORIAS = ['Todas', 'Institucional', 'MAC Express'];
+
+function initNoticiasPage() {
+  renderFiltrosNoticias();
+  renderNoticias('Todas');
+}
+
+function renderFiltrosNoticias() {
+  const container = document.getElementById('noticiasFilters');
+  if (!container) return;
+  container.innerHTML = NOTICIAS_CATEGORIAS.map(cat => `
+    <button class="filter-btn ${cat === 'Todas' ? 'active' : ''}" data-categoria="${cat}">
+      ${cat}
+    </button>
+  `).join('');
+
+  container.addEventListener('click', e => {
+    const btn = e.target.closest('.filter-btn');
+    if (!btn) return;
+    container.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderNoticias(btn.dataset.categoria);
+  });
+}
+
+function renderNoticias(categoriaActiva) {
+  const grid = document.getElementById('noticiasGrid');
+  if (!grid) return;
+
+  const filtradas = categoriaActiva === 'Todas'
+    ? noticiasMAC
+    : noticiasMAC.filter(n => n.categoria === categoriaActiva);
+
+  grid.innerHTML = filtradas.map(n => `
+    <article class="noticia-card card">
+      <div class="noticia-card__img-wrap">
+        <img src="${n.imagen}" alt="${n.titulo}" loading="lazy"
+             onerror="this.src='images/noticia-placeholder.jpg'">
+        <span class="noticia-card__badge">${n.categoria}</span>
+      </div>
+      <div class="noticia-card__body">
+        <time class="noticia-card__fecha" datetime="${n.fecha}">
+          ${new Date(n.fecha + 'T00:00:00').toLocaleDateString('es-PE', { day:'numeric', month:'long', year:'numeric' })}
+        </time>
+        <h3 class="noticia-card__titulo">${n.titulo}</h3>
+        <p class="noticia-card__resumen">${n.resumen}</p>
+        <a href="${n.url}" target="_blank" rel="noopener" class="btn btn--outline btn--sm">
+          Leer más →
+        </a>
+      </div>
+    </article>
+  `).join('');
+}
+
+// ── PUBLICACIONES PAGE ──────────────────────────────────────
+function initPublicacionesPage() {
+  renderPublicaciones();
+}
+
+function renderPublicaciones() {
+  const container = document.getElementById('publicacionesList');
+  if (!container) return;
+
+  const { boletinesAnuales, boletinesMensuales, manuales } = publicacionesMAC;
+
+  container.innerHTML = `
+    <!-- SECCIÓN: MANUALES -->
+    <div class="pub-section">
+      <div class="pub-section__header">
+        <div class="pub-section__icon">📚</div>
+        <div>
+          <h2 class="pub-section__title">Manuales Oficiales</h2>
+          <p class="pub-section__desc">Documentos normativos y guías operativas del Centro MAC</p>
+        </div>
+      </div>
+      <div class="pub-grid pub-grid--manuales">
+        ${manuales.map(m => `
+          <a href="${m.url}" target="_blank" rel="noopener" class="pub-card pub-card--manual">
+            <div class="pub-card__icon-wrap">${m.icono}</div>
+            <div class="pub-card__body">
+              <span class="pub-badge pub-badge--manual">Manual Oficial</span>
+              <h3 class="pub-card__titulo">${m.titulo}</h3>
+              <p class="pub-card__desc">${m.descripcion}</p>
+            </div>
+            <div class="pub-card__cta">Ver documento <span>→</span></div>
+          </a>
+        `).join('')}
+      </div>
+    </div>
+
+    <!-- SECCIÓN: BOLETINES MENSUALES -->
+    <div class="pub-section">
+      <div class="pub-section__header">
+        <div class="pub-section__icon">📊</div>
+        <div>
+          <h2 class="pub-section__title">Boletines Mensuales 2025</h2>
+          <p class="pub-section__desc">Estadísticas e indicadores de atención por mes</p>
+        </div>
+      </div>
+      <div class="pub-grid pub-grid--mensual">
+        ${boletinesMensuales.map(b => `
+          <a href="${b.url}" target="_blank" rel="noopener" class="pub-card pub-card--mensual">
+            <div class="pub-card__mes-label">${b.mes}</div>
+            <div class="pub-card__body">
+              <span class="pub-badge pub-badge--mensual">Boletín Mensual</span>
+              <h3 class="pub-card__titulo">${b.titulo}</h3>
+              <p class="pub-card__desc">${b.descripcion}</p>
+            </div>
+            <div class="pub-card__cta">Descargar PDF <span>↓</span></div>
+          </a>
+        `).join('')}
+      </div>
+    </div>
+
+    <!-- SECCIÓN: BOLETINES ANUALES -->
+    <div class="pub-section">
+      <div class="pub-section__header">
+        <div class="pub-section__icon">📅</div>
+        <div>
+          <h2 class="pub-section__title">Boletines Anuales</h2>
+          <p class="pub-section__desc">Memorias de gestión e informes anuales 2022 – 2025</p>
+        </div>
+      </div>
+      <div class="pub-grid pub-grid--anual">
+        ${boletinesAnuales.map(b => `
+          <a href="${b.url}" target="_blank" rel="noopener" class="pub-card pub-card--anual">
+            <div class="pub-card__año-label">${b.año}</div>
+            <div class="pub-card__body">
+              <span class="pub-badge pub-badge--anual">Boletín Anual</span>
+              <h3 class="pub-card__titulo">${b.titulo}</h3>
+              <p class="pub-card__desc">${b.descripcion}</p>
+            </div>
+            <div class="pub-card__cta">Descargar PDF <span>↓</span></div>
+          </a>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+// ── PASAPORTE PAGE ─────────────────────────────────────────
+function initPasaportePage() {
+  renderProcesoPasaporte();
+  renderRequisitosPasaporte();
+  renderFAQPasaporte();
+}
+
+function renderProcesoPasaporte() {
+  const container = document.getElementById('procesoTimeline');
+  if (!container) return;
+
+  container.innerHTML = procesosPasaporte.map(proc => `
+    <li class="timeline-item">
+      <div class="timeline-marker">
+        <div class="timeline-icon">${proc.icono}</div>
+        <div class="timeline-step">${proc.paso}</div>
+      </div>
+      <div class="timeline-content">
+        <h3>${proc.titulo}</h3>
+        <p>${proc.desc}</p>
+      </div>
+    </li>
+  `).join('');
+}
+
+function renderRequisitosPasaporte() {
+  const container = document.getElementById('requisitosChecklist');
+  if (!container) return;
+
+  container.innerHTML = requisitosPasaporte.map((req, idx) => `
+    <li class="checklist-item">
+      <input type="checkbox" id="req${idx}" class="checklist-input">
+      <label for="req${idx}" class="checklist-label">${req}</label>
+    </li>
+  `).join('');
+}
+
+function renderFAQPasaporte() {
+  const container = document.getElementById('faqPasaporte');
+  if (!container) return;
+
+  container.innerHTML = faqPasaporte.map((item, idx) => `
+    <details class="accordion-item">
+      <summary class="accordion-summary">${item.p}</summary>
+      <div class="accordion-content">
+        <p>${item.r}</p>
+      </div>
+    </details>
+  `).join('');
+}
+
+// ── SERVICIOS FULL PAGE ─────────────────────────────────────
+function initServiciosPage() {
+  renderServiciosFull();
+}
+
+function renderServiciosFull() {
+  const container = document.getElementById('serviciosGridFull');
+  if (!container) return;
+
+  container.innerHTML = serviciosMAC.map(svc => `
+    <div class="servicio-card card">
+      <a href="${svc.pdf}" class="servicio-card__link" download>
+        <div class="servicio-card__img">
+          <img src="${svc.img}" alt="${svc.name}" loading="lazy"
+               onerror="this.src='images/placeholder.png'">
+        </div>
+        <div class="servicio-card__content">
+          <h3>${svc.name}</h3>
+          <p>${svc.description}</p>
+          <span class="servicio-card__cta">Descargar ficha PDF →</span>
+        </div>
+      </a>
+    </div>
+  `).join('');
+}
+
+// ── HOME PAGE INIT ──────────────────────────────────────────
+function initHomePage() {
+  initStatsAnimation();
+  // Inicializar el panel de atención ciudadana (dashboard) que vive en inicio
+  initDashboardPage();
+}
+
+function initStatsAnimation() {
+  const statsSection = document.querySelector('.stats-strip');
+  if (!statsSection) return;
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting && !statsSection.classList.contains('animated')) {
+        statsSection.classList.add('animated');
+        // Animar solo los stat-number del strip
+        const counters = statsSection.querySelectorAll('.stat-number');
+        const easeOutExpo = (t) => t === 1 ? 1 : 1 - Math.pow(2, -10 * t);
+        counters.forEach(el => {
+          const target = parseInt(el.dataset.count, 10) || 0;
+          const duration = 2000;
+          const start = performance.now();
+          const update = (now) => {
+            const progress = Math.min((now - start) / duration, 1);
+            el.textContent = Math.round(target * easeOutExpo(progress)).toLocaleString('es-PE');
+            if (progress < 1) requestAnimationFrame(update);
+          };
+          requestAnimationFrame(update);
+        });
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.5 });
+
+  observer.observe(statsSection);
+}
+
+// ── DASHBOARD PAGE INIT ─────────────────────────────────────
+let dashboardInitialized = false;
+function initDashboardPage() {
+  if (dashboardInitialized) return;
+  dashboardInitialized = true;
+  animateCounters();
+  initCharts();
+}
+
+// También inicializar dashboard cuando se carga la página de inicio
+function initHomeDashboard() {
+  initDashboardPage();
+}
+
+// ── RESERVAS PAGE INIT ──────────────────────────────────────
+let reservasInitialized = false;
+function initReservasPage() {
+  if (reservasInitialized) return;
+  reservasInitialized = true;
+  initReservasSystem();
 }
 
 document.addEventListener('DOMContentLoaded', init);
