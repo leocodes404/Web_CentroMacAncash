@@ -66,6 +66,9 @@
             </div>
           </div>
         </div>
+        <div class="hero__decor" aria-hidden="true">
+
+        </div>
       </section>
 
       <section class="sobre" id="sobre-nosotros" data-reveal>
@@ -81,7 +84,7 @@
             <div class="video-card">
               <div class="video-card__header">
                 <span class="eyebrow">Video</span>
-                <p class="video-card__label">Presentación oficial del Centro MAC Chimbote en Megaplaza.</p>
+                <p class="video-card__label">VIDEO INFORMATIVO SOBRE CENTROS MAC</p>
               </div>
               <div id="sobreUsVideoWrapper" class="youtube-player" aria-label="Video de YouTube sobre Centro MAC Chimbote">
                 <div id="sobreUsVideo"></div>
@@ -683,5 +686,56 @@
       });
     })();
   </script>
+  <div class="chatbot-widget" id="chatbotWidget" aria-hidden="true">
+    <div class="chatbot__header">
+      <div class="chatbot__title">
+        <span class="chatbot__avatar">🤖</span>
+        <div>
+          <strong>Asistente MAC</strong>
+          <small>Orientación virtual</small>
+        </div>
+      </div>
+      <button class="chatbot__close" id="chatbotClose" aria-label="Cerrar chat">✕</button>
+    </div>
+    <div class="chatbot__messages" id="chatbotMessages">
+      </div>
+    <div class="chatbot__input-area" id="chatbotOptions">
+      </div>
+  </div>
+
+  <button class="chatbot-toggle" id="chatbotToggle" aria-label="Abrir asistente de orientación">
+    <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 2C6.477 2 2 6.029 2 11c0 2.87 1.54 5.43 3.93 7.08-.19.96-.8 2.54-.83 2.62-.05.15.01.32.14.41.06.04.14.06.21.06.08 0 .15-.02.22-.06 1.15-.65 2.61-1.63 3.49-2.27.91.2 1.86.3 2.84.3 5.523 0 10-4.029 10-9s-4.477-9-10-9zm0 16c-.84 0-1.66-.09-2.45-.25-.13-.03-.27-.01-.39.06l-2.45 1.59c.27-.85.64-1.99.78-2.65.04-.18-.02-.37-.15-.5C5.23 14.86 4 13.02 4 11c0-3.86 3.59-7 8-7s8 3.14 8 7-3.59 7-8 7z"/>
+      <path d="M7 10h2v2H7zm4 0h2v2h-2zm4 0h2v2h-2z"/>
+    </svg>
+  </button>
+  <div class="a11y-widget" id="a11yWidget" aria-hidden="true">
+    <button class="a11y-toggle" id="a11yToggle" aria-label="Abrir opciones de accesibilidad" aria-expanded="false" title="Accesibilidad">
+      <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2zm0 2a8 8 0 100 16 8 8 0 000-16zm0 2a1.5 1.5 0 110 3 1.5 1.5 0 010-3zm-3 4.5h6v2h-2v5.5h-2v-5.5H9v-2z"/>
+      </svg>
+    </button>
+    <div class="a11y-menu" id="a11yMenu" role="dialog" aria-label="Menú de accesibilidad">
+      <div class="a11y-menu__header">
+        <strong>Accesibilidad</strong>
+        <button id="a11yClose" aria-label="Cerrar panel de accesibilidad">✕</button>
+      </div>
+      <div class="a11y-menu__body">
+        <button class="a11y-btn" id="btnA11yText" aria-pressed="false">
+          <span class="a11y-icon">A+</span>
+          Aumentar texto
+        </button>
+        <button class="a11y-btn" id="btnA11yContrast" aria-pressed="false">
+          <span class="a11y-icon">◐</span>
+          Alto contraste
+        </button>
+        <div class="a11y-divider"></div>
+        <button class="a11y-btn a11y-btn--reset" id="btnA11yReset">
+          <span class="a11y-icon">↺</span>
+          Restablecer
+        </button>
+      </div>
+    </div>
+  </div>
 </body>
 </html>

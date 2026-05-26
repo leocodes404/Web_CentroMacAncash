@@ -2288,3 +2288,207 @@ function initReservasPage() {
 }
 
 document.addEventListener('DOMContentLoaded', init);
+
+// ── CHATBOT DE ORIENTACIÓN (ÁRBOL DE DECISIONES) ──────────────
+
+// Diccionario del árbol de decisiones
+const chatFlow = {
+  inicio: {
+    text: "¡Hola! 👋 Soy tu asistente de orientación del Centro MAC Chimbote. ¿Qué trámite necesitas realizar o sobre qué entidad buscas información?",
+    options: [
+      { label: "🛂 Pasaporte (Migraciones)", next: "pasaporte" },
+      { label: "🪪 Trámites de DNI (RENIEC)", next: "reniec" },
+      { label: "🏥 Seguros (EsSalud)", next: "essalud" },
+      { label: "🏢 Otros trámites", next: "otros" }
+    ]
+  },
+  pasaporte: {
+    text: "Para tramitar tu **Pasaporte**, debes acercarte al módulo de **Migraciones**.\n\n📄 **Requisitos:**\n• DNI original y vigente.\n• Voucher de pago en el Banco de la Nación (Cód. 06512).\n\n⚠️ **Cita:** SÍ, necesitas reservar cita previa en la web oficial de Migraciones.",
+    options: [
+      { label: "Ver guía detallada en la web", action: () => { navigateTo('pasaporte'); toggleChat(); } },
+      { label: "Hacer otra consulta", next: "inicio" }
+    ]
+  },
+  reniec: {
+    text: "En el módulo de **RENIEC** puedes realizar:\n• Renovación de DNI.\n• Duplicado de DNI.\n• Rectificación de datos.\n\n📄 **Requisitos:** Dependen del trámite, pero siempre debes presentar tu comprobante de pago del Banco de la Nación.\n\n⚠️ **Cita:** Puedes sacar un Ticket Virtual en esta misma web.",
+    options: [
+      { label: "Sacar Ticket Virtual", action: () => { navigateTo('reservar'); toggleChat(); } },
+      { label: "Hacer otra consulta", next: "inicio" }
+    ]
+  },
+  essalud: {
+    text: "En el módulo de **EsSalud** puedes gestionar:\n• Afiliaciones.\n• Acreditación de asegurados.\n• Actualización de datos.\n\n📄 **Requisitos:** Traer tu DNI vigente. \n⚠️ **Cita:** La atención suele ser por orden de llegada o sacando un ticket aquí.",
+    options: [
+      { label: "Sacar Ticket Virtual", action: () => { navigateTo('reservar'); toggleChat(); } },
+      { label: "Hacer otra consulta", next: "inicio" }
+    ]
+  },
+  otros: {
+    text: "Contamos con más entidades como:\n• **Banco de la Nación** (Pagos y tasas)\n• **INPE / Poder Judicial** (Antecedentes)\n• **ONP** (Pensiones)\n• **SUNARP / SUNAT**\n\n¿Deseas ver el catálogo completo de servicios y descargar sus requisitos en PDF?",
+    options: [
+      { label: "Ver todos los servicios", action: () => { navigateTo('servicios'); toggleChat(); } },
+      { label: "Volver al inicio", next: "inicio" }
+    ]
+  }
+};
+
+// Variables del DOM
+const chatbotToggle = document.getElementById('chatbotToggle');
+const chatbotWidget = document.getElementById('chatbotWidget');
+const chatbotClose = document.getElementById('chatbotClose');
+const chatbotMessages = document.getElementById('chatbotMessages');
+const chatbotOptions = document.getElementById('chatbotOptions');
+let chatHistory = [];
+
+// Funciones del Chatbot
+function toggleChat() {
+  const isOpen = chatbotWidget.classList.contains('is-open');
+  if (isOpen) {
+    chatbotWidget.classList.remove('is-open');
+    chatbotWidget.setAttribute('aria-hidden', 'true');
+  } else {
+    chatbotWidget.classList.add('is-open');
+    chatbotWidget.setAttribute('aria-hidden', 'false');
+    if (chatHistory.length === 0) {
+      loadChatNode('inicio'); // Iniciar la conversación si está vacío
+    }
+  }
+}
+
+function addMessage(text, sender) {
+  const bubble = document.createElement('div');
+  bubble.className = `chat-bubble chat-bubble--${sender}`;
+  // Reemplazar saltos de línea por <br> y poner negritas
+  let formattedText = text.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  bubble.innerHTML = formattedText;
+  chatbotMessages.appendChild(bubble);
+  chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+}
+
+function renderOptions(options) {
+  chatbotOptions.innerHTML = '';
+  options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'chat-option-btn';
+    btn.textContent = opt.label;
+    btn.onclick = () => {
+      // Mostrar lo que el usuario eligió
+      addMessage(opt.label, 'user');
+      chatbotOptions.innerHTML = ''; // Limpiar opciones temporales
+      
+      // Simular un pequeño retraso de "escribiendo..."
+      setTimeout(() => {
+        if (opt.action) {
+          opt.action();
+        } else if (opt.next) {
+          loadChatNode(opt.next);
+        }
+      }, 400);
+    };
+    chatbotOptions.appendChild(btn);
+  });
+}
+
+function loadChatNode(nodeId) {
+  const node = chatFlow[nodeId];
+  if (!node) return;
+  
+  addMessage(node.text, 'bot');
+  renderOptions(node.options);
+}
+
+// Event Listeners
+if (chatbotToggle) chatbotToggle.addEventListener('click', toggleChat);
+if (chatbotClose) chatbotClose.addEventListener('click', toggleChat);
+
+// ── ACCESSIBILITY CONTROLLER ────────────────────────────────────
+
+document.addEventListener('DOMContentLoaded', () => {
+  const a11yWidget = document.getElementById('a11yWidget');
+  const a11yToggle = document.getElementById('a11yToggle');
+  const a11yClose = document.getElementById('a11yClose');
+  const btnA11yText = document.getElementById('btnA11yText');
+  const btnA11yContrast = document.getElementById('btnA11yContrast');
+  const btnA11yReset = document.getElementById('btnA11yReset');
+  const rootHtml = document.documentElement;
+
+  if (!a11yWidget) return;
+
+  // Leer estado inicial de localStorage
+  let isLargeText = localStorage.getItem('mac-a11y-text') === 'true';
+  let isHighContrast = localStorage.getItem('mac-a11y-contrast') === 'true';
+
+  // Aplicar estado guardado al inicializar
+  if (isLargeText) enableLargeText();
+  if (isHighContrast) enableHighContrast();
+
+  // Abrir / Cerrar menú
+  a11yToggle.addEventListener('click', () => {
+    const isOpen = a11yWidget.classList.contains('is-open');
+    a11yWidget.classList.toggle('is-open', !isOpen);
+    a11yToggle.setAttribute('aria-expanded', !isOpen);
+  });
+
+  a11yClose.addEventListener('click', () => {
+    a11yWidget.classList.remove('is-open');
+    a11yToggle.setAttribute('aria-expanded', 'false');
+  });
+
+  // Toggle Tamaño de Texto
+  btnA11yText.addEventListener('click', () => {
+    isLargeText = !isLargeText;
+    if (isLargeText) enableLargeText();
+    else disableLargeText();
+  });
+
+  // Toggle Alto Contraste
+  btnA11yContrast.addEventListener('click', () => {
+    isHighContrast = !isHighContrast;
+    if (isHighContrast) enableHighContrast();
+    else disableHighContrast();
+  });
+
+  // Resetear todo
+  btnA11yReset.addEventListener('click', () => {
+    disableLargeText();
+    disableHighContrast();
+    isLargeText = false;
+    isHighContrast = false;
+  });
+
+  // Funciones Lógicas
+  function enableLargeText() {
+    rootHtml.classList.add('a11y-large-text');
+    localStorage.setItem('mac-a11y-text', 'true');
+    btnA11yText.classList.add('active');
+    btnA11yText.setAttribute('aria-pressed', 'true');
+  }
+
+  function disableLargeText() {
+    rootHtml.classList.remove('a11y-large-text');
+    localStorage.setItem('mac-a11y-text', 'false');
+    btnA11yText.classList.remove('active');
+    btnA11yText.setAttribute('aria-pressed', 'false');
+  }
+
+  function enableHighContrast() {
+    rootHtml.classList.add('a11y-high-contrast');
+    localStorage.setItem('mac-a11y-contrast', 'true');
+    btnA11yContrast.classList.add('active');
+    btnA11yContrast.setAttribute('aria-pressed', 'true');
+    
+    // El alto contraste funciona mejor forzando tu base del modo oscuro
+    rootHtml.setAttribute('data-theme', 'dark');
+  }
+
+  function disableHighContrast() {
+    rootHtml.classList.remove('a11y-high-contrast');
+    localStorage.setItem('mac-a11y-contrast', 'false');
+    btnA11yContrast.classList.remove('active');
+    btnA11yContrast.setAttribute('aria-pressed', 'false');
+    
+    // Regresamos al tema normal que el usuario tenía antes
+    const savedTheme = localStorage.getItem('mac-theme') || 'light';
+    rootHtml.setAttribute('data-theme', savedTheme);
+  }
+});
