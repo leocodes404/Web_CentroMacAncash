@@ -6,12 +6,12 @@ Diseñar, estructurar y desarrollar la página web oficial e informativa para el
 ## 👥 Miembros del Grupo
 **Semestre Académico:** 2026-I
 
-| Nombre Completo | Código Universitario |
-| :--- | :---: |
-| **Barrientos Avila Fabricio** | 0202414005 |
-| **Carranza Albujar Anthony Leonardo** | 0202414007 |
-| **Crisanto Santiago Michel** | 0202414013 |
-| **Norabuena Melgarejo Joshua** | 0202414031 |
+| Nombre Completo | Código Universitario | Usuario en GitHub |
+| :--- | :---: | :---: |
+| **Barrientos Avila Fabricio** | 0202414005 | [@fabricio-05](https://github.com/fabricio-05) |
+| **Carranza Albujar Anthony Leonardo** | 0202414007 | [@leocodes404](https://github.com/leocodes404) |
+| **Crisanto Santiago Michel** | 0202414013 | [@michelcrisant3-art](https://github.com/michelcrisant3-art) |
+| **Norabuena Melgarejo Joshua** | 0202414031 | [@kansap9-boop](https://github.com/kansap9-boop) |
 
 ## 🛠️ Tecnologías que se usaron
 * **HTML5:** Estructura semántica (BEM) para la correcta jerarquización de la información y SEO institucional.
