@@ -10,7 +10,7 @@ Diseñar, estructurar y desarrollar la página web oficial e informativa para el
 | :--- | :---: | :---: |
 | **Barrientos Avila Fabricio** | 0202414005 | [@fabricio-05](https://github.com/fabricio-05) |
 | **Carranza Albujar Anthony Leonardo** | 0202414007 | [@leocodes404](https://github.com/leocodes404) |
-| **Crisanto Santiago Michel** | 0202414013 | [@michelcrisant3-art](https://github.com/michelcrisant3-art) |
+| **Crisanto Santiago Michel** | 0202414013 | [@michelcrisant3-art](https://github.com/michelcrisan3-art) |
 | **Norabuena Melgarejo Joshua** | 0202414031 | [@kansap9-boop](https://github.com/kansap9-boop) |
 
 ## 🛠️ Tecnologías que se usaron
