@@ -3,47 +3,429 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Panel ERP | Centro MAC</title>
+  <title>Panel ERP | Centro MAC Chimbote</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="crm-dashboard.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --color-primary: #003082;
+      --color-secondary: #E8001C;
+      --color-accent: #F5A623;
+      --color-bg: #F4F6F9;
+      --color-text: #1A1A2E;
+      --color-muted: #5B6B8A;
+      --color-surface: #ffffff;
+      --color-border: #e5ebf2;
+      --color-sidebar: #0f1732;
+      --success: #10B981;
+      --warning: #F59E0B;
+      --danger: #EF4444;
+      --success-soft: #ecfff8;
+      --warning-soft: #fff7e6;
+      --danger-soft: #fff1f2;
+      --shadow: 0 18px 40px rgba(0, 48, 130, 0.08);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; min-height: 100%; background: var(--color-bg); color: var(--color-text); font-family: 'Inter', sans-serif; }
+    body { overflow-x: hidden; }
+    button, select { font: inherit; }
+
+    .app-shell { display: flex; min-height: 100vh; }
+
+    .sidebar {
+      width: 290px;
+      background: linear-gradient(180deg, var(--color-sidebar) 0%, #18284b 100%);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      padding: 18px 14px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      z-index: 20;
+      transition: transform 0.25s ease;
+    }
+    .sidebar-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand-mark { width: 48px; height: 48px; border-radius: 14px; background: linear-gradient(135deg, var(--color-accent), #ffd66d); display: grid; place-items: center; color: #13213d; font-weight: 800; font-size: 1rem; box-shadow: 0 12px 20px rgba(245,166,35,0.25); }
+    .brand-text h2 { margin: 0; font-family: 'Poppins', sans-serif; font-size: 1.02rem; color: #fff; }
+    .brand-text p { margin: 2px 0 0; color: #c8d6f2; font-size: 0.88rem; }
+    .menu-btn { display: none; border: 0; background: rgba(255,255,255,0.08); color: #fff; width: 42px; height: 42px; border-radius: 12px; cursor: pointer; }
+
+    .nav-list { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+    .nav-link {
+      display: flex; align-items: center; gap: 12px; text-decoration: none; color: #edf4ff; padding: 11px 12px; border-radius: 14px; border: 1px solid transparent; transition: background 0.18s ease, transform 0.18s ease;
+    }
+    .nav-link:hover, .nav-link.active { background: rgba(255,255,255,0.10); border-color: rgba(255,255,255,0.08); transform: translateX(2px); }
+    .nav-link.active { background: rgba(0,48,130,0.85); }
+    .nav-icon { width: 28px; text-align: center; font-size: 1rem; }
+
+    .sidebar-footer { margin-top: auto; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.08); color: #dbe8ff; font-size: 0.94rem; }
+    .sidebar-footer strong { display: block; color: #fff; margin-bottom: 2px; font-size: 1rem; }
+
+    .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+    .topbar {
+      display: flex; justify-content: space-between; align-items: center; gap: 12px;
+      padding: 16px 18px; background: rgba(255,255,255,0.95); border-bottom: 1px solid var(--color-border); box-shadow: 0 8px 18px rgba(15,23,50,0.03); position: sticky; top: 0; z-index: 10;
+    }
+    .topbar h1 { margin: 0; font-family: 'Poppins', sans-serif; font-size: 1.15rem; color: var(--color-primary); }
+    .topbar p { margin: 4px 0 0; color: var(--color-muted); font-size: 0.92rem; }
+    .topbar-actions { display: flex; align-items: center; gap: 10px; }
+    .date-pill { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 999px; padding: 10px 12px; color: var(--color-primary); font-weight: 700; box-shadow: var(--shadow); font-size: 0.92rem; }
+
+    .content { padding: 18px; display: flex; flex-direction: column; gap: 16px; }
+    .section { display: none; animation: fadeIn 0.22s ease; }
+    .section.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+    .panel-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+    .card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px; transition: transform 0.18s ease, box-shadow 0.18s ease; }
+    .card:hover { transform: translateY(-2px); }
+    .mini-label { color: var(--color-muted); text-transform: uppercase; letter-spacing: 0.12em; font-size: 0.78rem; font-weight: 700; }
+    .metric-value { margin-top: 8px; font-size: 1.7rem; font-weight: 800; color: var(--color-primary); }
+    .metric-note { margin-top: 4px; color: var(--color-muted); font-size: 0.93rem; }
+
+    .chart-card { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 16px; }
+    .chart-wrap { padding: 14px; }
+    .chart-caption { color: var(--color-muted); font-size: 0.95rem; margin-top: 8px; }
+
+    .module-head { display: flex; justify-content: space-between; align-items: end; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+    .module-head h3 { margin: 0; font-family: 'Poppins', sans-serif; color: var(--color-primary); font-size: 1.05rem; }
+    .module-head p { margin: 4px 0 0; color: var(--color-muted); font-size: 0.95rem; }
+
+    .filter-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+    .filter-btn {
+      border: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-text); border-radius: 999px; padding: 8px 12px; cursor: pointer; font-weight: 700; box-shadow: var(--shadow);
+    }
+    .filter-btn.active { background: var(--color-primary); color: #fff; border-color: var(--color-primary); }
+
+    .staff-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+    .staff-card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 14px; transition: transform 0.18s ease; }
+    .staff-card:hover { transform: translateY(-2px); }
+    .staff-card h4 { margin: 0 0 4px; color: var(--color-primary); font-size: 1rem; }
+    .staff-card .entity { color: var(--color-muted); font-size: 0.92rem; margin-bottom: 10px; }
+    .staff-meta { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; color: var(--color-text); font-size: 0.94rem; }
+    .badge { display: inline-flex; align-items: center; gap: 6px; border-radius: 999px; padding: 7px 10px; font-weight: 700; font-size: 0.82rem; border: 1px solid transparent; }
+    .badge.status-atendiendo { background: var(--success-soft); color: var(--success); border-color: #c6f8e5; }
+    .badge.status-refrigerio { background: var(--warning-soft); color: var(--warning); border-color: #ffe9be; }
+    .badge.status-falta { background: var(--danger-soft); color: var(--danger); border-color: #ffdbe0; }
+    .badge.state-normal { background: var(--success-soft); color: var(--success); border-color: #c6f8e5; }
+    .badge.state-critical { background: var(--danger-soft); color: var(--danger); border-color: #ffdbe0; }
+
+    .table-card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.93rem; }
+    th, td { padding: 11px 12px; text-align: left; border-bottom: 1px solid #edf2f7; vertical-align: middle; }
+    th { background: #f7faff; color: var(--color-primary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; font-size: 0.79rem; }
+    tbody tr.critical-row { background: rgba(239,68,68,0.08); border-left: 4px solid var(--danger); }
+    tbody tr:hover { background: #f9fbff; }
+    .summary-row { background: #f7faff; font-weight: 700; color: var(--color-primary); }
+    .summary-row td { border-bottom: 0; }
+
+    @media (max-width: 1100px) {
+      .panel-grid { grid-template-columns: repeat(2, 1fr); }
+      .chart-card { grid-template-columns: 1fr; }
+      .staff-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 768px) {
+      .sidebar { position: fixed; left: 0; top: 0; transform: translateX(-105%); box-shadow: 18px 0 32px rgba(10, 18, 36, 0.25); }
+      .sidebar.open { transform: translateX(0); }
+      .menu-btn { display: inline-grid; place-items: center; }
+    }
+
+    @media (max-width: 640px) {
+      .topbar { align-items: flex-start; }
+      .topbar-actions { width: 100%; justify-content: space-between; }
+      .panel-grid { grid-template-columns: 1fr; }
+      .content { padding: 12px; }
+      table { min-width: 760px; }
+      .table-card { overflow-x: auto; }
+    }
+  </style>
 </head>
 <body>
-  <header class="dashboard-header">
-    <div class="header-brand">
-      <img src="icon/MAC-LOGO.png" alt="Logo MAC" class="header-logo" />
-      <div>
-        <p class="eyebrow">Centro MAC Áncash</p>
-        <h1>Panel ERP</h1>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="brand">
+          <div class="brand-mark">MAC</div>
+          <div class="brand-text">
+            <h2>Panel ERP</h2>
+            <p>Coordinación</p>
+          </div>
+        </div>
+        <button class="menu-btn" id="closeSidebar" aria-label="Cerrar menú">✕</button>
       </div>
-    </div>
-    <button id="logoutBtn" class="logout-btn" type="button">Cerrar sesión</button>
-  </header>
 
-  <main class="erp-shell">
-    <section class="erp-card">
-      <div class="erp-icon" aria-hidden="true">🏢</div>
-      <h2>Panel ERP — Módulo en construcción</h2>
-      <p>Próximamente estarán disponibles los módulos de Gestión de Atenciones, Estadísticas y Control de Operadores para el equipo administrativo.</p>
-      <br />
-      <button id="logoutSecondary" class="logout-btn" type="button">Cerrar sesión</button>
-    </section>
-  </main>
+      <nav class="nav-list" aria-label="Navegación principal">
+        <a href="#" class="nav-link active" data-module="dashboard"> <span class="nav-icon">📊</span> Dashboard</a>
+        <a href="#" class="nav-link" data-module="ventanillas"> <span class="nav-icon">🪟</span> Ventanillas</a>
+        <a href="#" class="nav-link" data-module="inventario"> <span class="nav-icon">📦</span> Inventario</a>
+      </nav>
 
+      <div class="sidebar-footer">
+        <strong>Coord. Chimbote</strong>
+        <span>Coordinador local</span>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <button class="menu-btn" id="openSidebar" aria-label="Abrir menú">☰</button>
+          <h1 id="moduleTitle">Dashboard</h1>
+          <p id="moduleSubtitle">Resumen del día y métricas operativas</p>
+        </div>
+        <div class="topbar-actions">
+          <span class="date-pill" id="currentDate">Fecha</span>
+        </div>
+      </header>
+
+      <section class="content">
+        <section class="section active" id="dashboard-section">
+          <div class="panel-grid" id="kpiGrid"></div>
+          <article class="card chart-card">
+            <div class="chart-wrap">
+              <canvas id="attendanceChart" width="400" height="220"></canvas>
+            </div>
+            <div class="chart-wrap">
+              <h3 style="margin-top:0;font-family:'Poppins',sans-serif;color:var(--color-primary);">Atenciones por entidad</h3>
+              <p class="chart-caption">Muestra semanal del volumen de atención en el local. Este gráfico usa la librería Chart.js local incluida en la carpeta del proyecto.</p>
+              <p class="chart-caption">Datos base: RENIEC 320, Banco Nación 275, EsSalud 210, DRTC 185, ONP 160, Migraciones 140.</p>
+            </div>
+          </article>
+        </section>
+
+        <section class="section" id="ventanillas-section">
+          <div class="module-head">
+            <div>
+              <h3>Gestión de Ventanillas y Personal</h3>
+              <p>Estados operativos y asignación de asesores en el turno actual.</p>
+            </div>
+          </div>
+          <div class="filter-row" id="filterRow"></div>
+          <div class="staff-grid" id="staffGrid"></div>
+        </section>
+
+        <section class="section" id="inventario-section">
+          <div class="module-head">
+            <div>
+              <h3>Control de Inventario Logístico</h3>
+              <p>Las filas en rojo indican items que requieren reposición urgente.</p>
+            </div>
+          </div>
+          <article class="table-card">
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Insumo</th>
+                  <th>Categoría</th>
+                  <th>Stock Actual</th>
+                  <th>Stock Mínimo</th>
+                  <th>Estado</th>
+                </tr>
+              </thead>
+              <tbody id="inventoryBody"></tbody>
+            </table>
+          </article>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <script src="chart.umd.min.js"></script>
   <script>
-    const auth = JSON.parse(localStorage.getItem('mac_auth') || 'null');
-    if (!auth || auth.role !== 'admin') {
-      globalThis.location.href = 'login.html';
+    // Mock data: asesores simulados para el módulo de ventanillas.
+    const asesores = [
+      { nombre: 'María López', entidad: 'RENIEC', ventanilla: 1, estado: 'Atendiendo', color: '#10B981' },
+      { nombre: 'Carlos Paredes', entidad: 'Banco de la Nación', ventanilla: 2, estado: 'En refrigerio', color: '#F59E0B' },
+      { nombre: 'Ana Torres', entidad: 'EsSalud', ventanilla: 3, estado: 'Atendiendo', color: '#10B981' },
+      { nombre: 'José Ríos', entidad: 'Migraciones', ventanilla: 4, estado: 'Falta / Desc. médico', color: '#EF4444' },
+      { nombre: 'Lucía Mejía', entidad: 'ONP', ventanilla: 5, estado: 'Atendiendo', color: '#10B981' },
+      { nombre: 'Pedro Salazar', entidad: 'DRTC', ventanilla: 6, estado: 'En refrigerio', color: '#F59E0B' },
+      { nombre: 'Elena Huamán', entidad: 'RENIEC', ventanilla: 7, estado: 'Atendiendo', color: '#10B981' },
+      { nombre: 'Miguel Viera', entidad: 'Banco de la Nación', ventanilla: 8, estado: 'Falta / Desc. médico', color: '#EF4444' },
+      { nombre: 'Rosa Campos', entidad: 'EsSalud', ventanilla: 9, estado: 'Atendiendo', color: '#10B981' },
+      { nombre: 'Jorge Delgado', entidad: 'Migraciones', ventanilla: 10, estado: 'En refrigerio', color: '#F59E0B' },
+      { nombre: 'Patricia Bravo', entidad: 'ONP', ventanilla: 11, estado: 'Atendiendo', color: '#10B981' },
+      { nombre: 'Daniela Castro', entidad: 'DRTC', ventanilla: 12, estado: 'Atendiendo', color: '#10B981' }
+    ];
+
+    // Mock data: inventario simulados; si cambias stock o mínimo, la UI se actualiza sola.
+    const inventario = [
+      { insumo: 'Papel para tickets', categoria: 'Papelería', stock: 120, minimo: 150 },
+      { insumo: 'Tóner impresora', categoria: 'Oficina', stock: 4, minimo: 6 },
+      { insumo: 'Alcohol en gel', categoria: 'Bioseguridad', stock: 18, minimo: 20 },
+      { insumo: 'Biométricos de repuesto', categoria: 'Tecnología', stock: 7, minimo: 5 },
+      { insumo: 'Lapiceros', categoria: 'Papelería', stock: 80, minimo: 50 },
+      { insumo: 'Folders', categoria: 'Papelería', stock: 40, minimo: 30 },
+      { insumo: 'Rollos de cinta', categoria: 'Accesorios', stock: 12, minimo: 15 },
+      { insumo: 'Mascarillas', categoria: 'Bioseguridad', stock: 35, minimo: 25 },
+      { insumo: 'Detergente', categoria: 'Limpieza', stock: 10, minimo: 12 },
+      { insumo: 'Papel bond A4', categoria: 'Papelería', stock: 200, minimo: 180 },
+      { insumo: 'Tintas', categoria: 'Tecnología', stock: 5, minimo: 8 },
+      { insumo: 'USB de respaldo', categoria: 'Tecnología', stock: 9, minimo: 6 }
+    ];
+
+    const sections = document.querySelectorAll('.section');
+    const navLinks = document.querySelectorAll('.nav-link');
+    const moduleTitle = document.getElementById('moduleTitle');
+    const moduleSubtitle = document.getElementById('moduleSubtitle');
+    const currentDate = document.getElementById('currentDate');
+    const kpiGrid = document.getElementById('kpiGrid');
+    const staffGrid = document.getElementById('staffGrid');
+    const inventoryBody = document.getElementById('inventoryBody');
+    const filterRow = document.getElementById('filterRow');
+    const sidebar = document.getElementById('sidebar');
+
+    function formatDate() {
+      return new Date().toLocaleDateString('es-PE', {
+        weekday: 'long', day: '2-digit', month: 'long', year: 'numeric'
+      });
     }
 
-    document.getElementById('logoutBtn').addEventListener('click', logout);
-    document.getElementById('logoutSecondary').addEventListener('click', logout);
-
-    function logout() {
-      localStorage.removeItem('mac_auth');
-      globalThis.location.href = 'login.html';
+    function statusClass(status) {
+      return status === 'Atendiendo' ? 'status-atendiendo' : status === 'En refrigerio' ? 'status-refrigerio' : 'status-falta';
     }
+
+    function stateClass(stock, minimo) {
+      return stock <= minimo ? 'state-critical' : 'state-normal';
+    }
+
+    function stateLabel(stock, minimo) {
+      return stock <= minimo ? '⚠ Crítico' : '✓ Normal';
+    }
+
+    // Renderiza los KPIs del dashboard y calcula los críticos desde el array de inventario.
+    function renderDashboard() {
+      const criticalItems = inventario.filter(item => item.stock <= item.minimo).length;
+      const activeAdvisors = asesores.length;
+      const attentionWindows = asesores.filter(item => item.estado === 'Atendiendo').length;
+      const satisfaction = 4.3;
+
+      kpiGrid.innerHTML = [
+        { label: 'Asesores activos', value: activeAdvisors, note: 'Personal asignado al turno' },
+        { label: 'Ventanillas en atención', value: attentionWindows, note: 'Operando en tiempo real' },
+        { label: 'Insumos en stock crítico', value: criticalItems, note: 'Calculado automáticamente' },
+        { label: 'Satisfacción promedio', value: `${satisfaction.toFixed(1)}/5`, note: 'Promedio del servicio' }
+      ].map(item => `
+        <article class="card">
+          <div class="mini-label">${item.label}</div>
+          <div class="metric-value">${item.value}</div>
+          <div class="metric-note">${item.note}</div>
+        </article>
+      `).join('');
+    }
+
+    // Renderiza el gráfico de barras usando Chart.js local.
+    function renderChart() {
+      const ctx = document.getElementById('attendanceChart');
+      if (!ctx) return;
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['RENIEC', 'Banco Nación', 'EsSalud', 'DRTC', 'ONP', 'Migraciones'],
+          datasets: [{
+            label: 'Atenciones por entidad',
+            data: [320, 275, 210, 185, 160, 140],
+            backgroundColor: ['#003082', '#0f6cf2', '#F5A623', '#E8001C', '#10B981', '#7c93c3'],
+            borderRadius: 12,
+            maxBarThickness: 44
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true, grid: { color: 'rgba(0,48,130,0.08)' } }, x: { grid: { display: false } } }
+        }
+      });
+    }
+
+    // Renderiza los filtros y cards de personal por entidad.
+    function renderStaff(filter = 'Todos') {
+      const list = filter === 'Todos' ? asesores : asesores.filter(item => item.entidad === filter);
+      const entidades = ['Todos', ...new Set(asesores.map(item => item.entidad))];
+
+      filterRow.innerHTML = entidades.map(entity => `
+        <button class="filter-btn ${entity === filter ? 'active' : ''}" data-filter="${entity}">${entity}</button>
+      `).join('');
+
+      staffGrid.innerHTML = list.map(item => `
+        <article class="staff-card">
+          <div class="mini-label">Asesor</div>
+          <h4>${item.nombre}</h4>
+          <div class="entity">${item.entidad}</div>
+          <div class="staff-meta">
+            <span>Ventanilla ${item.ventanilla}</span>
+            <span class="badge ${statusClass(item.estado)}">${item.estado}</span>
+          </div>
+        </article>
+      `).join('');
+
+      filterRow.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => renderStaff(btn.dataset.filter));
+      });
+    }
+
+    // Renderiza la tabla de inventario y su resumen automático.
+    function renderInventory() {
+      const criticalCount = inventario.filter(item => item.stock <= item.minimo).length;
+      inventoryBody.innerHTML = inventario.map((item, index) => `
+        <tr class="${item.stock <= item.minimo ? 'critical-row' : ''}">
+          <td>${index + 1}</td>
+          <td>${item.insumo}</td>
+          <td>${item.categoria}</td>
+          <td>${item.stock}</td>
+          <td>${item.minimo}</td>
+          <td><span class="badge ${stateClass(item.stock, item.minimo)}">${stateLabel(item.stock, item.minimo)}</span></td>
+        </tr>
+      `).join('');
+
+      inventoryBody.insertAdjacentHTML('beforeend', `
+        <tr class="summary-row">
+          <td colspan="4">Total de ítems: ${inventario.length}</td>
+          <td colspan="2">Ítems en crítico: ${criticalCount}</td>
+        </tr>
+      `);
+    }
+
+    // Cambia el módulo activo al hacer clic en la navegación.
+    function setActiveModule(name) {
+      sections.forEach(section => section.classList.toggle('active', section.id === `${name}-section`));
+      navLinks.forEach(link => link.classList.toggle('active', link.dataset.module === name));
+
+      const labels = {
+        dashboard: ['Dashboard', 'Resumen del día y métricas operativas'],
+        ventanillas: ['Ventanillas', 'Gestión del personal y estado del turno'],
+        inventario: ['Inventario', 'Control logístico y alertas de stock']
+      };
+
+      moduleTitle.textContent = labels[name][0];
+      moduleSubtitle.textContent = labels[name][1];
+      sidebar.classList.remove('open');
+    }
+
+    navLinks.forEach(link => {
+      link.addEventListener('click', event => {
+        event.preventDefault();
+        setActiveModule(link.dataset.module);
+      });
+    });
+
+    document.getElementById('openSidebar').addEventListener('click', () => sidebar.classList.add('open'));
+    document.getElementById('closeSidebar').addEventListener('click', () => sidebar.classList.remove('open'));
+
+    currentDate.textContent = formatDate();
+    renderDashboard();
+    renderChart();
+    renderStaff();
+    renderInventory();
   </script>
 </body>
 </html>
+
