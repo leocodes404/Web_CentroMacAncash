@@ -1,0 +1,145 @@
+/* --- Variables de Color (Inspirado en tonos institucionales) --- */
+:root {
+    --primary-color: #D32F2F; /* Rojo estilo institucional peruano */
+    --primary-hover: #B71C1C;
+    --text-main: #333333;
+    --text-muted: #666666;
+    --bg-color: #F4F6F8;
+    --card-bg: #FFFFFF;
+    --border-color: #E0E0E0;
+    --error-color: #d32f2f;
+}
+
+/* --- Reseteo básico --- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* --- Fondo y centrado de la pantalla --- */
+.login-body {
+    background-color: var(--bg-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+/* --- Tarjeta de Login --- */
+.login-card {
+    background-color: var(--card-bg);
+    width: 100%;
+    max-width: 400px;
+    padding: 40px 30px;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    margin: 20px;
+}
+
+/* --- Cabecera del Login --- */
+.login-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.login-logo {
+    max-width: 120px;
+    margin-bottom: 15px;
+}
+
+.login-header h2 {
+    color: var(--text-main);
+    font-size: 24px;
+    margin-bottom: 5px;
+}
+
+.login-header p {
+    color: var(--text-muted);
+    font-size: 14px;
+}
+
+/* --- Grupos de Inputs --- */
+.input-group {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.input-group label {
+    display: block;
+    font-size: 14px;
+    color: var(--text-main);
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 16px;
+    outline: none;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Efecto cuando el usuario hace clic en el input */
+.input-group input:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(211, 47, 47, 0.1);
+}
+
+/* --- Botón de Enviar --- */
+.btn-submit {
+    width: 100%;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 14px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.1s ease;
+    margin-top: 10px;
+}
+
+.btn-submit:hover {
+    background-color: var(--primary-hover);
+}
+
+.btn-submit:active {
+    transform: scale(0.98); /* Pequeño efecto de clic */
+}
+
+/* --- Mensaje de Error --- */
+.error-msg {
+    color: var(--error-color);
+    background-color: #fdecea;
+    padding: 10px;
+    border-radius: 6px;
+    font-size: 14px;
+    text-align: center;
+    margin-top: 15px;
+    display: none; /* Oculto por defecto */
+    border: 1px solid #f5c2c7;
+}
+
+/* --- Pie de página (Volver) --- */
+.login-footer {
+    text-align: center;
+    margin-top: 25px;
+}
+
+.back-link {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 14px;
+    transition: color 0.3s ease;
+}
+
+.back-link:hover {
+    color: var(--primary-color);
+    text-decoration: underline;
+}
