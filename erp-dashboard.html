@@ -181,6 +181,7 @@
         </div>
         <div class="topbar-actions">
           <span class="date-pill" id="currentDate">Fecha</span>
+          <button id="erpLogoutBtn" class="menu-btn" title="Cerrar sesión">Salir</button>
         </div>
       </header>
 
@@ -239,6 +240,23 @@
 
   <script src="chart.umd.min.js"></script>
   <script>
+    // Autenticación: proteger rutas del ERP (solo admin)
+    (function() {
+      const auth = JSON.parse(localStorage.getItem('mac_auth') || 'null');
+      if (!auth || auth.role !== 'admin') {
+        // No autorizado: redirigir al login
+        return globalThis.location.replace('login.html');
+      }
+      // Evitar que, tras cierre de sesión, el usuario vuelva con el botón atrás.
+      history.replaceState({}, document.title, location.href);
+      window.addEventListener('popstate', () => {
+        const nowAuth = JSON.parse(localStorage.getItem('mac_auth') || 'null');
+        if (!nowAuth || nowAuth.role !== 'admin') {
+          globalThis.location.replace('login.html');
+        }
+      });
+    })();
+
     // Mock data: asesores simulados para el módulo de ventanillas.
     const asesores = [
       { nombre: 'María López', entidad: 'RENIEC', ventanilla: 1, estado: 'Atendiendo', color: '#10B981' },
@@ -425,6 +443,16 @@
     renderChart();
     renderStaff();
     renderInventory();
+
+    // Botón de cierre de sesión (ERP): limpiar auth y redirigir al login
+    const erpLogout = document.getElementById('erpLogoutBtn');
+    if (erpLogout) {
+      erpLogout.addEventListener('click', () => {
+        localStorage.removeItem('mac_auth');
+        // Usar replace para no permitir volver con atrás.
+        globalThis.location.replace('login.html');
+      });
+    }
   </script>
 </body>
 </html>

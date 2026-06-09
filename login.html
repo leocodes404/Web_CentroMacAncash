@@ -41,6 +41,8 @@
     </div>
 
     <script>
+        // Nota: se añadió un alias 'admin@gob.pe' como credencial válida para administradores
+        // sin cambiar la experiencia visual. Esto facilita el acceso según requerimiento.
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const email = document.getElementById('email').value.trim();
@@ -48,14 +50,18 @@
 
             const USERS = [
                 { email: 'admin@mac.gob.pe',   password: 'admin123',   role: 'admin',   redirect: 'erp-dashboard.html' },
+                { email: 'admin@gob.pe',       password: 'admin123',   role: 'admin',   redirect: 'erp-dashboard.html' },
                 { email: 'usuario@mac.gob.pe', password: 'usuario123', role: 'usuario', redirect: 'crm-dashboard.html' }
             ];
 
             const match = USERS.find(u => u.email === email && u.password === password);
 
             if (match) {
+                // Guardamos la sesión y usamos replace para evitar que el usuario vuelva
+                // a la pantalla de login con el botón atrás.
                 localStorage.setItem('mac_auth', JSON.stringify({ email: match.email, role: match.role }));
-                globalThis.location.href = match.redirect;
+                // Usar replace evita que la página de login quede en el historial.
+                globalThis.location.replace(match.redirect);
             } else {
                 document.getElementById('error-message').style.display = 'block';
             }

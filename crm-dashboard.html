@@ -36,19 +36,7 @@
         <h3>Historial de Trámites</h3>
         <p>Consulta rápida del estado de tus gestiones</p>
       </div>
-      <div class="table-wrapper">
-        <table class="tramites-table">
-          <thead>
-            <tr>
-              <th>Entidad</th>
-              <th>Trámite</th>
-              <th>Fecha</th>
-              <th>Estado</th>
-            </tr>
-          </thead>
-          <tbody id="tramitesBody"></tbody>
-        </table>
-      </div>
+      <div id="servicesContainer" class="services-container"></div>
     </section>
 
     <section class="card">
@@ -69,24 +57,47 @@
   </main>
 
   <script>
-    const auth = JSON.parse(localStorage.getItem('mac_auth') || 'null');
-    if (!auth || auth.role !== 'usuario') {
-      globalThis.location.href = 'login.html';
-    }
+    // Protección de rutas: solo usuarios con rol 'usuario' acceden a CRM
+    (function() {
+      const auth = JSON.parse(localStorage.getItem('mac_auth') || 'null');
+      if (!auth || auth.role !== 'usuario') {
+        return globalThis.location.replace('login.html');
+      }
+      // Evitar volver con el botón atrás a esta página después del logout
+      history.replaceState({}, document.title, location.href);
+      window.addEventListener('popstate', () => {
+        const nowAuth = JSON.parse(localStorage.getItem('mac_auth') || 'null');
+        if (!nowAuth || nowAuth.role !== 'usuario') {
+          globalThis.location.replace('login.html');
+        }
+      });
+    })();
 
+    // Datos de ejemplo organizados por servicios para Perfil 360°
     const ciudadano = {
       nombre: 'Juan Pérez López',
       email: 'usuario@mac.gob.pe',
-      tramites: [
-        { entidad: 'RENIEC', tramite: 'Renovación de DNI', fecha: '2025-03-15', estado: 'Completado' },
-        { entidad: 'Banco de la Nación', tramite: 'Apertura de cuenta básica', fecha: '2025-05-02', estado: 'Completado' },
-        { entidad: 'Migraciones', tramite: 'Pasaporte ordinario', fecha: '2026-01-10', estado: 'Pendiente' },
-        { entidad: 'RENIEC', tramite: 'Partida de nacimiento', fecha: '2026-04-20', estado: 'En proceso' }
-      ],
-      reservas: [
-        { codigo: 'RES-2026-0041', entidad: 'RENIEC', fecha: '2026-06-15', hora: '10:30 AM', estado: 'Activa' },
-        { codigo: 'RES-2025-0198', entidad: 'Banco de la Nación', fecha: '2025-11-08', hora: '09:00 AM', estado: 'Expirada' }
-      ]
+      servicios: {
+        'RENIEC': {
+          tramites: [
+            { id: 'T-1001', tramite: 'Renovación de DNI', fecha: '2025-03-15', estado: 'Completado', observaciones: 'Documento entregado correctamente.' },
+            { id: 'T-1045', tramite: 'Partida de nacimiento', fecha: '2026-04-20', estado: 'En proceso', observaciones: 'Se requiere validación de firma.' }
+          ],
+          reservas: [ { codigo: 'RES-2026-0041', fecha: '2026-06-15', hora: '10:30 AM', estado: 'Activa' } ]
+        },
+        'Banco de la Nación': {
+          tramites: [ { id: 'T-2003', tramite: 'Apertura de cuenta básica', fecha: '2025-05-02', estado: 'Completado', observaciones: 'Cuenta N° 001-234567' } ],
+          reservas: [ { codigo: 'RES-2025-0198', fecha: '2025-11-08', hora: '09:00 AM', estado: 'Expirada' } ]
+        },
+        'Migraciones': {
+          tramites: [ { id: 'T-3007', tramite: 'Pasaporte ordinario', fecha: '2026-01-10', estado: 'Pendiente', observaciones: 'Pago pendiente.' } ],
+          reservas: []
+        },
+        'MINEDU': {
+          tramites: [ { id: 'T-4012', tramite: 'Certificado de estudios', fecha: '2026-06-20', estado: 'En proceso', observaciones: '' } ],
+          reservas: []
+        }
+      }
     };
 
     const procesos = [
@@ -103,29 +114,39 @@
       Expirada: 'status status--muted'
     };
 
+    // Renderiza el Perfil 360°: información agrupada por servicio.
     function renderDashboard() {
       document.getElementById('citizenName').textContent = ciudadano.nombre;
       document.getElementById('citizenEmail').textContent = ciudadano.email;
 
-      const tramitesBody = document.getElementById('tramitesBody');
-      tramitesBody.innerHTML = ciudadano.tramites.map(item => `
-        <tr>
-          <td>${item.entidad}</td>
-          <td>${item.tramite}</td>
-          <td>${item.fecha}</td>
-          <td><span class="${statusClassMap[item.estado] || 'status'}">${item.estado}</span></td>
-        </tr>
-      `).join('');
+      // Servicios: generar secciones independientes dentro del historial
+      const servicesContainer = document.getElementById('servicesContainer');
+      servicesContainer.innerHTML = Object.keys(ciudadano.servicios).map(serv => {
+        const svc = ciudadano.servicios[serv];
+        const tramitesCount = svc.tramites.length;
+        const reservasCount = svc.reservas.length;
+        return `
+          <article class="service-card">
+            <div class="service-head">
+              <h4>${serv}</h4>
+              <div class="service-meta">Trámites: ${tramitesCount} • Reservas: ${reservasCount}</div>
+            </div>
+            <div class="service-actions">
+              <button class="btn-view-history" data-service="${serv}">Ver historial</button>
+            </div>
+            <div class="service-history" id="history-${serv.replace(/\s+/g,'-')}"></div>
+          </article>
+        `;
+      }).join('');
 
+      // Render reservas generales
       const reservasGrid = document.getElementById('reservasGrid');
-      reservasGrid.innerHTML = ciudadano.reservas.map(reserva => `
+      const allReservas = Object.values(ciudadano.servicios).flatMap(s => s.reservas.map(r => ({...r, entidad: Object.keys(ciudadano.servicios).find(k => ciudadano.servicios[k].reservas.includes(r))})));
+      reservasGrid.innerHTML = Object.values(ciudadano.servicios).flatMap(s => s.reservas).map(reserva => `
         <article class="reservation-card">
-          <div class="qr-placeholder" aria-hidden="true">
-            <span>📱</span>
-          </div>
+          <div class="qr-placeholder" aria-hidden="true"><span>📱</span></div>
           <div class="reservation-details">
             <h4>${reserva.codigo}</h4>
-            <p><strong>Entidad:</strong> ${reserva.entidad}</p>
             <p><strong>Fecha:</strong> ${reserva.fecha}</p>
             <p><strong>Hora:</strong> ${reserva.hora}</p>
             <span class="${statusClassMap[reserva.estado] || 'status'}">${reserva.estado}</span>
@@ -133,6 +154,7 @@
         </article>
       `).join('');
 
+      // Progreso de procesos (mantener view original)
       const progressList = document.getElementById('progressList');
       progressList.innerHTML = procesos.map(proceso => `
         <article class="progress-item">
@@ -148,11 +170,61 @@
           </div>
         </article>
       `).join('');
+
+      // Asociar handlers para ver historial por servicio
+      document.querySelectorAll('.btn-view-history').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const svcName = btn.dataset.service;
+          toggleServiceHistory(svcName);
+        });
+      });
     }
 
-    document.getElementById('logoutBtn').addEventListener('click', function() {
+    // Muestra/oculta y renderiza el historial detallado por servicio
+    function toggleServiceHistory(servicio) {
+      const id = `history-${servicio.replace(/\s+/g,'-')}`;
+      const container = document.getElementById(id);
+      if (!container) return;
+      if (container.innerHTML.trim() !== '') {
+        container.innerHTML = '';
+        return;
+      }
+      const svc = ciudadano.servicios[servicio];
+      // Agrupar trámites por estado
+      const estados = { completado: [], enproceso: [], pendiente: [], observado: [] };
+      svc.tramites.forEach(t => {
+        const key = (t.estado || '').toLowerCase();
+        if (key.includes('complet')) estados.completado.push(t);
+        else if (key.includes('en proceso') || key.includes('en proceso')) estados.enproceso.push(t);
+        else if (key.includes('pendient')) estados.pendiente.push(t);
+        else estados.observado.push(t);
+      });
+
+      container.innerHTML = `
+        <div class="history-grid">
+          <div class="history-col">
+            <h5>Trámites Completados</h5>
+            ${estados.completado.map(t => `<div class="history-row"><strong>${t.tramite}</strong><span>${t.fecha}</span><div>${t.observaciones || ''}</div></div>`).join('')}
+          </div>
+          <div class="history-col">
+            <h5>Trámites en Proceso</h5>
+            ${estados.enproceso.map(t => `<div class="history-row"><strong>${t.tramite}</strong><span>${t.fecha}</span><div>${t.observaciones || ''}</div></div>`).join('')}
+            <h5>Trámites Pendientes / Observados</h5>
+            ${[...estados.pendiente, ...estados.observado].map(t => `<div class="history-row"><strong>${t.tramite}</strong><span>${t.fecha}</span><div>${t.observaciones || ''}</div></div>`).join('')}
+          </div>
+          <div class="history-col">
+            <h5>Reservas / Tickets</h5>
+            ${svc.reservas.map(r => `<div class="history-row"><strong>${r.codigo}</strong><span>${r.fecha} ${r.hora}</span><div>Estado: ${r.estado}</div></div>`).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    // Mejorar logout: usar replace y limpiar auth
+    const logoutBtn = document.getElementById('logoutBtn');
+    logoutBtn.addEventListener('click', function() {
       localStorage.removeItem('mac_auth');
-      globalThis.location.href = 'login.html';
+      globalThis.location.replace('login.html');
     });
 
     document.addEventListener('DOMContentLoaded', renderDashboard);
