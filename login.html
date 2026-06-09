@@ -41,15 +41,21 @@
     </div>
 
     <script>
-        // Lógica de validación simulada
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value.trim();
 
-            if(email === "admin@mac.gob.pe" && password === "1234") {
-                localStorage.setItem('isAuthenticated', 'true');
-                window.location.href = "index.html#/dashboard"; // Te redirige al dashboard
+            const USERS = [
+                { email: 'admin@mac.gob.pe',   password: 'admin123',   role: 'admin',   redirect: 'erp-dashboard.html' },
+                { email: 'usuario@mac.gob.pe', password: 'usuario123', role: 'usuario', redirect: 'crm-dashboard.html' }
+            ];
+
+            const match = USERS.find(u => u.email === email && u.password === password);
+
+            if (match) {
+                localStorage.setItem('mac_auth', JSON.stringify({ email: match.email, role: match.role }));
+                globalThis.location.href = match.redirect;
             } else {
                 document.getElementById('error-message').style.display = 'block';
             }

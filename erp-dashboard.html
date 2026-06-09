@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Panel ERP | Centro MAC</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="crm-dashboard.css" />
+</head>
+<body>
+  <header class="dashboard-header">
+    <div class="header-brand">
+      <img src="icon/MAC-LOGO.png" alt="Logo MAC" class="header-logo" />
+      <div>
+        <p class="eyebrow">Centro MAC Áncash</p>
+        <h1>Panel ERP</h1>
+      </div>
+    </div>
+    <button id="logoutBtn" class="logout-btn" type="button">Cerrar sesión</button>
+  </header>
+
+  <main class="erp-shell">
+    <section class="erp-card">
+      <div class="erp-icon" aria-hidden="true">🏢</div>
+      <h2>Panel ERP — Módulo en construcción</h2>
+      <p>Próximamente estarán disponibles los módulos de Gestión de Atenciones, Estadísticas y Control de Operadores para el equipo administrativo.</p>
+      <br />
+      <button id="logoutSecondary" class="logout-btn" type="button">Cerrar sesión</button>
+    </section>
+  </main>
+
+  <script>
+    const auth = JSON.parse(localStorage.getItem('mac_auth') || 'null');
+    if (!auth || auth.role !== 'admin') {
+      globalThis.location.href = 'login.html';
+    }
+
+    document.getElementById('logoutBtn').addEventListener('click', logout);
+    document.getElementById('logoutSecondary').addEventListener('click', logout);
+
+    function logout() {
+      localStorage.removeItem('mac_auth');
+      globalThis.location.href = 'login.html';
+    }
+  </script>
+</body>
+</html>
