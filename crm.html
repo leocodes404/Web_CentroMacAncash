@@ -45,29 +45,44 @@
                     <p id="welcomeDate">Lunes, 15 de junio de 2026</p>
                 </div>
 
-                <div class="kpi-grid">
-                    <div class="kpi-card">
-                        <div class="kpi-icon">🎫</div>
-                        <div class="kpi-value" id="kpiActivos">0</div>
-                        <div class="kpi-label">Tickets activos</div>
+                <div class="metrics-grid">
+                    <div class="metric-card-advanced">
+                        <div class="metric-header"><h4>Tickets Activos</h4><span class="metric-badge">Esta semana</span></div>
+                        <div class="metric-body"><div class="metric-value" id="kpiActivos">0</div></div>
                     </div>
-                    <div class="kpi-card">
-                        <div class="kpi-icon">✅</div>
-                        <div class="kpi-value" id="kpiCompletados">0</div>
-                        <div class="kpi-label">Trámites completados</div>
+                    <div class="metric-card-advanced">
+                        <div class="metric-header"><h4>Trámites Completados</h4><span class="metric-badge">Este mes</span></div>
+                        <div class="metric-body"><div class="metric-value" id="kpiCompletados">0</div></div>
                     </div>
-                    <div class="kpi-card">
-                        <div class="kpi-icon">📅</div>
-                        <div class="kpi-value" id="kpiProxima">Sin citas</div>
-                        <div class="kpi-label">Próxima cita</div>
+                    <div class="metric-card-advanced">
+                        <div class="metric-header"><h4>Próxima Cita</h4><span class="metric-badge" id="kpiProximaBadge">Pendiente</span></div>
+                        <div class="metric-body"><div class="metric-value" id="kpiProxima">Sin citas</div></div>
+                    </div>
+                    <div class="metric-card-advanced">
+                        <div class="metric-header"><h4>Puntos de Fidelidad</h4><span class="metric-badge">Nivel Oro</span></div>
+                        <div class="metric-body"><div class="metric-value" id="kpiPuntos">1,250</div></div>
                     </div>
                 </div>
 
                 <button class="btn-reservar" onclick="navegar('tickets')">🎫 Reservar nuevo turno</button>
 
-                <div class="chart-container">
-                    <h3>Mis atenciones por mes</h3>
-                    <canvas id="chartMisAtenciones"></canvas>
+                <div class="charts-grid">
+                    <div class="chart-card">
+                        <h4 class="chart-title">Mis atenciones por mes</h4>
+                        <div class="chart-container"><canvas id="chartMisAtenciones"></canvas></div>
+                    </div>
+                    <div class="chart-card">
+                        <h4 class="chart-title">Mis trámites por tipo</h4>
+                        <div class="chart-container"><canvas id="chartTipos"></canvas></div>
+                    </div>
+                    <div class="chart-card">
+                        <h4 class="chart-title">Estado de mis tickets</h4>
+                        <div class="chart-container"><canvas id="chartEstados"></canvas></div>
+                    </div>
+                    <div class="chart-card">
+                        <h4 class="chart-title">Tiempo promedio de atención</h4>
+                        <div class="chart-container"><canvas id="chartTiempos"></canvas></div>
+                    </div>
                 </div>
             </section>
 
@@ -328,11 +343,39 @@
             document.getElementById('formCambiarPassword').addEventListener('submit', cambiarPassword);
         });
 
+        const sectionTitles = {
+            dashboard: 'Mi Dashboard',
+            tickets: 'Mis Tickets',
+            mensajes: 'Mensajes',
+            fidelizacion: 'Fidelización',
+            perfil: 'Mi Perfil'
+        };
+
         function navegar(section) {
             document.querySelectorAll('.crm-section').forEach(s => s.classList.remove('crm-section--active'));
             document.getElementById(section).classList.add('crm-section--active');
             document.querySelectorAll('.sidebar__item[data-section]').forEach(i => i.classList.remove('sidebar__item--active'));
-            document.querySelector(`[data-section="${section}"]`).classList.add('sidebar__item--active');
+            const activeLink = document.querySelector(`[data-section="${section}"]`);
+            if (activeLink) activeLink.classList.add('sidebar__item--active');
+
+            const headerTitle = document.getElementById('headerTitle');
+            if (headerTitle) headerTitle.textContent = sectionTitles[section] || 'Mi Dashboard';
+        }
+
+        let dashboardCharts = {};
+
+        function destroyChart(id) {
+            if (dashboardCharts[id]) {
+                dashboardCharts[id].destroy();
+                delete dashboardCharts[id];
+            }
+        }
+
+        function crearChart(id, config) {
+            const canvas = document.getElementById(id);
+            if (!canvas) return;
+            destroyChart(id);
+            dashboardCharts[id] = new Chart(canvas.getContext('2d'), config);
         }
 
         function renderizarDashboard() {
@@ -345,28 +388,104 @@
             document.getElementById('kpiActivos').textContent = activos;
             document.getElementById('kpiCompletados').textContent = completados;
             document.getElementById('kpiProxima').textContent = proxima ? `${proxima.fecha} en ${proxima.entidad}` : 'Sin citas';
+            document.getElementById('kpiProximaBadge').textContent = proxima ? 'Próxima' : 'Pendiente';
+            document.getElementById('kpiPuntos').textContent = '1,250';
 
-            // Gráfico
-            const ctx = document.getElementById('chartMisAtenciones').getContext('2d');
-            new Chart(ctx, {
+            const atenciones = [0, 1, 1, 2, 1, 0];
+            crearChart('chartMisAtenciones', {
                 type: 'bar',
                 data: {
                     labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'],
                     datasets: [{
                         label: 'Mis atenciones',
-                        data: [0, 1, 1, 2, 1, 0],
-                        backgroundColor: '#0057B8'
+                        data: atenciones,
+                        backgroundColor: '#0057B8',
+                        borderRadius: 12,
+                        borderSkipped: false
                     }]
                 },
-                options: { responsive: true, plugins: { legend: { display: false } } }
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+                }
+            });
+
+            crearChart('chartTipos', {
+                type: 'doughnut',
+                data: {
+                    labels: ['DNI', 'Licencias', 'Certificados', 'Otros'],
+                    datasets: [{
+                        data: [35, 25, 28, 12],
+                        backgroundColor: ['#0057B8', '#1D9E75', '#EF9F27', '#E24B4A'],
+                        borderColor: '#fff',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'right' },
+                        tooltip: { callbacks: { label: ctx => `${ctx.label}: ${ctx.parsed}%` } }
+                    }
+                }
+            });
+
+            crearChart('chartEstados', {
+                type: 'bar',
+                data: {
+                    labels: ['Pendiente', 'En proceso', 'Completado', 'Cancelado'],
+                    datasets: [{
+                        data: [4, 3, 8, 1],
+                        backgroundColor: ['#FDE68A', '#3B82F6', '#34D399', '#FCA5A5'],
+                        borderRadius: 12,
+                        borderSkipped: false
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { x: { beginAtZero: true, ticks: { stepSize: 2 } } }
+                }
+            });
+
+            crearChart('chartTiempos', {
+                type: 'line',
+                data: {
+                    labels: ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4', 'Sem 5', 'Sem 6'],
+                    datasets: [{
+                        label: 'Minutos',
+                        data: [25, 28, 22, 30, 26, 20],
+                        borderColor: '#0057B8',
+                        backgroundColor: 'rgba(0, 87, 184, 0.15)',
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: '#0057B8',
+                        pointRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true, ticks: { callback: value => `${value} min` } } }
+                }
             });
         }
 
         function renderizarGridEntidades() {
             const entidades = ['RENIEC', 'Migraciones', 'EsSalud', 'Banco Nación', 'ONP', 'SUNARP'];
+            const colores = ['#003087', '#0F766E', '#7C3AED', '#1D4ED8', '#B45309', '#9333EA'];
             const grid = document.getElementById('gridEntidades');
-            grid.innerHTML = entidades.map(e => `
-                <button class="entidad-card" onclick="seleccionarEntidad('${e}')">${e}</button>
+            grid.innerHTML = entidades.map((e, index) => `
+                <button class="entidad-card" onclick="seleccionarEntidad('${e}')" style="--entity-color: ${colores[index]};">
+                    <span class="entidad-dot"></span>
+                    <span>${e}</span>
+                </button>
             `).join('');
         }
 
