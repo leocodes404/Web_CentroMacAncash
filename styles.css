@@ -1596,7 +1596,7 @@ input[type="date"]:disabled {
 /* ── DASHBOARD ─────────────────────────────────────────── */
 .dashboard {
   padding: 7rem 0;
-  background: var(--mac-blue-900);
+  background: radial-gradient(circle at top right, #1e2c45, #0a1120 60%, #03060c);
   color: white;
   position: relative;
   overflow: hidden;
@@ -1607,9 +1607,10 @@ input[type="date"]:disabled {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(ellipse 50% 60% at 90% 10%, rgba(72, 128, 224, 0.18), transparent),
-    radial-gradient(ellipse 40% 50% at 10% 90%, rgba(232, 0, 28, 0.10), transparent);
+    radial-gradient(ellipse 60% 70% at 85% 5%, rgba(72, 128, 224, 0.25), transparent),
+    radial-gradient(ellipse 50% 60% at 15% 95%, rgba(232, 0, 28, 0.15), transparent);
   pointer-events: none;
+  mix-blend-mode: screen;
 }
 
 .dashboard__container {
@@ -1780,7 +1781,7 @@ input[type="date"]:disabled {
 /* Charts */
 .dashboard__charts {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(2, 1fr);
   gap: 1.25rem;
 }
 
@@ -1792,6 +1793,10 @@ input[type="date"]:disabled {
   padding: 1.75rem;
   box-shadow: var(--shadow-card);
   overflow: hidden;
+}
+
+.chart-card--fullwidth {
+  grid-column: 1 / -1;
 }
 
 .chart-card::before {
@@ -1824,7 +1829,7 @@ input[type="date"]:disabled {
 
 .chart-container {
   position: relative;
-  height: 320px;
+  height: 360px;
   width: 100%;
   border-radius: 24px;
   background: var(--color-surface-2);
@@ -4379,7 +4384,7 @@ html.a11y-high-contrast video {
     background: radial-gradient(circle at center, #0b224e, #030a1c);
     color: white;
     min-height: 100vh;
-    padding: 40px;
+    padding: 130px 40px 40px;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -4544,6 +4549,7 @@ html.a11y-high-contrast video {
     padding: 18px 24px;
     border-radius: 20px;
     transition: transform 0.2s ease;
+    animation: slideInRight 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .history-item:hover {
@@ -4575,4 +4581,33 @@ html.a11y-high-contrast video {
     font-size: 18px;
     color: rgba(255, 255, 255, 0.4);
     font-style: italic;
+}
+
+@keyframes flashActive {
+    0% {
+        opacity: 0.8;
+        text-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+    }
+    100% {
+        opacity: 1;
+        text-shadow: 0 0 60px rgba(255, 255, 255, 0.8), 0 0 80px rgba(56, 189, 248, 0.6);
+        transform: scale(1.02);
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(40px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes flashActiveCard {
+    0% { box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4); transform: scale(1); }
+    50% { box-shadow: 0 0 80px rgba(56, 189, 248, 0.8); transform: scale(1.03); background: rgba(56, 189, 248, 0.1); }
+    100% { box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4); transform: scale(1); }
 }

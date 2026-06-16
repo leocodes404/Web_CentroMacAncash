@@ -24,7 +24,6 @@
             <a href="#" data-section="analiticas" class="sidebar__item">⭐ Analíticas de Feedback</a>
             <div class="sidebar__divider"></div>
             <a href="index.html" class="sidebar__item">🌐 Volver a la Web</a>
-            <a href="#" class="sidebar__item sidebar__logout" onclick="cerrarSesion(); return false;">🚪 Cerrar sesión</a>
         </nav>
     </aside>
 
@@ -32,65 +31,146 @@
         <header class="erp-header">
             <h1 class="erp-header__title" id="headerTitle">Dashboard</h1>
             <div class="erp-header__right">
-                <span class="erp-header__user" id="headerUser">Admin</span>
-                <button class="erp-header__logout" onclick="cerrarSesion()">🚪 Cerrar sesión</button>
+                <div class="user-menu-wrapper">
+                    <span class="erp-header__user" id="headerUser" onclick="toggleUserMenu()" style="cursor: pointer; display: flex; align-items: center; gap: 6px;">Admin ▾</span>
+                    <div class="user-dropdown-menu" id="userMenu" style="display: none;">
+                        <div class="user-menu-header">
+                            <strong id="userMenuName">Admin</strong>
+                            <span>Administrador del Sistema</span>
+                        </div>
+                        <a href="#" onclick="alert('Funciones de configuración de sistema próximamente...'); toggleUserMenu(); return false;">⚙️ Configuración</a>
+                        <a href="#" onclick="cerrarSesion(); return false;" class="logout-link">🚪 Cerrar sesión</a>
+                    </div>
+                </div>
             </div>
         </header>
 
         <div class="erp-content">
             <!-- ────── SECCIÓN: DASHBOARD ────── -->
             <section id="dashboard" class="erp-section erp-section--active">
-                <div class="kpi-grid">
-                    <div class="kpi-card">
-                        <div class="kpi-icon">📊</div>
-                        <div class="kpi-value" id="kpiAtendidosHoy">0</div>
-                        <div class="kpi-label">Atendidos hoy</div>
-                        <div class="kpi-variation positive">↑ 6%</div>
+                <div class="filters-row" style="margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;">
+                    <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                        <select id="dashFiltroPeriodo" class="erp-filter-select" onchange="actualizarDashboardFiltros()">
+                            <option value="mes">Últimos 30 días</option>
+                            <option value="semana">Esta semana</option>
+                            <option value="hoy">Hoy</option>
+                            <option value="anio">Este año</option>
+                        </select>
+                        <select id="dashFiltroEntidad" class="erp-filter-select" onchange="actualizarDashboardFiltros()">
+                            <option value="">Todas las entidades</option>
+                            <option value="RENIEC">RENIEC</option>
+                            <option value="Migraciones">Migraciones</option>
+                            <option value="EsSalud">EsSalud</option>
+                            <option value="Banco de la Nación">Banco de la Nación</option>
+                            <option value="ONP">ONP</option>
+                            <option value="SUNARP">SUNARP</option>
+                        </select>
+                        <select id="dashFiltroTramite" class="erp-filter-select" onchange="actualizarDashboardFiltros()">
+                            <option value="">Todos los trámites</option>
+                            <option value="emision">Emisión</option>
+                            <option value="renovacion">Renovación</option>
+                            <option value="consultas">Consultas</option>
+                        </select>
+                        <select id="dashFiltroSede" class="erp-filter-select" onchange="actualizarDashboardFiltros()">
+                            <option value="chimbote">Sede Chimbote</option>
+                        </select>
                     </div>
-                    <div class="kpi-card">
-                        <div class="kpi-icon">📅</div>
-                        <div class="kpi-value" id="kpiEstaSemana">0</div>
-                        <div class="kpi-label">Esta semana</div>
-                        <div class="kpi-variation positive">↑ 12%</div>
-                    </div>
-                    <div class="kpi-card">
-                        <div class="kpi-icon">📆</div>
-                        <div class="kpi-value" id="kpiEsteMes">0</div>
-                        <div class="kpi-label">Este mes</div>
-                        <div class="kpi-variation positive">↑ 8%</div>
-                    </div>
-                    <div class="kpi-card">
-                        <div class="kpi-icon">⏱️</div>
-                        <div class="kpi-value">14</div>
-                        <div class="kpi-label">Espera promedio (min)</div>
-                        <div class="kpi-variation negative">↓ 2%</div>
-                    </div>
+                    <button class="btn-filter btn-filter--secondary btn-limpiar-erp" onclick="limpiarFiltrosDashboard()">🧹 Limpiar</button>
                 </div>
-
-                <div class="dashboard-charts">
-                    <div class="chart-container">
-                        <h3>Atenciones mensuales — 2025</h3>
-                        <canvas id="chartBarras"></canvas>
+                <div class="modern-dash-grid">
+                    <!-- Fila 1 -->
+                    <div class="dash-card dash-card--gradient col-span-3">
+                        <h3>Total Atenciones</h3>
+                        <p class="kpi-val" id="kpiAtendidos">0</p>
+                        <span style="font-size: 14px; opacity: 0.9;">↑ 12% vs anterior</span>
                     </div>
-                    <div class="chart-container">
-                        <h3>Distribución por entidad</h3>
-                        <canvas id="chartDonut"></canvas>
+                    <div class="dash-card col-span-3">
+                        <h3>Tickets Generados</h3>
+                        <p class="kpi-val" id="kpiTickets">0</p>
+                        <div style="height: 50px; position: relative;">
+                            <canvas id="chartSpark1"></canvas>
+                        </div>
                     </div>
-                </div>
+                    <div class="dash-card col-span-3">
+                        <h3>Espera Promedio</h3>
+                        <p class="kpi-val"><span id="kpiEspera">0</span> min</p>
+                        <div style="height: 50px; position: relative;">
+                            <canvas id="chartSpark2"></canvas>
+                        </div>
+                    </div>
+                    <div class="dash-card col-span-3">
+                        <div style="display: flex; justify-content: space-between;">
+                            <h3>Satisfacción Goal</h3>
+                            <span style="color: var(--text); font-weight: bold;"><span id="kpiSatisfaccion">0</span>% / 95%</span>
+                        </div>
+                        <p style="font-size: 12px; color: var(--text-muted); margin: 0;">Progreso actual</p>
+                        <div class="progress-container">
+                            <div class="progress-bar" id="kpiProgress" style="width: 0%; transition: width 1s ease;"></div>
+                        </div>
+                        <div class="progress-labels">
+                            <span>0%</span>
+                            <span>100%</span>
+                        </div>
+                    </div>
 
-                <div class="dashboard-table">
-                    <h3>Resumen por entidad</h3>
-                    <table class="table table--responsive">
-                        <thead>
-                            <th onclick="ordenarTabla('entidad')">Entidad ↑↓</th>
-                            <th onclick="ordenarTabla('atenciones')">Atenciones ↑↓</th>
-                            <th>% del total</th>
-                            <th>Satisfacción</th>
-                            <th>Estado</th>
-                        </thead>
-                        <tbody id="tableEntidadesBody">
-                        </tbody>
-                    </table>
+                    <!-- Fila 2 -->
+                    <div class="dash-card col-span-5 row-span-2">
+                        <h3>Distribución de Entidades</h3>
+                        <div style="height: 320px; position: relative; margin-top: auto; margin-bottom: auto;">
+                            <canvas id="chartDonut"></canvas>
+                        </div>
+                    </div>
+                    <div class="dash-card col-span-7">
+                        <h3>Volumen de Trámites por Tipo</h3>
+                        <div style="height: 220px; position: relative;">
+                            <canvas id="chartBarras"></canvas>
+                        </div>
+                    </div>
+                    
+                    <!-- Fila 3 -->
+                    <div class="dash-card col-span-7">
+                        <h3>Tendencia de Atenciones (En Vivo)</h3>
+                        <div style="height: 220px; position: relative;">
+                            <canvas id="chartArea"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Fila 4 -->
+                    <div class="dash-card col-span-6">
+                        <h3>Rendimiento y Satisfacción</h3>
+                        <div style="height: 280px; position: relative;">
+                            <canvas id="chartPolar"></canvas>
+                        </div>
+                    </div>
+                    <div class="dash-card col-span-6">
+                        <h3>Resumen Rápido de Entidades</h3>
+                        <div>
+                            <div class="list-item">
+                                <div class="list-item-icon" style="background: #1e3a8a;">🏛️</div>
+                                <div class="list-item-content">
+                                    <div class="list-item-title">RENIEC</div>
+                                    <div class="list-item-subtitle">Identificación y Estado Civil</div>
+                                </div>
+                                <div class="list-item-value">Top Atenciones</div>
+                            </div>
+                            <div class="list-item">
+                                <div class="list-item-icon" style="background: #f59e0b;">✈️</div>
+                                <div class="list-item-content">
+                                    <div class="list-item-title">Migraciones</div>
+                                    <div class="list-item-subtitle">Pasaportes y Extranjería</div>
+                                </div>
+                                <div class="list-item-value">Alta Demanda</div>
+                            </div>
+                            <div class="list-item">
+                                <div class="list-item-icon" style="background: #10b981;">🏥</div>
+                                <div class="list-item-content">
+                                    <div class="list-item-title">EsSalud</div>
+                                    <div class="list-item-subtitle">Seguros y Acreditaciones</div>
+                                </div>
+                                <div class="list-item-value">Flujo Constante</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </section>
 
@@ -123,23 +203,29 @@
 
             <!-- ────── SECCIÓN: CONTROL DE TICKETS ────── -->
             <section id="tickets" class="erp-section">
-                <div class="filters-row">
-                    <select id="filtroEntidad" class="filter-select">
-                        <option value="">Todas las entidades</option>
-                        <option value="RENIEC">RENIEC</option>
-                        <option value="Migraciones">Migraciones</option>
-                        <option value="EsSalud">EsSalud</option>
-                        <option value="Banco de la Nación">Banco de la Nación</option>
-                    </select>
-                    <select id="filtroEstado" class="filter-select">
-                        <option value="">Todos los estados</option>
-                        <option value="pendiente">Pendiente</option>
-                        <option value="atendido">Atendido</option>
-                        <option value="cancelado">Cancelado</option>
-                    </select>
-                    <input type="date" id="filtroFecha" class="filter-select">
-                    <button class="btn-filter" onclick="filtrarTickets()">🔍 Buscar</button>
-                    <button class="btn-filter btn-filter--secondary" onclick="limpiarFiltrosTickets()">✖ Limpiar</button>
+                <div class="filters-row" style="margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;">
+                    <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                        <select id="filtroEntidad" class="erp-filter-select">
+                            <option value="">Todas las entidades</option>
+                            <option value="RENIEC">RENIEC</option>
+                            <option value="Migraciones">Migraciones</option>
+                            <option value="EsSalud">EsSalud</option>
+                            <option value="Banco de la Nación">Banco de la Nación</option>
+                            <option value="ONP">ONP</option>
+                            <option value="SUNARP">SUNARP</option>
+                        </select>
+                        <select id="filtroEstado" class="erp-filter-select">
+                            <option value="">Todos los estados</option>
+                            <option value="pendiente">Pendiente</option>
+                            <option value="atendido">Atendido</option>
+                            <option value="cancelado">Cancelado</option>
+                        </select>
+                        <input type="date" id="filtroFecha" class="erp-filter-select" style="padding-right: 16px; background-image: none;">
+                    </div>
+                    <div style="display: flex; gap: 12px;">
+                        <button class="btn-filter" onclick="filtrarTickets()" style="border-radius: 8px; padding: 10px 18px;">🔍 Buscar</button>
+                        <button class="btn-filter btn-filter--secondary btn-limpiar-erp" onclick="limpiarFiltrosTickets()">🧹 Limpiar</button>
+                    </div>
                 </div>
 
                 <span class="result-counter" id="ticketsCounter">Mostrando 0 tickets</span>
@@ -262,6 +348,20 @@
             }
         }
 
+        function toggleUserMenu() {
+            const menu = document.getElementById('userMenu');
+            menu.style.display = menu.style.display === 'none' ? 'flex' : 'none';
+        }
+        
+        // Ocultar menú al hacer click fuera
+        document.addEventListener('click', function(e) {
+            const menu = document.getElementById('userMenu');
+            const userSpan = document.getElementById('headerUser');
+            if (menu && userSpan && !menu.contains(e.target) && e.target !== userSpan) {
+                menu.style.display = 'none';
+            }
+        });
+
         // ────────── INICIALIZACIÓN ──────────
         document.addEventListener('DOMContentLoaded', function() {
             protegerRuta('admin');
@@ -269,7 +369,8 @@
 
             const sesion = getSesion();
             document.getElementById('sidebarUser').textContent = sesion.nombre;
-            document.getElementById('headerUser').textContent = sesion.nombre;
+            document.getElementById('headerUser').textContent = sesion.nombre + ' ▾';
+            document.getElementById('userMenuName').textContent = sesion.nombre;
 
             // Navegación entre secciones
             document.querySelectorAll('.sidebar__item[data-section]').forEach(item => {
@@ -326,69 +427,474 @@
         });
 
         function renderizarDashboard() {
-            const reservas = getReservas();
-            const hoy = new Date().toISOString().split('T')[0];
-            const atendidosHoy = reservas.filter(r => r.fecha === hoy && r.estado === 'atendido').length;
-            document.getElementById('kpiAtendidosHoy').textContent = atendidosHoy;
-
-            const hace7dias = new Date(Date.now() - 7*24*60*60*1000).toISOString().split('T')[0];
-            const estaSemana = reservas.filter(r => r.fecha >= hace7dias && r.estado === 'atendido').length;
-            document.getElementById('kpiEstaSemana').textContent = estaSemana;
-
-            const mesActual = hoy.slice(0, 7);
-            const esteMes = reservas.filter(r => r.fecha.startsWith(mesActual) && r.estado === 'atendido').length;
-            document.getElementById('kpiEsteMes').textContent = esteMes;
-
-            // Gráficos
-            dibujarGraficoBarras();
-            dibujarGraficoDonut();
+            // Inicializar filtros y cargar datos
+            actualizarDashboardFiltros();
 
             // Tabla resumen
             renderizarTablaEntidades();
         }
 
-        function dibujarGraficoBarras() {
+        let chartBarrasInstance = null;
+        let chartDonutInstance = null;
+        let chartAreaInstance = null;
+        let chartSpark1Instance = null;
+        let chartSpark2Instance = null;
+        let chartPolarInstance = null;
+
+        function actualizarDashboardFiltros() {
+            const entidad = document.getElementById('dashFiltroEntidad').value;
+            const periodo = document.getElementById('dashFiltroPeriodo').value;
+            
+            const reservas = getReservas();
+            const hoyStr = new Date().toISOString().split('T')[0];
+            
+            // Filtrar reservas según Dashboard
+            let reservasFiltradas = reservas;
+            if (entidad) {
+                reservasFiltradas = reservasFiltradas.filter(r => r.entidad === entidad);
+            }
+            if (periodo === 'hoy') {
+                reservasFiltradas = reservasFiltradas.filter(r => r.fecha === hoyStr);
+            } else if (periodo === 'semana') {
+                const hace7dias = new Date(Date.now() - 7*24*60*60*1000).toISOString().split('T')[0];
+                reservasFiltradas = reservasFiltradas.filter(r => r.fecha >= hace7dias);
+            } else if (periodo === 'mes') {
+                const mesActual = hoyStr.slice(0, 7);
+                reservasFiltradas = reservasFiltradas.filter(r => r.fecha.startsWith(mesActual));
+            } else if (periodo === 'anio') {
+                const anioActual = hoyStr.slice(0, 4);
+                reservasFiltradas = reservasFiltradas.filter(r => r.fecha.startsWith(anioActual));
+            }
+            
+            // Calcular KPIs reales o simulados
+            let totalTickets, atendidos, pendientes, satisfaccion, espera;
+            
+            if (periodo === 'hoy') {
+                // Datos Reales
+                totalTickets = reservasFiltradas.length;
+                atendidos = reservasFiltradas.filter(r => r.estado === 'atendido').length;
+                pendientes = reservasFiltradas.filter(r => r.estado === 'pendiente').length;
+                satisfaccion = atendidos > 0 ? Math.floor(Math.random() * (100 - 85 + 1)) + 85 : 0; 
+                espera = atendidos > 0 ? Math.floor(Math.random() * 15) + 5 : 0; 
+            } else {
+                // Datos Simulados y Ricos en volumen para que el dashboard no se vea vacío
+                const factorPer = periodo === 'semana' ? 5 : periodo === 'mes' ? 22 : 250;
+                const factorEnt = entidad ? 0.4 : 1;
+                totalTickets = Math.floor(125 * factorPer * factorEnt);
+                atendidos = Math.floor(totalTickets * 0.88); // 88% de atención
+                pendientes = totalTickets - atendidos;
+                satisfaccion = Math.floor(Math.random() * (100 - 92 + 1)) + 92; // Alta satisfacción
+                espera = Math.floor(Math.random() * 8) + 12; // 12-20 min
+            }
+            
+            animarContador('kpiAtendidos', atendidos);
+            animarContador('kpiTickets', totalTickets);
+            animarContador('kpiSatisfaccion', satisfaccion);
+            animarContador('kpiEspera', espera);
+
+            const progBar = document.getElementById('kpiProgress');
+            if (progBar) progBar.style.width = satisfaccion + '%';
+            
+            // Re-renderizar gráficos actualizando datos en lugar de destruirlos
+            if (!chartBarrasInstance) {
+                dibujarGraficoSpark1(totalTickets);
+                dibujarGraficoSpark2(espera);
+                dibujarGraficoBarras(1, 1);
+                dibujarGraficoDonut(1);
+                dibujarGraficoArea(1, 1);
+                dibujarGraficoPolar(1);
+            } else {
+                actualizarDatosGraficos(reservasFiltradas, periodo, entidad, totalTickets, espera);
+            }
+        }
+
+        function actualizarDatosGraficos(reservasFiltradas, periodo, entidad, totalTickets, espera) {
+            let donutData;
+            const entidadesKeys = ['RENIEC', 'Migraciones', 'EsSalud', 'Banco de la Nación', 'ONP', 'SUNARP'];
+            
+            if (periodo === 'hoy') {
+                // Distribución real
+                donutData = entidadesKeys.map(ent => reservasFiltradas.filter(r => r.entidad === ent).length);
+                const otros = reservasFiltradas.length - donutData.reduce((a,b) => a+b, 0);
+                donutData.push(otros);
+                
+                if (reservasFiltradas.length === 0) {
+                    donutData = [1, 1, 1, 1, 1, 1, 1]; 
+                }
+            } else {
+                // Distribución simulada rica
+                const baseVol = periodo === 'semana' ? 625 : periodo === 'mes' ? 2750 : 33000;
+                if (entidad) {
+                    donutData = entidadesKeys.map(e => e === entidad ? baseVol : 0);
+                    donutData.push(0); // otros
+                } else {
+                    donutData = [0.38, 0.22, 0.15, 0.12, 0.06, 0.05, 0.02].map(p => Math.floor(baseVol * p));
+                }
+            }
+            
+            chartDonutInstance.data.datasets[0].data = donutData;
+            chartDonutInstance.update();
+
+            // Para Barras y Áreas, usamos simulación para que no se vea vacío salvo en 'hoy'
+            let factor = 1;
+            let factorPer = 1;
+
+            if (periodo === 'hoy') {
+                factor = reservasFiltradas.length > 0 ? (reservasFiltradas.length / 10) : 0.05;
+                if (factor < 0.1) factor = 0.1;
+                factorPer = 0.05;
+            } else {
+                factor = entidad ? 0.4 : 1;
+                factorPer = periodo === 'semana' ? 0.25 : periodo === 'mes' ? 1 : 12;
+            }
+
+            // Actualizar Barras
+            chartBarrasInstance.data.datasets[0].data = [1820, 2150, 1980, 2340, 2100, 2480].map(v => Math.floor(v * factor * (factorPer > 1 ? factorPer/12 : 1)));
+            chartBarrasInstance.data.datasets[1].data = [1950, 2300, 2050, 2500, 2250, 2600].map(v => Math.floor(v * factor * (factorPer > 1 ? factorPer/12 : 1)));
+            chartBarrasInstance.update();
+
+            // Actualizar Area
+            chartAreaInstance.data.datasets[0].data = [120, 150, 180, 160, 210, 190, 250, 230, 280, 260, 310, 290].map(v => Math.floor(v * factor * (factorPer > 1 ? factorPer/5 : 1)));
+            chartAreaInstance.update();
+
+            // Actualizar Polar
+            if (chartPolarInstance) {
+                chartPolarInstance.data.datasets[0].data = [80, 60, 90, 70, 85, 65].map(v => Math.floor(v * factor * (factorPer > 1 ? factorPer/12 : 1) + (Math.random() * 10)));
+                chartPolarInstance.update();
+            }
+
+            // Actualizar Sparks
+            const randData = () => Array.from({length: 6}, () => Math.floor(Math.random() * totalTickets * 0.5) + totalTickets * 0.1);
+            chartSpark1Instance.data.datasets[0].data = randData();
+            chartSpark1Instance.update();
+            chartSpark2Instance.data.datasets[0].data = Array.from({length: 6}, () => Math.floor(Math.random() * espera * 0.5) + espera * 0.5);
+            chartSpark2Instance.update();
+        }
+
+        function animarContador(id, valorFinal) {
+            const el = document.getElementById(id);
+            const duracion = 1500; // 1.5 segundos
+            const fps = 60;
+            const totalFrames = Math.round((duracion / 1000) * fps);
+            let frameActual = 0;
+
+            const update = () => {
+                frameActual++;
+                const progreso = frameActual / totalFrames;
+                // Easing suave (easeOutQuart)
+                const progresoEasing = 1 - Math.pow(1 - progreso, 4);
+                
+                const valorActual = Math.floor(valorFinal * progresoEasing);
+                el.textContent = valorActual;
+
+                if (frameActual < totalFrames) {
+                    requestAnimationFrame(update);
+                } else {
+                    el.textContent = valorFinal;
+                }
+            };
+            
+            requestAnimationFrame(update);
+        }
+
+        function limpiarFiltrosDashboard() {
+            document.getElementById('dashFiltroEntidad').value = '';
+            document.getElementById('dashFiltroPeriodo').value = 'mes';
+            actualizarDashboardFiltros();
+        }
+
+        function dibujarGraficoBarras(factor = 1, factorPer = 1) {
             const ctx = document.getElementById('chartBarras').getContext('2d');
-            new Chart(ctx, {
+            const dataAtendidos = [1820, 2150, 1980, 2340, 2100, 2480].map(v => Math.floor(v * factor * (factorPer > 1 ? factorPer/12 : 1)));
+            const dataTickets = [1950, 2300, 2050, 2500, 2250, 2600].map(v => Math.floor(v * factor * (factorPer > 1 ? factorPer/12 : 1)));
+            
+            chartBarrasInstance = new Chart(ctx, {
                 type: 'bar',
                 data: {
                     labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'],
-                    datasets: [{
-                        label: 'Atenciones',
-                        data: [1820, 2150, 1980, 2340, 2100, 2480],
-                        backgroundColor: '#003087',
-                        borderColor: '#0057B8',
-                        borderWidth: 2
-                    }]
+                    datasets: [
+                        {
+                            label: 'Ciudadanos Atendidos',
+                            data: dataAtendidos,
+                            backgroundColor: '#1e3a8a', // Dark blue
+                            borderRadius: 6,
+                            barPercentage: 0.6,
+                            categoryPercentage: 0.8
+                        },
+                        {
+                            label: 'Tickets Generados',
+                            data: dataTickets,
+                            backgroundColor: '#f59e0b', // Orange
+                            borderRadius: 6,
+                            barPercentage: 0.6,
+                            categoryPercentage: 0.8
+                        }
+                    ]
                 },
                 options: {
                     responsive: true,
-                    plugins: { legend: { display: false } },
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    plugins: { 
+                        legend: { 
+                            position: 'top',
+                            labels: {
+                                usePointStyle: true,
+                                boxWidth: 8,
+                                font: { family: 'Inter', size: 13, weight: '500' }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: '#152238',
+                            titleFont: { family: 'Inter', size: 14 },
+                            bodyFont: { family: 'Inter', size: 13 },
+                            padding: 12,
+                            cornerRadius: 8,
+                            displayColors: true
+                        }
+                    },
+                    animation: {
+                        duration: 1500,
+                        easing: 'easeOutQuart'
+                    },
                     scales: {
-                        y: { beginAtZero: true }
+                        y: { 
+                            beginAtZero: true,
+                            grid: { color: '#e2e8f0', drawBorder: false },
+                            ticks: { font: { family: 'Inter', size: 12 }, color: '#64748b' }
+                        },
+                        x: {
+                            grid: { display: false, drawBorder: false },
+                            ticks: { font: { family: 'Inter', size: 12 }, color: '#64748b' }
+                        }
                     }
                 }
             });
         }
 
-        function dibujarGraficoDonut() {
+        function dibujarGraficoDonut(factor = 1) {
             const ctx = document.getElementById('chartDonut').getContext('2d');
-            new Chart(ctx, {
+            
+            // Simular variación con 7 entidades
+            let baseData = [40, 20, 15, 10, 5, 5, 5];
+            if (factor < 1) baseData = [75, 5, 5, 5, 5, 3, 2];
+
+            // Eliminamos el texto central para un diseño más limpio
+            chartDonutInstance = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
-                    labels: ['RENIEC', 'Migraciones', 'EsSalud', 'Banco Nación', 'Otros'],
+                    labels: ['RENIEC', 'Migraciones', 'EsSalud', 'Banco Nación', 'ONP', 'SUNARP', 'Otros'],
                     datasets: [{
-                        data: [450, 380, 320, 280, 170],
-                        backgroundColor: ['#003087', '#0057B8', '#1B9E78', '#D4001A', '#F5B820']
+                        data: baseData,
+                        backgroundColor: ['#1e3a8a', '#3b82f6', '#10b981', '#ef4444', '#f59e0b', '#8b5cf6', '#64748b'],
+                        borderWidth: 2,
+                        borderColor: '#ffffff',
+                        hoverOffset: 6,
+                        spacing: 3, // Separa los elementos del donut
+                        borderRadius: 4
                     }]
                 },
-                options: { responsive: true }
+                options: { 
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '70%',
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                usePointStyle: true,
+                                boxWidth: 8,
+                                font: { family: 'Inter', size: 12, weight: '500' }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return ' ' + context.label + ': ' + context.parsed + '%';
+                                }
+                            },
+                            backgroundColor: '#152238',
+                            bodyFont: { family: 'Inter', size: 14, weight: '600' },
+                            padding: 12,
+                            cornerRadius: 8
+                        }
+                    },
+                    animation: {
+                        duration: 1500,
+                        easing: 'easeOutQuart',
+                        animateScale: true,
+                        animateRotate: true
+                    }
+                }
+            });
+        }
+
+        function dibujarGraficoArea(factor = 1, factorPer = 1) {
+            const ctx = document.getElementById('chartArea').getContext('2d');
+            
+            // Gradiente suave Azul
+            const gradient1 = ctx.createLinearGradient(0, 0, 0, 300);
+            gradient1.addColorStop(0, 'rgba(59, 130, 246, 0.4)'); // Light blue
+            gradient1.addColorStop(1, 'rgba(59, 130, 246, 0.05)');
+
+            const baseData1 = [120, 150, 180, 160, 210, 190, 250, 230, 280, 260, 310, 290].map(v => Math.floor(v * factor * (factorPer > 1 ? factorPer/5 : 1)));
+
+            chartAreaInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['S', 'M', 'T', 'W', 'T', 'F', 'S', 'S', 'M', 'T', 'W', 'T'],
+                    datasets: [
+                        {
+                            label: 'Atenciones Diarias',
+                            data: baseData1,
+                            fill: true,
+                            backgroundColor: gradient1,
+                            borderColor: '#3b82f6', // Azul brillante
+                            borderWidth: 3,
+                            tension: 0.4,
+                            pointBackgroundColor: '#ffffff',
+                            pointBorderColor: '#3b82f6',
+                            pointBorderWidth: 2,
+                            pointRadius: 4,
+                            pointHoverRadius: 6
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#152238',
+                            titleFont: { family: 'Inter', size: 14 },
+                            bodyFont: { family: 'Inter', size: 13 },
+                            padding: 12,
+                            cornerRadius: 8,
+                            displayColors: false
+                        }
+                    },
+                    animation: {
+                        duration: 1000,
+                        easing: 'easeOutQuart'
+                    },
+                    scales: {
+                        y: { 
+                            beginAtZero: true,
+                            grid: { color: '#e2e8f0', drawBorder: false },
+                            ticks: { font: { family: 'Inter', size: 12 }, color: '#64748b' } // Mostrar números
+                        },
+                        x: {
+                            grid: { display: false, drawBorder: false },
+                            ticks: { font: { family: 'Inter', size: 12 }, color: '#64748b' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function dibujarGraficoPolar(factor = 1) {
+            const ctx = document.getElementById('chartPolar').getContext('2d');
+            const data = [80, 60, 90, 70, 85, 65].map(v => Math.floor(v * factor));
+            chartPolarInstance = new Chart(ctx, {
+                type: 'polarArea',
+                data: {
+                    labels: ['RENIEC', 'Migraciones', 'EsSalud', 'Banco Nación', 'ONP', 'SUNARP'],
+                    datasets: [{
+                        label: 'Satisfacción',
+                        data: data,
+                        backgroundColor: [
+                            'rgba(30, 58, 138, 0.7)',
+                            'rgba(245, 158, 11, 0.7)',
+                            'rgba(16, 185, 129, 0.7)',
+                            'rgba(139, 92, 246, 0.7)',
+                            'rgba(236, 72, 153, 0.7)',
+                            'rgba(14, 165, 233, 0.7)'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: { ticks: { display: false } }
+                    },
+                    plugins: {
+                        legend: { position: 'right', labels: { usePointStyle: true, font: { family: 'Inter', size: 11 } } },
+                        tooltip: {
+                            backgroundColor: '#152238', titleFont: { family: 'Inter', size: 14 }, padding: 12, cornerRadius: 8
+                        }
+                    }
+                }
+            });
+        }
+
+        function dibujarGraficoSpark1(baseValue) {
+            const ctx = document.getElementById('chartSpark1').getContext('2d');
+            const data = Array.from({length: 6}, () => Math.floor(Math.random() * baseValue * 0.5) + baseValue * 0.1);
+            
+            chartSpark1Instance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['1', '2', '3', '4', '5', '6'],
+                    datasets: [{
+                        data: data,
+                        borderColor: '#f59e0b',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        pointRadius: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false }, tooltip: { enabled: false } },
+                    scales: {
+                        x: { display: false },
+                        y: { display: false }
+                    }
+                }
+            });
+        }
+
+        function dibujarGraficoSpark2(baseValue) {
+            const ctx = document.getElementById('chartSpark2').getContext('2d');
+            const data = Array.from({length: 6}, () => Math.floor(Math.random() * baseValue * 0.5) + baseValue * 0.5);
+            
+            chartSpark2Instance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['1', '2', '3', '4', '5', '6'],
+                    datasets: [{
+                        data: data,
+                        borderColor: '#10b981',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        pointRadius: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false }, tooltip: { enabled: false } },
+                    scales: {
+                        x: { display: false },
+                        y: { display: false }
+                    }
+                }
             });
         }
 
         function renderizarTablaEntidades() {
             const entidades = getEntidades();
             const tbody = document.getElementById('tableEntidadesBody');
+            if (!tbody) return; // Prevent crash since the dashboard table was removed
             const totalAtenciones = 450 + 380 + 320 + 280 + 110 + 60;
             const atencionesSimuladas = {
                 'RENIEC': 450,
@@ -636,6 +1142,7 @@
                 reserva.estado = nuevoEstado;
                 setReservas(reservas);
                 renderizarTickets();
+                actualizarDashboardFiltros();
             }
         }
 

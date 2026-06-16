@@ -107,7 +107,21 @@ function inicializarDatos() {
         ]);
     }
 
+    if (!localStorage.getItem('mac_calificaciones')) {
+        setCalificaciones([
+            { id: 'CAL-001', nombreCiudadano: 'María López Torres', entidad: 'RENIEC', estrellas: 5, comentario: 'Excelente atención, muy rápido y el personal muy amable.', fecha: '2025-06-15' },
+            { id: 'CAL-002', nombreCiudadano: 'Carlos Ruiz Sánchez', entidad: 'Migraciones', estrellas: 4, comentario: 'Buena atención pero tuve que esperar un poco más de lo indicado.', fecha: '2025-06-16' },
+            { id: 'CAL-003', nombreCiudadano: 'Ana Flores Pérez', entidad: 'EsSalud', estrellas: 5, comentario: 'Todo perfecto, me resolvieron todas mis dudas.', fecha: '2025-06-16' },
+            { id: 'CAL-004', nombreCiudadano: 'Luis Torres', entidad: 'Banco de la Nación', estrellas: 3, comentario: 'El trámite fue lento, faltan más ventanillas.', fecha: '2025-06-17' },
+            { id: 'CAL-005', nombreCiudadano: 'Elena Díaz', entidad: 'SUNARP', estrellas: 5, comentario: 'Muy eficientes, gran mejora en el servicio.', fecha: '2025-06-18' }
+        ]);
+    }
+
     getEntidades();
+}
+
+function setCalificaciones(arr) {
+    localStorage.setItem('mac_calificaciones', JSON.stringify(arr));
 }
 
 function escaparHTML(str) {

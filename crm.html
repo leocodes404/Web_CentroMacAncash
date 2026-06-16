@@ -21,10 +21,18 @@
             <a href="#" data-section="tickets" class="sidebar__item">🎫 Mis Tickets</a>
             <a href="#" data-section="mensajes" class="sidebar__item">📧 Mensajes <span class="badge-notif" id="badgeNotif" style="display: none;">0</span></a>
             <a href="#" data-section="fidelizacion" class="sidebar__item">⭐ Fidelización</a>
-            <a href="#" data-section="perfil" class="sidebar__item">👤 Mi Perfil</a>
             <div class="sidebar__divider"></div>
             <a href="index.html" class="sidebar__item">🌐 Volver a la Web</a>
-            <a href="#" class="sidebar__item sidebar__logout" onclick="cerrarSesion(); return false;">🚪 Cerrar sesión</a>
+            <div class="sidebar__item-group">
+                <a href="#" class="sidebar__item" onclick="toggleSidebarSubmenu(); return false;" style="display: flex; justify-content: space-between; align-items: center;">
+                    <span>👤 Mi Perfil</span>
+                    <svg id="chevronPerfil" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transition: transform 0.2s; transform: rotate(-90deg);"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </a>
+                <div class="sidebar__submenu" id="submenuPerfil" style="display: none;">
+                    <a href="#" onclick="navegar('perfil'); switchProfileTab('info'); return false;">Información de cuenta</a>
+                    <a href="#" onclick="navegar('perfil'); switchProfileTab('seguridad'); return false;">Seguridad</a>
+                </div>
+            </div>
         </nav>
     </aside>
 
@@ -47,8 +55,19 @@
                         </div>
                     </div>
                 </div>
-                <span class="crm-header__user" id="headerUser">Usuario</span>
-                <button class="crm-header__logout" onclick="cerrarSesion()">🚪</button>
+                <!-- Menú de Usuario -->
+                <div class="user-menu-wrapper" style="position: relative;">
+                    <span class="crm-header__user" id="headerUser" onclick="toggleUserMenu()" style="cursor: pointer; display: flex; align-items: center; gap: 6px;">Usuario ▾</span>
+                    <div class="user-dropdown-menu" id="userMenu" style="display: none;">
+                        <div class="user-menu-header" onclick="navegar('perfil'); switchProfileTab('info'); toggleUserMenu();" style="cursor: pointer;" title="Ir a mi perfil">
+                            <strong id="userMenuName">Usuario</strong>
+                            <span>Información de la cuenta</span>
+                        </div>
+                        <a href="#" onclick="navegar('perfil'); switchProfileTab('seguridad'); toggleUserMenu(); return false;">⚙️ Configuración</a>
+                        <a href="#" onclick="cerrarSesion(); return false;" class="logout-link">🚪 Cerrar sesión</a>
+                    </div>
+                </div>
+                <button class="crm-header__logout" onclick="cerrarSesion()">🚪 Cerrar sesión</button>
             </div>
         </header>
 
@@ -59,44 +78,111 @@
                     <h2 id="welcomeTitle">¡Hola, Usuario! 👋</h2>
                     <p id="welcomeDate">Lunes, 15 de junio de 2026</p>
                 </div>
+                <!-- Barra de filtros estilo Google Ads -->
+                <div class="dash-filters" style="display: flex; flex-wrap: wrap; align-items: center; gap: 16px;">
+                    <div class="dash-filter-item">
+                        <select id="filtroTiempo" onchange="simularDatosDashboard()">
+                            <option value="30d">Últimos 30 días</option>
+                            <option value="mes">Este mes</option>
+                            <option value="ano">Este año</option>
+                        </select>
+                    </div>
+                    <div class="dash-filter-item">
+                        <select id="filtroEntidad" onchange="simularDatosDashboard()">
+                            <option value="todas">Todas las entidades</option>
+                            <option value="reniec">RENIEC</option>
+                            <option value="migraciones">Migraciones</option>
+                            <option value="essalud">EsSalud</option>
+                            <option value="bn">Banco de la Nación</option>
+                            <option value="onp">ONP</option>
+                            <option value="sunarp">SUNARP</option>
+                        </select>
+                    </div>
+                    <div class="dash-filter-item">
+                        <select id="filtroTramite" onchange="simularDatosDashboard()">
+                            <option value="todos">Todos los trámites</option>
+                            <option value="dni">DNI / Pasaporte</option>
+                            <option value="certificados">Certificados</option>
+                            <option value="salud">Seguro Social</option>
+                        </select>
+                    </div>
+                    <div class="dash-filter-item">
+                        <select id="filtroSede">
+                            <option value="chimbote">Sede Chimbote</option>
+                        </select>
+                    </div>
+                    <button class="btn-limpiar" onclick="limpiarFiltrosDashboard()" style="margin-left: auto;">🧹 Limpiar</button>
+                </div>
 
-                <div class="metrics-grid">
-                    <div class="metric-card-advanced">
-                        <div class="metric-header"><h4>Tickets Activos</h4><span class="metric-badge">Esta semana</span></div>
-                        <div class="metric-body"><div class="metric-value" id="kpiActivos">0</div></div>
+                <!-- KPI Cards Row -->
+                <div class="dash-kpi-row">
+                    <div class="dash-kpi-card dash-kpi--white">
+                        <span class="kpi-title">Total Trámites</span>
+                        <div class="kpi-value" id="kpiTotal">12</div>
+                        <div class="kpi-trend trend-up">↑ 20.5% desde el mes anterior</div>
                     </div>
-                    <div class="metric-card-advanced">
-                        <div class="metric-header"><h4>Trámites Completados</h4><span class="metric-badge">Este mes</span></div>
-                        <div class="metric-body"><div class="metric-value" id="kpiCompletados">0</div></div>
+                    <div class="dash-kpi-card dash-kpi--darkblue">
+                        <span class="kpi-title">Tiempo Prom. (min)</span>
+                        <div class="kpi-value" id="kpiTiempo">24.5</div>
+                        <div class="kpi-trend trend-down">↓ -12.4%</div>
                     </div>
-                    <div class="metric-card-advanced">
-                        <div class="metric-header"><h4>Próxima Cita</h4><span class="metric-badge" id="kpiProximaBadge">Pendiente</span></div>
-                        <div class="metric-body"><div class="metric-value" id="kpiProxima">Sin citas</div></div>
+                    <div class="dash-kpi-card dash-kpi--blue">
+                        <span class="kpi-title">Puntos Fidelidad</span>
+                        <div class="kpi-value" id="kpiPuntosMain">1.2K</div>
+                        <div class="kpi-trend trend-up">↑ 34.7%</div>
                     </div>
-                    <div class="metric-card-advanced">
-                        <div class="metric-header"><h4>Puntos de Fidelidad</h4><span class="metric-badge">Nivel Oro</span></div>
-                        <div class="metric-body"><div class="metric-value" id="kpiPuntos">1,250</div></div>
+                    <div class="dash-kpi-card dash-kpi--green">
+                        <span class="kpi-title">Completados</span>
+                        <div class="kpi-value" id="kpiCompletadosMain">8</div>
+                        <div class="kpi-trend trend-up">↑ 15.0%</div>
+                    </div>
+                    <div class="dash-kpi-card dash-kpi--pink">
+                        <span class="kpi-title">Nivel Actual</span>
+                        <div class="kpi-value" id="kpiNivel">Oro</div>
+                        <div class="kpi-trend trend-up">↑ +1 Nivel</div>
                     </div>
                 </div>
 
-                <button class="btn-reservar" onclick="navegar('tickets')">🎫 Reservar nuevo turno</button>
+                <!-- Middle Charts Row -->
+                <div class="dash-middle-row">
+                    <!-- Funnel Chart -->
+                    <div class="dash-chart-card dash-funnel-card">
+                        <h4 class="chart-title">Embudo de Trámites</h4>
+                        <div class="funnel-container">
+                            <!-- SVG/HTML Funnel simulación -->
+                            <div class="funnel-step step-1">
+                                <div class="funnel-bar">15 Solicitudes</div>
+                            </div>
+                            <div class="funnel-arrow">↓ 80%</div>
+                            <div class="funnel-step step-2">
+                                <div class="funnel-bar">12 Tickets Generados</div>
+                            </div>
+                            <div class="funnel-arrow">↓ 66%</div>
+                            <div class="funnel-step step-3">
+                                <div class="funnel-bar">8 Completados</div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Area Chart -->
+                    <div class="dash-chart-card dash-area-card">
+                        <h4 class="chart-title">Evolución de Trámites & Puntos</h4>
+                        <div class="chart-container"><canvas id="chartEvolucion"></canvas></div>
+                    </div>
+                </div>
 
-                <div class="charts-grid">
-                    <div class="chart-card">
-                        <h4 class="chart-title">Mis atenciones por mes</h4>
-                        <div class="chart-container"><canvas id="chartMisAtenciones"></canvas></div>
+                <!-- Bottom Charts Row -->
+                <div class="dash-bottom-row">
+                    <div class="dash-chart-card">
+                        <h4 class="chart-title">Trámites por Entidad</h4>
+                        <div class="chart-container"><canvas id="chartEntidad"></canvas></div>
                     </div>
-                    <div class="chart-card">
-                        <h4 class="chart-title">Mis trámites por tipo</h4>
-                        <div class="chart-container"><canvas id="chartTipos"></canvas></div>
+                    <div class="dash-chart-card">
+                        <h4 class="chart-title">Tiempos Promedio</h4>
+                        <div class="chart-container"><canvas id="chartTiemposNuevos"></canvas></div>
                     </div>
-                    <div class="chart-card">
-                        <h4 class="chart-title">Estado de mis tickets</h4>
-                        <div class="chart-container"><canvas id="chartEstados"></canvas></div>
-                    </div>
-                    <div class="chart-card">
-                        <h4 class="chart-title">Tiempo promedio de atención</h4>
-                        <div class="chart-container"><canvas id="chartTiempos"></canvas></div>
+                    <div class="dash-chart-card">
+                        <h4 class="chart-title">Estado de Tickets</h4>
+                        <div class="chart-container"><canvas id="chartEstadosNuevos"></canvas></div>
                     </div>
                 </div>
             </section>
@@ -303,47 +389,54 @@
                     <div class="perfil-avatar" id="perfilAvatar">AB</div>
                     <h2 id="perfilNombre">Usuario</h2>
                     <p id="perfilDatos"></p>
+                </div>
 
-                    <div class="perfil-info">
-                        <p><strong>DNI:</strong> <span id="perfilDNI">00000000</span></p>
-                        <p><strong>Correo electrónico:</strong> <span id="perfilEmail">email@example.com</span></p>
-                        <p><strong>Teléfono:</strong> <span id="perfilTelefono">987654321</span></p>
-                        <p><strong>Miembro desde:</strong> <span id="perfilMiembro">2025-01-01</span></p>
+                <div id="tabProfileInfo" class="profile-tab-content active">
+                    <div class="perfil-card" style="text-align: left; margin-bottom: 24px;">
+                        <h3 style="margin-bottom: 16px;">Datos de la cuenta</h3>
+                        <div class="perfil-info">
+                            <p><strong>DNI:</strong> <span id="perfilDNI">00000000</span></p>
+                            <p><strong>Correo electrónico:</strong> <span id="perfilEmail">email@example.com</span></p>
+                            <p><strong>Teléfono:</strong> <span id="perfilTelefono">987654321</span></p>
+                            <p><strong>Miembro desde:</strong> <span id="perfilMiembro">2025-01-01</span></p>
+                        </div>
+                    </div>
+
+                    <div class="formulario-edicion">
+                        <h3>Editar Perfil</h3>
+                        <form id="formEditarPerfil">
+                            <div class="form-group">
+                                <label>Nombre completo</label>
+                                <input type="text" id="editNombre" class="crm-input">
+                            </div>
+                            <div class="form-group">
+                                <label>Teléfono móvil</label>
+                                <input type="tel" id="editTelefono" class="crm-input">
+                            </div>
+                            <button type="submit" class="btn-primary" style="margin-top: 10px;">💾 Guardar cambios</button>
+                        </form>
                     </div>
                 </div>
 
-                <div class="formulario-edicion">
-                    <h3>Editar Perfil</h3>
-                    <form id="formEditarPerfil">
-                        <div class="form-group">
-                            <label>Nombre</label>
-                            <input type="text" id="editNombre">
-                        </div>
-                        <div class="form-group">
-                            <label>Teléfono</label>
-                            <input type="tel" id="editTelefono">
-                        </div>
-                        <button type="submit" class="btn-primary">💾 Guardar cambios</button>
-                    </form>
-                </div>
-
-                <div class="cambiar-contrasena">
-                    <h3>Cambiar Contraseña</h3>
-                    <form id="formCambiarPassword">
-                        <div class="form-group">
-                            <label>Contraseña actual</label>
-                            <input type="password" id="passwordActual">
-                        </div>
-                        <div class="form-group">
-                            <label>Nueva contraseña</label>
-                            <input type="password" id="passwordNueva">
-                        </div>
-                        <div class="form-group">
-                            <label>Confirmar contraseña</label>
-                            <input type="password" id="passwordConfirm">
-                        </div>
-                        <button type="submit" class="btn-primary">🔑 Cambiar contraseña</button>
-                    </form>
+                <div id="tabProfileSeguridad" class="profile-tab-content" style="display: none;">
+                    <div class="cambiar-contrasena">
+                        <h3>Cambiar Contraseña</h3>
+                        <form id="formCambiarPassword">
+                            <div class="form-group">
+                                <label>Contraseña actual</label>
+                                <input type="password" id="passwordActual" class="crm-input">
+                            </div>
+                            <div class="form-group">
+                                <label>Nueva contraseña</label>
+                                <input type="password" id="passwordNueva" class="crm-input">
+                            </div>
+                            <div class="form-group">
+                                <label>Confirmar contraseña</label>
+                                <input type="password" id="passwordConfirm" class="crm-input">
+                            </div>
+                            <button type="submit" class="btn-primary" style="margin-top: 10px;">🔑 Cambiar contraseña</button>
+                        </form>
+                    </div>
                 </div>
             </section>
         </div>
@@ -355,6 +448,12 @@
             <button class="modal-close" onclick="cerrarModalQR()">✕</button>
             <div id="qrCode"></div>
         </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toastNotification" class="toast-notification" style="display: none;">
+        <span id="toastIcon">⚠️</span>
+        <span id="toastMessage">Mensaje de error</span>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -381,7 +480,8 @@
             const sesion = getSesion();
 
             document.getElementById('sidebarUser').textContent = sesion.nombre;
-            document.getElementById('headerUser').textContent = sesion.nombre;
+            document.getElementById('headerUser').textContent = sesion.nombre + ' ▾';
+            document.getElementById('userMenuName').textContent = sesion.nombre;
             document.getElementById('welcomeTitle').textContent = `¡Hola, ${sesion.nombre}! 👋`;
 
             // Actualizar fecha
@@ -453,113 +553,260 @@
             dashboardCharts[id] = new Chart(canvas.getContext('2d'), config);
         }
 
+        function animarNumero(id, endValue, duration) {
+            const element = document.getElementById(id);
+            if (!element) return;
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                // easeOutQuart
+                const easeOut = 1 - Math.pow(1 - progress, 4);
+                let current = progress === 1 ? endValue : endValue * easeOut;
+                
+                if (Number.isInteger(endValue)) {
+                    element.textContent = Math.floor(current);
+                } else if (typeof endValue === 'number') {
+                    element.textContent = current.toFixed(1);
+                } else {
+                    element.textContent = endValue; // Si es texto como "Oro", se asigna directo
+                }
+                if (progress < 1) window.requestAnimationFrame(step);
+            };
+            window.requestAnimationFrame(step);
+        }
+
         function renderizarDashboard() {
-            const sesion = getSesion();
-            const reservas = getReservas().filter(r => r.uid === sesion.uid);
-            const activos = reservas.filter(r => r.estado === 'pendiente').length;
-            const completados = reservas.filter(r => r.estado === 'atendido').length;
-            const proxima = reservas.find(r => r.estado === 'pendiente') || null;
+            // Animar KPIs
+            animarNumero('kpiTotal', 124, 1500);
+            animarNumero('kpiTiempo', 24.5, 1500);
+            // kpiPuntosMain y kpiCompletadosMain son textos con K o enteros
+            document.getElementById('kpiPuntosMain').textContent = '1.2K';
+            animarNumero('kpiCompletadosMain', 89, 1500);
+            document.getElementById('kpiNivel').textContent = 'Oro';
 
-            document.getElementById('kpiActivos').textContent = activos;
-            document.getElementById('kpiCompletados').textContent = completados;
-            document.getElementById('kpiProxima').textContent = proxima ? `${proxima.fecha} en ${proxima.entidad}` : 'Sin citas';
-            document.getElementById('kpiProximaBadge').textContent = proxima ? 'Próxima' : 'Pendiente';
-            document.getElementById('kpiPuntos').textContent = '1,250';
+            // Gráfico 1: Evolución (Línea + Área)
+            crearChart('chartEvolucion', {
+                type: 'line',
+                data: {
+                    labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
+                    datasets: [
+                        {
+                            label: 'Puntos Ganados',
+                            data: [15, 30, 25, 45, 40, 60, 55],
+                            borderColor: '#10b981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            fill: true,
+                            tension: 0.4,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: 'Trámites',
+                            data: [2, 4, 3, 6, 5, 8, 7],
+                            borderColor: '#0ea5e9',
+                            backgroundColor: 'transparent',
+                            borderDash: [5, 5],
+                            tension: 0.4,
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    scales: {
+                        y: { type: 'linear', display: true, position: 'left' },
+                        y1: { type: 'linear', display: true, position: 'right', grid: { drawOnChartArea: false } }
+                    }
+                }
+            });
 
-            const atenciones = [0, 1, 1, 2, 1, 0];
-            crearChart('chartMisAtenciones', {
+            // Gráfico 2: Trámites por Entidad (Bar)
+            crearChart('chartEntidad', {
                 type: 'bar',
                 data: {
-                    labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'],
+                    labels: ['RENIEC', 'Migraciones', 'EsSalud', 'Banco Nación', 'SUNARP'],
                     datasets: [{
-                        label: 'Mis atenciones',
-                        data: atenciones,
-                        backgroundColor: '#0057B8',
-                        borderRadius: 12,
-                        borderSkipped: false
+                        label: 'Atenciones',
+                        data: [45, 25, 20, 15, 8],
+                        backgroundColor: '#3b82f6',
+                        borderRadius: 6
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: { legend: { display: false } },
-                    scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+                    scales: { y: { beginAtZero: true } }
                 }
             });
 
-            crearChart('chartTipos', {
-                type: 'doughnut',
+            // Gráfico 3: Tiempos Promedio (Bar + Line Combo)
+            crearChart('chartTiemposNuevos', {
+                type: 'bar',
                 data: {
-                    labels: ['DNI', 'Licencias', 'Certificados', 'Otros'],
-                    datasets: [{
-                        data: [35, 25, 28, 12],
-                        backgroundColor: ['#0057B8', '#1D9E75', '#EF9F27', '#E24B4A'],
-                        borderColor: '#fff',
-                        borderWidth: 2
-                    }]
+                    labels: ['S1', 'S2', 'S3', 'S4', 'S5'],
+                    datasets: [
+                        {
+                            type: 'line',
+                            label: 'Meta (min)',
+                            data: [20, 20, 20, 20, 20],
+                            borderColor: '#ec4899',
+                            borderWidth: 2,
+                            fill: false
+                        },
+                        {
+                            type: 'bar',
+                            label: 'Tiempo Real',
+                            data: [25, 22, 18, 24, 19],
+                            backgroundColor: '#8b5cf6',
+                            borderRadius: 4
+                        }
+                    ]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: 'right' },
-                        tooltip: { callbacks: { label: ctx => `${ctx.label}: ${ctx.parsed}%` } }
-                    }
                 }
             });
 
-            crearChart('chartEstados', {
+            // Gráfico 4: Estado de Tickets (Bar Horizontal)
+            crearChart('chartEstadosNuevos', {
                 type: 'bar',
                 data: {
-                    labels: ['Pendiente', 'En proceso', 'Completado', 'Cancelado'],
+                    labels: ['Completado', 'Pendiente', 'En proceso', 'Cancelado'],
                     datasets: [{
-                        data: [4, 3, 8, 1],
-                        backgroundColor: ['#FDE68A', '#3B82F6', '#34D399', '#FCA5A5'],
-                        borderRadius: 12,
-                        borderSkipped: false
+                        label: 'Tickets',
+                        data: [89, 12, 5, 2],
+                        backgroundColor: ['#10b981', '#f59e0b', '#3b82f6', '#ef4444'],
+                        borderRadius: 6
                     }]
                 },
                 options: {
                     indexAxis: 'y',
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: { x: { beginAtZero: true, ticks: { stepSize: 2 } } }
-                }
-            });
-
-            crearChart('chartTiempos', {
-                type: 'line',
-                data: {
-                    labels: ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4', 'Sem 5', 'Sem 6'],
-                    datasets: [{
-                        label: 'Minutos',
-                        data: [25, 28, 22, 30, 26, 20],
-                        borderColor: '#0057B8',
-                        backgroundColor: 'rgba(0, 87, 184, 0.15)',
-                        fill: true,
-                        tension: 0.4,
-                        pointBackgroundColor: '#0057B8',
-                        pointRadius: 4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: { y: { beginAtZero: true, ticks: { callback: value => `${value} min` } } }
+                    plugins: { legend: { display: false } }
                 }
             });
         }
+        
+        function toggleSidebarSubmenu() {
+            const submenu = document.getElementById('submenuPerfil');
+            const chevron = document.getElementById('chevronPerfil');
+            if (submenu.style.display === 'none') {
+                submenu.style.display = 'flex';
+                chevron.style.transform = 'rotate(0deg)';
+            } else {
+                submenu.style.display = 'none';
+                chevron.style.transform = 'rotate(-90deg)';
+            }
+        }
+        
+        function mostrarToast(mensaje, tipo = 'error') {
+            const toast = document.getElementById('toastNotification');
+            const toastIcon = document.getElementById('toastIcon');
+            const toastMessage = document.getElementById('toastMessage');
+            
+            toastMessage.textContent = mensaje;
+            if (tipo === 'error') {
+                toast.style.borderLeftColor = 'var(--danger)';
+                toastIcon.textContent = '⚠️';
+            } else {
+                toast.style.borderLeftColor = 'var(--success)';
+                toastIcon.textContent = '✅';
+            }
+            
+            toast.style.display = 'flex';
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 3000);
+        }
+
+        function toggleUserMenu() {
+            const menu = document.getElementById('userMenu');
+            menu.style.display = menu.style.display === 'none' ? 'flex' : 'none';
+        }
+        
+        function switchProfileTab(tabId) {
+            document.querySelectorAll('.profile-tab-content').forEach(c => c.style.display = 'none');
+            
+            if(tabId === 'info') {
+                document.getElementById('tabProfileInfo').style.display = 'block';
+            } else {
+                document.getElementById('tabProfileSeguridad').style.display = 'block';
+            }
+        }
+        
+        // Hide user menu when clicking outside
+        document.addEventListener('click', function(event) {
+            const wrapper = document.querySelector('.user-menu-wrapper');
+            const menu = document.getElementById('userMenu');
+            if (wrapper && !wrapper.contains(event.target)) {
+                menu.style.display = 'none';
+            }
+        });
+
+        function limpiarFiltrosDashboard() {
+            document.getElementById('filtroTiempo').value = '30d';
+            document.getElementById('filtroEntidad').value = 'todas';
+            document.getElementById('filtroTramite').value = 'todos';
+            simularDatosDashboard();
+        }
+
+        function simularDatosDashboard() {
+            let multi = 1;
+            const tiempo = document.getElementById('filtroTiempo').value;
+            const entidad = document.getElementById('filtroEntidad').value;
+            const tramite = document.getElementById('filtroTramite').value;
+            
+            if (tiempo === 'mes') multi = 0.6;
+            if (tiempo === 'ano') multi = 4.5;
+            if (entidad !== 'todas') multi *= 0.35;
+            if (tramite !== 'todos') multi *= 0.6;
+
+            animarNumero('kpiTotal', 124 * multi, 800);
+            animarNumero('kpiTiempo', 24.5 + (Math.random() * 8 - 4), 800);
+            animarNumero('kpiCompletadosMain', 89 * multi, 800);
+            
+            if (dashboardCharts['chartEvolucion']) {
+                dashboardCharts['chartEvolucion'].data.datasets[0].data = [15, 30, 25, 45, 40, 60, 55].map(v => v * multi);
+                dashboardCharts['chartEvolucion'].data.datasets[1].data = [2, 4, 3, 6, 5, 8, 7].map(v => v * multi);
+                dashboardCharts['chartEvolucion'].update();
+            }
+            if (dashboardCharts['chartEntidad']) {
+                let baseData = [45, 25, 20, 15, 8];
+                if (entidad === 'reniec') baseData = [45 * multi, 0, 0, 0, 0];
+                else if (entidad === 'migraciones') baseData = [0, 25 * multi, 0, 0, 0];
+                else if (entidad === 'essalud') baseData = [0, 0, 20 * multi, 0, 0];
+                else if (entidad === 'bn') baseData = [0, 0, 0, 15 * multi, 0];
+                else if (entidad === 'sunarp') baseData = [0, 0, 0, 0, 8 * multi];
+                else baseData = baseData.map(v => v * multi);
+                dashboardCharts['chartEntidad'].data.datasets[0].data = baseData;
+                dashboardCharts['chartEntidad'].update();
+            }
+            if (dashboardCharts['chartEstadosNuevos']) {
+                dashboardCharts['chartEstadosNuevos'].data.datasets[0].data = [89, 12, 5, 2].map(v => v * multi);
+                dashboardCharts['chartEstadosNuevos'].update();
+            }
+        }
 
         function renderizarGridEntidades() {
-            const entidades = ['RENIEC', 'Migraciones', 'EsSalud', 'Banco Nación', 'ONP', 'SUNARP'];
+            const entidades = [
+                { nombre: 'RENIEC', icon: '🏛️' },
+                { nombre: 'Migraciones', icon: '🛂' },
+                { nombre: 'EsSalud', icon: '⚕️' },
+                { nombre: 'Banco Nación', icon: '🏦' },
+                { nombre: 'ONP', icon: '👴' },
+                { nombre: 'SUNARP', icon: '📑' }
+            ];
             const colores = ['#003087', '#0F766E', '#7C3AED', '#1D4ED8', '#B45309', '#9333EA'];
             const grid = document.getElementById('gridEntidades');
             grid.innerHTML = entidades.map((e, index) => `
-                <button class="entidad-card" onclick="seleccionarEntidad('${e}')" style="--entity-color: ${colores[index]};">
-                    <span class="entidad-dot"></span>
-                    <span>${e}</span>
+                <button class="entidad-card" onclick="seleccionarEntidad('${e.nombre}')" style="--entity-color: ${colores[index]};">
+                    <span style="font-size: 24px;">${e.icon}</span>
+                    <span style="font-weight: 600; font-size: 15px; color: var(--text);">${e.nombre}</span>
                 </button>
             `).join('');
         }
@@ -570,8 +817,9 @@
         }
 
         function pasoSiguiente() {
-            if (pasoActual === 1 && !reservaTemporal.entidad) return alert('Selecciona una entidad');
-            if (pasoActual === 2 && !reservaTemporal.fecha) return alert('Selecciona fecha y hora');
+            if (pasoActual === 1 && !reservaTemporal.entidad) return mostrarToast('Por favor, selecciona una entidad', 'error');
+            if (pasoActual === 2 && !reservaTemporal.fecha) return mostrarToast('Por favor, selecciona la fecha y hora', 'error');
+            if (pasoActual === 2 && !reservaTemporal.hora) return mostrarToast('Por favor, elige un horario disponible', 'error');
 
             pasoActual++;
             actualizarVistaPasos();
@@ -606,7 +854,7 @@
 
         function seleccionarHora(hora, boton) {
             const fecha = document.getElementById('fechaInput').value;
-            if (!fecha) return alert('Selecciona fecha primero');
+            if (!fecha) return mostrarToast('Selecciona una fecha primero', 'error');
             reservaTemporal.fecha = fecha;
             reservaTemporal.hora = hora;
             document.querySelectorAll('.horario-btn').forEach(b => b.classList.remove('active'));
@@ -623,6 +871,19 @@
         function confirmarReserva() {
             const sesion = getSesion();
             const reservas = getReservas();
+            
+            const duplicada = reservas.find(r => 
+                r.uid === sesion.uid && 
+                r.entidad === reservaTemporal.entidad && 
+                r.fecha === reservaTemporal.fecha && 
+                r.hora === reservaTemporal.hora
+            );
+
+            if (duplicada) {
+                mostrarToast(`Ya tienes un turno reservado para ${reservaTemporal.entidad} en esa fecha y hora.`, 'error');
+                return;
+            }
+
             const id = 'MAC-ANCASH-' + String(reservas.length + 1).padStart(4, '0');
 
             const nueva = {
@@ -640,7 +901,8 @@
 
             reservas.push(nueva);
             setReservas(reservas);
-            alert(`✅ Turno reservado: ${id}`);
+            mostrarToast('¡Tu turno fue reservado exitosamente!', 'success');
+            
             pasoActual = 1;
             reservaTemporal = {};
             renderizarMisReservas();
@@ -1223,6 +1485,96 @@
             }).join('');
         }
 
+        function renderizarFidelizacion() {
+            const sesion = getSesion();
+            if (!sesion) return;
+            const reservas = getReservas().filter(r => r.uid === sesion.uid && r.estado === 'atendido');
+            const totalTramites = reservas.length;
+            
+            let nivel = 'Bronce';
+            let emoji = '🥉';
+            let faltan = 0;
+            let porcentaje = 0;
+            let proximoNivel = 'Plata';
+
+            if (totalTramites >= 6) {
+                nivel = 'Oro';
+                emoji = '🏆';
+                porcentaje = 100;
+                proximoNivel = 'Nivel Máximo Alcanzado';
+            } else if (totalTramites >= 3) {
+                nivel = 'Plata';
+                emoji = '🥈';
+                faltan = 6 - totalTramites;
+                porcentaje = ((totalTramites - 3) / 3) * 100;
+                proximoNivel = `Faltan ${faltan} trámites para Oro`;
+            } else {
+                nivel = 'Bronce';
+                emoji = '🥉';
+                faltan = 3 - totalTramites;
+                porcentaje = (totalTramites / 3) * 100;
+                proximoNivel = `Faltan ${faltan} trámites para Plata`;
+            }
+
+            const nivelNombreEl = document.getElementById('nivelNombre');
+            const nivelEmojiEl = document.getElementById('nivelEmoji');
+            const nivelTramitesEl = document.getElementById('nivelTramites');
+            const nivelProximoEl = document.getElementById('nivelProximo');
+            const barraProgresoEl = document.getElementById('barraProgreso');
+
+            if (nivelNombreEl) nivelNombreEl.textContent = nivel;
+            if (nivelEmojiEl) nivelEmojiEl.textContent = emoji;
+            if (nivelTramitesEl) nivelTramitesEl.textContent = `${totalTramites} trámites completados`;
+            if (nivelProximoEl) nivelProximoEl.textContent = proximoNivel;
+            if (barraProgresoEl) barraProgresoEl.style.width = `${porcentaje}%`;
+
+            // Historial
+            const tbody = document.getElementById('historialVisitasBody');
+            if (tbody) {
+                tbody.innerHTML = '';
+                if (reservas.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 24px; color: var(--text-muted);">Aún no tienes trámites completados. ¡Agenda tu primera cita!</td></tr>';
+                } else {
+                    reservas.sort((a,b) => new Date(b.fecha) - new Date(a.fecha)).forEach(r => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>${escaparHTML(r.fecha)}</td>
+                            <td>${escaparHTML(r.entidad)}</td>
+                            <td>${escaparHTML(r.motivo)}</td>
+                            <td><span class="badge badge--complete">+10 pts</span></td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                }
+            }
+
+            // Insignias
+            const container = document.getElementById('insigniasContainer');
+            if (container) {
+                container.innerHTML = '';
+                
+                function addInsignia(icon, text, unlocked) {
+                    const div = document.createElement('div');
+                    div.className = 'insignia-card';
+                    if (!unlocked) {
+                        div.style.opacity = '0.4';
+                        div.style.filter = 'grayscale(100%)';
+                    }
+                    div.innerHTML = `<span class="icon">${icon}</span><span>${text}</span>`;
+                    container.appendChild(div);
+                }
+
+                addInsignia('🌟', 'Primera Visita', totalTramites >= 1);
+                addInsignia('🚀', 'Ciudadano Frecuente', totalTramites >= 3);
+                
+                const madrugador = reservas.some(r => parseInt(r.hora.split(':')[0]) < 10);
+                addInsignia('🌅', 'Madrugador', madrugador);
+                
+                addInsignia('📅', 'Planificador', reservas.length > 0); // Simplificado
+                addInsignia('💎', 'Nivel Oro', totalTramites >= 6);
+            }
+        }
+
         function renderizarTarjetasCitas() {
             const sesion = getSesion();
             if (!sesion) return;
@@ -1417,6 +1769,7 @@
 
             renderizarTarjetasCitas();
             renderizarMensajes();
+            renderizarFidelizacion();
         }
 
         function mostrarAlertaLlamado(reserva) {

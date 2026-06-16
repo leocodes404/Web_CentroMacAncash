@@ -62,6 +62,17 @@ function renderRoute() {
     navToggle.setAttribute('aria-expanded', 'false');
   }
 
+  // Ocultar navbar por defecto si es turnos
+  const navbar = document.getElementById('navbar');
+  if (navbar) {
+    if (route === 'turnos') {
+      navbar.style.transform = 'translateY(-100%)';
+      navbar.style.transition = 'transform 0.3s ease';
+    } else {
+      navbar.style.transform = 'translateY(0)';
+    }
+  }
+
   // Ejecutar init de cada página si es necesario
   onRouteChange(route);
 }
@@ -650,15 +661,48 @@ function initYouTubeSection() {
   observer.observe(videoWrapper);
 }
 
+let lastScrollY = window.scrollY;
+
 function handleNavbarScroll() {
   if (!navbar) return;
-  const offset = window.scrollY;
-  if (offset > 40) {
+  const currentScrollY = window.scrollY;
+  const route = getRoute();
+
+  if (currentScrollY > 40) {
     navbar.classList.add('scrolled');
   } else {
     navbar.classList.remove('scrolled');
   }
+
+  // Lógica para página de Turnos (ocultar hacia abajo, mostrar hacia arriba)
+  if (route === 'turnos') {
+    // Si la página es escroleable
+    if (currentScrollY > lastScrollY) {
+      navbar.style.transform = 'translateY(-100%)'; // Scrolling down, hide navbar
+    } else if (currentScrollY < lastScrollY) {
+      navbar.style.transform = 'translateY(0)'; // Scrolling up, show navbar
+    }
+  } else {
+    navbar.style.transform = 'translateY(0)';
+  }
+
+  lastScrollY = currentScrollY;
 }
+
+// Escuchar la rueda del ratón explícitamente para la página de turnos (en caso de que no haya overflow)
+window.addEventListener('wheel', (e) => {
+  const navbar = document.getElementById('navbar');
+  if (!navbar) return;
+  if (getRoute() === 'turnos') {
+    if (e.deltaY < 0) {
+      // Scroll up
+      navbar.style.transform = 'translateY(0)';
+    } else if (e.deltaY > 0) {
+      // Scroll down
+      navbar.style.transform = 'translateY(-100%)';
+    }
+  }
+}, { passive: true });
 
 function animateCounters() {
   const counters = document.querySelectorAll('[data-count]');
@@ -2343,9 +2387,35 @@ function actualizarPantallaTurnos() {
 
   // Obtener reservas y ordenar por llamadoEn desc (los más recientes primero)
   const reservas = JSON.parse(localStorage.getItem('mac_reservas')) || [];
-  const llamados = reservas
+  let llamados = reservas
     .filter(r => r.estado === 'llamado')
     .sort((a, b) => (b.llamadoEn || 0) - (a.llamadoEn || 0));
+
+  // Simulación dinámica para mostrar la pantalla 100% funcional si no hay datos reales
+  if (llamados.length === 0) {
+    if (!window.mockLlamados) {
+      window.mockLlamados = [
+        { id: 'MAC-ANC-0144', entidad: 'Banco de la Nación', ventanilla: 1, llamadoEn: Date.now() - 60000 },
+        { id: 'MAC-ANC-0143', entidad: 'RENIEC', ventanilla: 4, llamadoEn: Date.now() - 120000 },
+        { id: 'MAC-ANC-0142', entidad: 'EsSalud', ventanilla: 2, llamadoEn: Date.now() - 180000 }
+      ];
+      setInterval(() => {
+        if (getRoute() !== 'turnos') return; // Solo animar si estamos en la ruta turnos
+        const entidades = ['Migraciones', 'RENIEC', 'Banco de la Nación', 'EsSalud', 'SUNAT', 'Poder Judicial'];
+        const randomEntidad = entidades[Math.floor(Math.random() * entidades.length)];
+        const newId = 'MAC-ANC-0' + Math.floor(100 + Math.random() * 899);
+        window.mockLlamados.unshift({
+          id: newId,
+          entidad: randomEntidad,
+          ventanilla: Math.floor(1 + Math.random() * 5),
+          llamadoEn: Date.now()
+        });
+        if(window.mockLlamados.length > 5) window.mockLlamados.pop();
+        actualizarPantallaTurnos();
+      }, 7000); // Llama un nuevo ticket cada 7 segundos
+    }
+    llamados = window.mockLlamados;
+  }
 
   if (llamados.length === 0) {
     currentBody.innerHTML = '<div class="lobby-empty-ticket">Esperando llamados...</div>';
@@ -2362,7 +2432,7 @@ function actualizarPantallaTurnos() {
     if (currentCard) {
       currentCard.style.animation = 'none';
       void currentCard.offsetWidth; // trigger reflow
-      currentCard.style.animation = 'flashActive 1s ease';
+      currentCard.style.animation = 'flashActiveCard 1s ease';
     }
   }
 
@@ -2421,16 +2491,16 @@ const chatFlow = {
     ]
   },
   reniec: {
-    text: "En el módulo de **RENIEC** puedes realizar:\n• Renovación de DNI.\n• Duplicado de DNI.\n• Rectificación de datos.\n\n📄 **Requisitos:** Dependen del trámite, pero siempre debes presentar tu comprobante de pago del Banco de la Nación.\n\n⚠️ **Cita:** Puedes sacar un Ticket Virtual en esta misma web.",
+    text: "En el módulo de **RENIEC** puedes realizar:\n• Renovación de DNI.\n• Duplicado de DNI.\n• Rectificación de datos.\n\n📄 **Requisitos:** Dependen del trámite, pero siempre debes presentar tu comprobante de pago del Banco de la Nación.\n\n⚠️ **Importante:** Para poder sacar o agendar una cita necesitas tener una cuenta en la página e iniciar sesión.",
     options: [
-      { label: "Sacar Ticket Virtual", action: () => { navigateTo('reservar'); toggleChat(); } },
+      { label: "Iniciar sesión / Registrarse", action: () => { window.location.href = 'login.html'; } },
       { label: "Hacer otra consulta", next: "inicio" }
     ]
   },
   essalud: {
-    text: "En el módulo de **EsSalud** puedes gestionar:\n• Afiliaciones.\n• Acreditación de asegurados.\n• Actualización de datos.\n\n📄 **Requisitos:** Traer tu DNI vigente. \n⚠️ **Cita:** La atención suele ser por orden de llegada o sacando un ticket aquí.",
+    text: "En el módulo de **EsSalud** puedes gestionar:\n• Afiliaciones.\n• Acreditación de asegurados.\n• Actualización de datos.\n\n📄 **Requisitos:** Traer tu DNI vigente. \n⚠️ **Importante:** Para poder sacar o agendar una cita necesitas tener una cuenta en la página e iniciar sesión.",
     options: [
-      { label: "Sacar Ticket Virtual", action: () => { navigateTo('reservar'); toggleChat(); } },
+      { label: "Iniciar sesión / Registrarse", action: () => { window.location.href = 'login.html'; } },
       { label: "Hacer otra consulta", next: "inicio" }
     ]
   },
