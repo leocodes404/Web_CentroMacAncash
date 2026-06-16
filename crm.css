@@ -1700,3 +1700,69 @@ body {
     from { transform: translate(-50%, 20px); opacity: 0; }
     to { transform: translate(-50%, 0); opacity: 1; }
 }
+
+/* DARK MODE - Rediseño limpio (solo colores de fondo) */
+[data-theme="dark"] {
+    --surface: rgba(30, 41, 59, 0.72);
+    --background: linear-gradient(135deg, hsl(220, 50%, 8%), hsl(255, 60%, 10%));
+    --border: rgba(255, 255, 255, 0.1);
+    --text: hsl(220, 20%, 95%);
+    --text-muted: hsl(220, 16%, 65%);
+}
+[data-theme="dark"] .kpi-card,
+[data-theme="dark"] .metric-card-advanced,
+[data-theme="dark"] .chart-card,
+[data-theme="dark"] .dash-chart-card,
+[data-theme="dark"] .chart-container,
+[data-theme="dark"] .formulario-reserva,
+[data-theme="dark"] .mis-reservas,
+[data-theme="dark"] .perfil-card,
+[data-theme="dark"] .nuevo-mensaje,
+[data-theme="dark"] .mensaje-detalle,
+[data-theme="dark"] .formulario-edicion,
+[data-theme="dark"] .cambiar-contrasena,
+[data-theme="dark"] .historial-visitas,
+[data-theme="dark"] .cita-card,
+[data-theme="dark"] .insignias-grid {
+    background: rgba(30, 41, 59, 0.85);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+[data-theme="dark"] .paso-item,
+[data-theme="dark"] .paso-content input,
+[data-theme="dark"] .paso-content textarea,
+[data-theme="dark"] .paso-content select,
+[data-theme="dark"] .insignia-card {
+    background: rgba(15, 23, 42, 0.6);
+    color: var(--text);
+    border-color: rgba(255,255,255,0.1);
+}
+[data-theme="dark"] .crm-header {
+    background: rgba(30, 41, 59, 0.9);
+}
+[data-theme="dark"] .crm-header__logout {
+    background: rgba(255, 255, 255, 0.1);
+    color: #93c5fd;
+}
+[data-theme="dark"] .table thead th,
+[data-theme="dark"] .table thead {
+    background: rgba(15, 23, 42, 0.9);
+    color: #cbd5e1;
+    border-color: rgba(255, 255, 255, 0.1);
+}
+[data-theme="dark"] .table tbody tr {
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+[data-theme="dark"] .table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+[data-theme="dark"] .entidad-card,
+[data-theme="dark"] .horario-btn {
+    background: rgba(15, 23, 42, 0.6);
+    color: var(--text);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+[data-theme="dark"] .entidad-card:hover,
+[data-theme="dark"] .horario-btn:hover {
+    background: rgba(30, 41, 59, 0.8);
+    border-color: var(--primary);
+}

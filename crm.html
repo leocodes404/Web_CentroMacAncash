@@ -8,6 +8,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="crm.css">
+    <script>
+        const savedTheme = localStorage.getItem('mac-theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+    </script>
 </head>
 <body class="crm-body">
     <aside class="crm-sidebar" id="crmSidebar">
@@ -40,6 +44,8 @@
         <header class="crm-header">
             <h1 class="crm-header__title" id="headerTitle">Mi Dashboard</h1>
             <div class="crm-header__right">
+                <!-- Toggle Theme -->
+                <button id="themeToggleCrm" class="btn-secondary" style="padding: 6px; font-size: 18px; border-radius: 50%; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; background: var(--surface); border: 1px solid var(--border); cursor: pointer;" aria-label="Alternar tema oscuro">🌙</button>
                 <!-- Icono de Campana de Notificaciones -->
                 <div class="notif-dropdown-wrapper">
                     <button class="btn-notif" id="btnNotifBell" onclick="toggleNotifDropdown()" aria-label="Notificaciones">
@@ -322,7 +328,7 @@
                             <h2>Nuevo Mensaje</h2>
                             <button class="btn-close" onclick="cerrarModalRedactar()" style="background: none; border: none; font-size: 20px; cursor: pointer;">✖</button>
                         </div>
-                        <form id="formNuevoMensaje" onsubmit="enviarMensajeGmail(event)">
+                        <form id="formNuevoMensaje">
                             <div class="form-group" style="margin-top: 16px;">
                                 <label for="redactarEntidad">Destinatario (Entidad)</label>
                                 <select id="redactarEntidad" class="filter-select" style="width: 100%; border-radius: 12px; padding: 12px; margin-top: 6px; border: 1px solid var(--border);" required>
@@ -342,6 +348,17 @@
                             <div class="form-group" style="margin-top: 12px;">
                                 <label for="nuevoMensaje">Mensaje</label>
                                 <textarea id="nuevoMensaje" rows="6" style="width: 100%; border-radius: 12px; padding: 12px; margin-top: 6px; border: 1px solid var(--border); resize: vertical;" placeholder="Escribe tu consulta detallada aquí..." required></textarea>
+                            </div>
+                            <div class="form-group" style="margin-top: 12px;">
+                                <label>Valoración</label>
+                                <div class="rating-stars" id="nuevoMensajeRating" style="font-size: 24px; cursor: pointer; user-select: none;">
+                                    <span data-value="1">⭐</span>
+                                    <span data-value="2">⭐</span>
+                                    <span data-value="3">⭐</span>
+                                    <span data-value="4">⭐</span>
+                                    <span data-value="5">⭐</span>
+                                </div>
+                                <input type="hidden" id="nuevoMensajeValoracion" value="5">
                             </div>
                             <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px;">
                                 <button type="button" class="btn-secondary" onclick="cerrarModalRedactar()">Cancelar</button>
@@ -507,6 +524,38 @@
             renderizarFidelizacion();
             renderizarPerfil();
 
+            // Theme toggle logic
+            const themeBtn = document.getElementById('themeToggleCrm');
+            
+            function applyChartTheme(theme) {
+                if (typeof Chart !== 'undefined') {
+                    const textColor = theme === 'dark' ? '#cbd5e1' : '#475569';
+                    const gridColor = theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+                    Chart.defaults.color = textColor;
+                    Chart.defaults.borderColor = gridColor;
+                    if (typeof dashboardCharts !== 'undefined') {
+                        for (let id in dashboardCharts) {
+                            dashboardCharts[id].update();
+                        }
+                    }
+                }
+            }
+
+            if(themeBtn) {
+                const initTheme = document.documentElement.getAttribute('data-theme') || 'light';
+                themeBtn.textContent = initTheme === 'dark' ? '☀️' : '🌙';
+                setTimeout(() => applyChartTheme(initTheme), 500); // Apply initially after charts load
+                
+                themeBtn.addEventListener('click', () => {
+                    const currentTheme = document.documentElement.getAttribute('data-theme');
+                    const nextTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                    document.documentElement.setAttribute('data-theme', nextTheme);
+                    localStorage.setItem('mac-theme', nextTheme);
+                    themeBtn.textContent = nextTheme === 'dark' ? '☀️' : '🌙';
+                    applyChartTheme(nextTheme);
+                });
+            }
+
             // Inicializar notificaciones y tarjetas de citas
             renderizarNotificaciones();
             renderizarTarjetasCitas();
@@ -516,6 +565,24 @@
             document.getElementById('formNuevoMensaje').addEventListener('submit', enviarMensaje);
             document.getElementById('formEditarPerfil').addEventListener('submit', guardarPerfil);
             document.getElementById('formCambiarPassword').addEventListener('submit', cambiarPassword);
+
+            // Rating Stars Logic
+            const ratingStars = document.querySelectorAll('#nuevoMensajeRating span');
+            if (ratingStars.length > 0) {
+                ratingStars.forEach(star => {
+                    star.addEventListener('click', function() {
+                        const value = parseInt(this.getAttribute('data-value'));
+                        document.getElementById('nuevoMensajeValoracion').value = value;
+                        ratingStars.forEach(s => {
+                            if (parseInt(s.getAttribute('data-value')) <= value) {
+                                s.textContent = '⭐';
+                            } else {
+                                s.textContent = '☆';
+                            }
+                        });
+                    });
+                });
+            }
         });
 
         const sectionTitles = {
@@ -1217,7 +1284,21 @@
             });
 
             setMensajes(mensajes);
-            alert('✅ Mensaje enviado con éxito');
+
+            // Agregar a Analíticas de Feedback
+            const ratingValue = parseInt(document.getElementById('nuevoMensajeValoracion').value) || 5;
+            const calificaciones = JSON.parse(localStorage.getItem('mac_calificaciones')) || [];
+            calificaciones.unshift({
+                id: 'CAL-' + Date.now(),
+                nombreCiudadano: sesion.nombre,
+                entidad: entidad,
+                estrellas: ratingValue,
+                comentario: texto,
+                fecha: new Date().toISOString().split('T')[0]
+            });
+            localStorage.setItem('mac_calificaciones', JSON.stringify(calificaciones));
+
+            mostrarToast('Mensaje enviado con éxito', 'success');
             cerrarModalRedactar();
             cambiarCarpeta('enviados');
         }

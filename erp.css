@@ -774,3 +774,53 @@ div.dash-card--gradient .kpi-val {
 .form-actions button {
     flex: 1;
 }
+
+/* DARK MODE - Rediseño limpio (solo colores de fondo) */
+[data-theme="dark"] {
+    --admin-bg: #0f172a;
+    --admin-sidebar: #020617;
+    --surface: #1e293b;
+    --border: #334155;
+    --text: #f1f5f9;
+    --text-muted: #94a3b8;
+}
+[data-theme="dark"] .erp-header {
+    background: #1e293b;
+    border-color: #334155;
+}
+[data-theme="dark"] .user-dropdown-menu {
+    background: #1e293b;
+    border-color: #334155;
+}
+[data-theme="dark"] .user-dropdown-menu a:hover {
+    background: #0f172a;
+}
+[data-theme="dark"] .search-input,
+[data-theme="dark"] .erp-filter-select,
+[data-theme="dark"] .btn-limpiar-erp {
+    background: #0f172a;
+    color: #f1f5f9;
+    border-color: #334155;
+}
+[data-theme="dark"] .table thead th {
+    background: #152238;
+    color: #cbd5e1;
+    border-bottom: 2px solid #0f172a;
+}
+[data-theme="dark"] .modal-content {
+    background: #1e293b;
+}
+[data-theme="dark"] .form-modal input,
+[data-theme="dark"] .form-modal select,
+[data-theme="dark"] .form-modal textarea {
+    background: #0f172a;
+    color: #f1f5f9;
+    border-color: #334155;
+}
+[data-theme="dark"] .dash-card {
+    background: #1e293b;
+    border-color: #334155;
+}
+[data-theme="dark"] .kpi-card.highlight {
+    background: #020617;
+}
