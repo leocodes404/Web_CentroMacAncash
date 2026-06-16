@@ -228,7 +228,13 @@
                     </div>
                 </div>
 
-                <span class="result-counter" id="ticketsCounter">Mostrando 0 tickets</span>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+                    <span class="result-counter" id="ticketsCounter">Mostrando 0 tickets</span>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn-filter" onclick="exportarTicketsAExcel()" style="border-radius: 8px; padding: 10px 16px; background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; cursor: pointer; font-weight: 600;">📊 Descargar Excel</button>
+                        <button class="btn-filter" onclick="exportarTicketsAPDF()" style="border-radius: 8px; padding: 10px 16px; background: linear-gradient(135deg, #ef4444, #dc2626); color: white; border: none; cursor: pointer; font-weight: 600;">📄 Descargar PDF</button>
+                    </div>
+                </div>
 
                 <div class="table-wrapper">
                     <table class="table table--responsive">
@@ -335,6 +341,9 @@
     </div>
 
     <script src="chart.umd.min.js"></script>
+    <!-- Librerías de Exportación -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="dataService.js"></script>
     <script>
         function protegerRuta(rolRequerido) {
@@ -1262,6 +1271,136 @@
 
         function ordenarTabla(columna) {
             console.log('Ordenar por:', columna);
+        }
+
+        // ────────── FUNCIONES DE EXPORTACIÓN ──────────
+        function exportarTicketsAExcel() {
+            try {
+                const reservas = getReservas();
+                if (reservas.length === 0) {
+                    alert('No hay tickets para descargar');
+                    return;
+                }
+
+                if (typeof XLSX === 'undefined') {
+                    alert('Error: La librería de Excel aún está cargando. Intenta de nuevo en un momento.');
+                    return;
+                }
+
+                // Preparar datos para Excel
+                const datosExcel = reservas.map(r => ({
+                    'Código': r.id,
+                    'Ciudadano': r.nombre,
+                    'DNI': r.dni,
+                    'Entidad': r.entidad,
+                    'Fecha': r.fecha,
+                    'Hora': r.hora,
+                    'Estado': r.estado,
+                    'Ventanilla': r.ventanilla || '-',
+                    'Llamado en': r.llamadoEn ? new Date(r.llamadoEn).toLocaleString() : '-'
+                }));
+
+                // Crear workbook de Excel
+                const wb = XLSX.utils.book_new();
+                const ws = XLSX.utils.json_to_sheet(datosExcel);
+                
+                // Ajustar ancho de columnas
+                ws['!cols'] = [
+                    { wch: 15 },  // Código
+                    { wch: 20 },  // Ciudadano
+                    { wch: 12 },  // DNI
+                    { wch: 18 },  // Entidad
+                    { wch: 12 },  // Fecha
+                    { wch: 10 },  // Hora
+                    { wch: 12 },  // Estado
+                    { wch: 12 },  // Ventanilla
+                    { wch: 22 }   // Llamado en
+                ];
+
+                // Agregar hoja al workbook
+                XLSX.utils.book_append_sheet(wb, ws, "Reporte Tickets");
+                
+                // Generar nombre de archivo con fecha
+                const fecha = new Date().toISOString().split('T')[0];
+                const nombreArchivo = `Reporte_Tickets_${fecha}.xlsx`;
+                
+                // Descargar archivo
+                XLSX.writeFile(wb, nombreArchivo);
+                console.log('✅ Excel generado correctamente:', nombreArchivo);
+            } catch (error) {
+                console.error('Error al exportar a Excel:', error);
+                alert('Error al generar el archivo Excel. Revisa la consola para más detalles.');
+            }
+        }
+
+        function exportarTicketsAPDF() {
+            const reservas = getReservas();
+            if (reservas.length === 0) {
+                alert('No hay tickets para descargar');
+                return;
+            }
+
+            // Crear tabla HTML para PDF
+            let tablaHTML = `
+                <div style="font-family: Arial, sans-serif; padding: 20px;">
+                    <h2 style="text-align: center; color: #1e3a8a; margin-bottom: 20px;">📊 Reporte de Tickets - Centro MAC</h2>
+                    <p style="text-align: right; color: #666; font-size: 12px; margin-bottom: 20px;">Generado: ${new Date().toLocaleString()}</p>
+                    <table style="width: 100%; border-collapse: collapse; border: 1px solid #ddd;">
+                        <thead>
+                            <tr style="background-color: #1e3a8a; color: white;">
+                                <th style="border: 1px solid #ddd; padding: 10px; text-align: left; font-weight: bold;">Código</th>
+                                <th style="border: 1px solid #ddd; padding: 10px; text-align: left; font-weight: bold;">Ciudadano</th>
+                                <th style="border: 1px solid #ddd; padding: 10px; text-align: left; font-weight: bold;">DNI</th>
+                                <th style="border: 1px solid #ddd; padding: 10px; text-align: left; font-weight: bold;">Entidad</th>
+                                <th style="border: 1px solid #ddd; padding: 10px; text-align: left; font-weight: bold;">Fecha</th>
+                                <th style="border: 1px solid #ddd; padding: 10px; text-align: left; font-weight: bold;">Hora</th>
+                                <th style="border: 1px solid #ddd; padding: 10px; text-align: center; font-weight: bold;">Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            // Agregar filas de datos
+            reservas.forEach((r, idx) => {
+                const colorEstado = r.estado === 'atendido' ? '#10b981' : r.estado === 'pendiente' ? '#f59e0b' : '#ef4444';
+                tablaHTML += `
+                    <tr style="${idx % 2 === 0 ? 'background-color: #f9fafb;' : ''}">
+                        <td style="border: 1px solid #ddd; padding: 10px;">${escaparHTML(r.id)}</td>
+                        <td style="border: 1px solid #ddd; padding: 10px;">${escaparHTML(r.nombre)}</td>
+                        <td style="border: 1px solid #ddd; padding: 10px;">${escaparHTML(r.dni)}</td>
+                        <td style="border: 1px solid #ddd; padding: 10px;">${escaparHTML(r.entidad)}</td>
+                        <td style="border: 1px solid #ddd; padding: 10px;">${escaparHTML(r.fecha)}</td>
+                        <td style="border: 1px solid #ddd; padding: 10px;">${escaparHTML(r.hora)}</td>
+                        <td style="border: 1px solid #ddd; padding: 10px; text-align: center; color: white; background-color: ${colorEstado}; font-weight: bold; border-radius: 4px;">${escaparHTML(r.estado)}</td>
+                    </tr>
+                `;
+            });
+
+            tablaHTML += `
+                        </tbody>
+                    </table>
+                    <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; color: #666; font-size: 12px;">
+                        <p><strong>Total de Tickets:</strong> ${reservas.length}</p>
+                        <p><strong>Atendidos:</strong> ${reservas.filter(r => r.estado === 'atendido').length}</p>
+                        <p><strong>Pendientes:</strong> ${reservas.filter(r => r.estado === 'pendiente').length}</p>
+                        <p><strong>Cancelados:</strong> ${reservas.filter(r => r.estado === 'cancelado').length}</p>
+                    </div>
+                </div>
+            `;
+
+            // Generar PDF
+            const elemento = document.createElement('div');
+            elemento.innerHTML = tablaHTML;
+            
+            const opt = {
+                margin: 10,
+                filename: `Reporte_Tickets_${new Date().toISOString().split('T')[0]}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { orientation: 'landscape', unit: 'mm', format: 'a4' }
+            };
+
+            html2pdf().set(opt).from(elemento).save();
         }
     </script>
 </body>
