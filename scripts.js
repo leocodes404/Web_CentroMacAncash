@@ -84,10 +84,10 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 // Logica de interaccion y animaciones para la landing page
-const navToggle = document.getElementById('navToggle');
-const navMenu = document.getElementById('navMenu');
-const navbar = document.getElementById('navbar');
-const contactForm = document.getElementById('contactForm');
+let navToggle = document.getElementById('navToggle');
+let navMenu = document.getElementById('navMenu');
+let navbar = document.getElementById('navbar');
+let contactForm = document.getElementById('contactForm');
 const formNotice = document.getElementById('formNotice');
 const servicioCardsGrid = document.getElementById('serviciosGrid');
 
@@ -638,6 +638,7 @@ function initYouTubeSection() {
 }
 
 function handleNavbarScroll() {
+  if (!navbar) return;
   const offset = window.scrollY;
   if (offset > 40) {
     navbar.classList.add('scrolled');
@@ -1118,7 +1119,16 @@ function handleFormSubmit(event) {
 }
 
 function init() {
-  typeWriter(heroText, heroTarget);
+  const heroTarget = document.getElementById('heroTypewriter');
+  const navToggleElem = document.getElementById('navToggle');
+  const navMenuElem = document.getElementById('navMenu');
+  const contactFormElem = document.getElementById('contactForm');
+  const navbarElem = document.getElementById('navbar');
+
+  if (heroTarget) {
+    typeWriter(heroText, heroTarget);
+  }
+
   renderServiceCards();
   initCarouselNavigation();
   handleScrollReveal();
@@ -1127,30 +1137,27 @@ function init() {
   initYouTubeSection();
   initHeroBackgroundVideo();
 
-  navToggle.addEventListener('click', toggleMenu);
-  navMenu.querySelectorAll('a').forEach((link) => {
-    link.addEventListener('click', closeMenu);
-  });
+  navToggle = navToggleElem;
+  navMenu = navMenuElem;
+  navbar = navbarElem;
+  contactForm = contactFormElem;
+
+  if (navToggle) {
+    navToggle.addEventListener('click', toggleMenu);
+  }
+
+  if (navMenu) {
+    navMenu.querySelectorAll('a').forEach((link) => {
+      link.addEventListener('click', closeMenu);
+    });
+  }
 
   window.addEventListener('scroll', handleNavbarScroll);
-  contactForm.addEventListener('submit', handleFormSubmit);
+
+  if (contactForm) {
+    contactForm.addEventListener('submit', handleFormSubmit);
+  }
 }
-
-/* ========== SISTEMA DE RESERVAS CON FIREBASE ========== */
-
-// Configuración de Firebase
-const firebaseConfig = {
-  apiKey: "AIzaSyA43Uu_3-Oy71LkQ8_r0rpt_fJcjt3jRYg",
-  authDomain: "mac-chimbote.firebaseapp.com",
-  projectId: "mac-chimbote",
-  storageBucket: "mac-chimbote.firebasestorage.app",
-  messagingSenderId: "246175906335",
-  appId: "1:246175906335:web:c202b8bf77a637d9d5b32a"
-};
-
-// Inicializar Firebase
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
 
 // Entidades disponibles (12 del Centro MAC)
 const entidadesDisponibles = [
@@ -1282,31 +1289,6 @@ function generateTimeSlots() {
   return slots;
 }
 
-// Obtener cantidad de reservas en un horario específico
-async function getSlotReservations(date, time, entity) {
-  const snapshot = await db.collection('reservas')
-    .where('fecha', '==', date)
-    .where('hora', '==', time)
-    .where('entidad', '==', entity)
-    .get();
-  return snapshot.size;
-}
-
-// Verificar si el DNI ya tiene reserva para esa fecha y entidad
-async function checkDuplicateReservation(dni, date, entity) {
-  const snapshot = await db.collection('reservas')
-    .where('dni', '==', dni)
-    .where('fecha', '==', date)
-    .where('entidad', '==', entity)
-    .get();
-  return snapshot.size > 0;
-}
-
-// Generar código único MAC-ANCASH-XXXX
-function generateTicketCode() {
-  const randomNum = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
-  return `MAC-ANCASH-${randomNum}`;
-}
 
 // Renderizar grid de entidades
 function renderEntitiesGrid() {
@@ -1404,7 +1386,7 @@ async function renderTimeSlots(date) {
   const container = document.getElementById('timeSlotsContainer');
   if (!container || !reservasState.selectedEntity) return;
 
-  // Mostrar loading mientras consulta Firebase
+  // Mostrar loading mientras se generan los horarios
   container.innerHTML = '<p class="time-slots__loading">Cargando horarios...</p>';
 
   const slots = generateTimeSlots();
@@ -1558,11 +1540,10 @@ function updateProgressBar() {
   });
 }
 
-// Guardar en Firestore
+// Guardar reserva en localStorage
 async function saveReservation(formData) {
   try {
     const ticketCode = generateTicketCode();
-    
     const reserva = {
       codigoTicket: ticketCode,
       entidad: reservasState.selectedEntity,
@@ -1572,10 +1553,13 @@ async function saveReservation(formData) {
       fecha: reservasState.selectedDate,
       hora: reservasState.selectedTime,
       motivo: formData.motivo,
-      creadoEn: firebase.firestore.FieldValue.serverTimestamp()
+      creadoEn: new Date().toISOString()
     };
 
-    await db.collection('reservas').add(reserva);
+    const reservas = getReservasLocal();
+    reservas.push(reserva);
+    setReservasLocal(reservas);
+
     return { success: true, ticketCode, data: reserva };
   } catch (error) {
     console.error('Error al guardar reserva:', error);
@@ -1975,7 +1959,6 @@ function initReservasSystem() {
       return;
     }
 
-    // Guardar en Firestore
     submitBtn.disabled = true;
     submitBtn.textContent = 'Guardando...';
 

@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Portal - Centro MAC Chimbote</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="crm.css">
+</head>
+<body class="crm-body">
+    <aside class="crm-sidebar" id="crmSidebar">
+        <div class="sidebar__header">
+            <h2 class="sidebar__brand">MAC Ciudadano</h2>
+            <p class="sidebar__user" id="sidebarUser">Usuario</p>
+        </div>
+
+        <nav class="sidebar__nav" id="sidebarNav">
+            <a href="#" data-section="dashboard" class="sidebar__item sidebar__item--active">🏠 Mi Dashboard</a>
+            <a href="#" data-section="tickets" class="sidebar__item">🎫 Mis Tickets</a>
+            <a href="#" data-section="mensajes" class="sidebar__item">📧 Mensajes <span class="badge-notif" id="badgeNotif" style="display: none;">0</span></a>
+            <a href="#" data-section="fidelizacion" class="sidebar__item">⭐ Fidelización</a>
+            <a href="#" data-section="perfil" class="sidebar__item">👤 Mi Perfil</a>
+            <div class="sidebar__divider"></div>
+            <a href="#" class="sidebar__item sidebar__logout" onclick="cerrarSesion(); return false;">🚪 Cerrar sesión</a>
+        </nav>
+    </aside>
+
+    <main class="crm-main">
+        <header class="crm-header">
+            <h1 class="crm-header__title" id="headerTitle">Mi Dashboard</h1>
+            <div class="crm-header__right">
+                <span class="crm-header__user" id="headerUser">Usuario</span>
+                <button class="crm-header__logout" onclick="cerrarSesion()">🚪</button>
+            </div>
+        </header>
+
+        <div class="crm-content">
+            <!-- ────── SECCIÓN: DASHBOARD ────── -->
+            <section id="dashboard" class="crm-section crm-section--active">
+                <div class="dashboard-welcome">
+                    <h2 id="welcomeTitle">¡Hola, Usuario! 👋</h2>
+                    <p id="welcomeDate">Lunes, 15 de junio de 2026</p>
+                </div>
+
+                <div class="kpi-grid">
+                    <div class="kpi-card">
+                        <div class="kpi-icon">🎫</div>
+                        <div class="kpi-value" id="kpiActivos">0</div>
+                        <div class="kpi-label">Tickets activos</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-icon">✅</div>
+                        <div class="kpi-value" id="kpiCompletados">0</div>
+                        <div class="kpi-label">Trámites completados</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-icon">📅</div>
+                        <div class="kpi-value" id="kpiProxima">Sin citas</div>
+                        <div class="kpi-label">Próxima cita</div>
+                    </div>
+                </div>
+
+                <button class="btn-reservar" onclick="navegar('tickets')">🎫 Reservar nuevo turno</button>
+
+                <div class="chart-container">
+                    <h3>Mis atenciones por mes</h3>
+                    <canvas id="chartMisAtenciones"></canvas>
+                </div>
+            </section>
+
+            <!-- ────── SECCIÓN: MIS TICKETS ────── -->
+            <section id="tickets" class="crm-section">
+                <div class="formulario-reserva">
+                    <h2>Formulario de Reserva</h2>
+                    <div class="pasos">
+                        <div class="paso-item active" id="paso1Item">1. Entidad</div>
+                        <div class="paso-item" id="paso2Item">2. Fecha y Hora</div>
+                        <div class="paso-item" id="paso3Item">3. Confirmación</div>
+                    </div>
+
+                    <div id="paso1" class="paso-content">
+                        <p>Selecciona la entidad:</p>
+                        <div id="gridEntidades" class="grid-entidades"></div>
+                    </div>
+
+                    <div id="paso2" class="paso-content" style="display: none;">
+                        <label>Fecha (L-V):</label>
+                        <input type="date" id="fechaInput">
+                        <label>Horarios disponibles:</label>
+                        <div id="gridHorarios" class="grid-horarios"></div>
+                    </div>
+
+                    <div id="paso3" class="paso-content" style="display: none;">
+                        <div class="form-group">
+                            <label>Nombre</label>
+                            <input type="text" id="reservaNombre" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>DNI</label>
+                            <input type="text" id="reservaDNI" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>Teléfono</label>
+                            <input type="text" id="reservaTelefono" readonly>
+                        </div>
+                        <button class="btn-primary" onclick="confirmarReserva()">Confirmar Reserva</button>
+                    </div>
+
+                    <div class="paso-nav">
+                        <button class="btn-secondary" id="btnAnterior" onclick="pasoAnterior()" style="display: none;">← Anterior</button>
+                        <button class="btn-primary" id="btnSiguiente" onclick="pasoSiguiente()">Siguiente →</button>
+                    </div>
+                </div>
+
+                <div class="mis-reservas">
+                    <h2>Mis Reservas</h2>
+                    <div class="table-wrapper">
+                        <table class="table">
+                            <thead>
+                                <th>Código</th>
+                                <th>Entidad</th>
+                                <th>Fecha</th>
+                                <th>Hora</th>
+                                <th>Estado</th>
+                                <th>QR</th>
+                                <th>Cancelar</th>
+                            </thead>
+                            <tbody id="misReservasBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ────── SECCIÓN: MENSAJES ────── -->
+            <section id="mensajes" class="crm-section">
+                <div class="bandeja-entrada">
+                    <h2>Bandeja de Entrada</h2>
+                    <table class="table">
+                        <thead>
+                            <th style="width: 20px;"></th>
+                            <th>Asunto</th>
+                            <th>Fecha</th>
+                        </thead>
+                        <tbody id="mensajesBody"></tbody>
+                    </table>
+                </div>
+
+                <div id="detallesMensaje" class="mensaje-detalle" style="display: none;">
+                    <h3 id="mensajeAsunto"></h3>
+                    <p id="mensajeFecha" style="font-size: 12px; color: #666;"></p>
+                    <div id="mensajeContenido"></div>
+                    <button class="btn-secondary" onclick="cerrarMensaje()">✖ Cerrar</button>
+                </div>
+
+                <div class="nuevo-mensaje">
+                    <h2>Enviar Mensaje</h2>
+                    <form id="formNuevoMensaje">
+                        <div class="form-group">
+                            <label>Asunto</label>
+                            <input type="text" id="nuevoAsunto" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Mensaje</label>
+                            <textarea id="nuevoMensaje" rows="5" required></textarea>
+                        </div>
+                        <button type="submit" class="btn-primary">📤 Enviar mensaje</button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- ────── SECCIÓN: FIDELIZACIÓN ────── -->
+            <section id="fidelizacion" class="crm-section">
+                <div class="nivel-card">
+                    <div class="nivel-emoji" id="nivelEmoji">🥉</div>
+                    <h2 id="nivelNombre">Bronce</h2>
+                    <p id="nivelTramites">0 trámites completados</p>
+                    <div class="progreso-bar">
+                        <div id="barraProgreso" class="progreso-fill"></div>
+                    </div>
+                    <p id="nivelProximo">Falta 2 trámites para Nivel Plata</p>
+                </div>
+
+                <div class="historial-visitas">
+                    <h3>Historial de Visitas</h3>
+                    <table class="table">
+                        <thead>
+                            <th>Fecha</th>
+                            <th>Entidad</th>
+                            <th>Motivo</th>
+                            <th>Puntos</th>
+                        </thead>
+                        <tbody id="historialVisitasBody"></tbody>
+                    </table>
+                </div>
+
+                <div class="insignias-grid">
+                    <h3>Mis Insignias</h3>
+                    <div id="insigniasContainer" class="insignias"></div>
+                </div>
+            </section>
+
+            <!-- ────── SECCIÓN: MI PERFIL ────── -->
+            <section id="perfil" class="crm-section">
+                <div class="perfil-card">
+                    <div class="perfil-avatar" id="perfilAvatar">AB</div>
+                    <h2 id="perfilNombre">Usuario</h2>
+                    <p id="perfilDatos"></p>
+
+                    <div class="perfil-info">
+                        <p><strong>DNI:</strong> <span id="perfilDNI">00000000</span></p>
+                        <p><strong>Email:</strong> <span id="perfilEmail">email@example.com</span></p>
+                        <p><strong>Teléfono:</strong> <span id="perfilTelefono">987654321</span></p>
+                        <p><strong>Miembro desde:</strong> <span id="perfilMiembro">2025-01-01</span></p>
+                    </div>
+                </div>
+
+                <div class="formulario-edicion">
+                    <h3>Editar Perfil</h3>
+                    <form id="formEditarPerfil">
+                        <div class="form-group">
+                            <label>Nombre</label>
+                            <input type="text" id="editNombre">
+                        </div>
+                        <div class="form-group">
+                            <label>Teléfono</label>
+                            <input type="tel" id="editTelefono">
+                        </div>
+                        <button type="submit" class="btn-primary">💾 Guardar cambios</button>
+                    </form>
+                </div>
+
+                <div class="cambiar-contrasena">
+                    <h3>Cambiar Contraseña</h3>
+                    <form id="formCambiarPassword">
+                        <div class="form-group">
+                            <label>Contraseña actual</label>
+                            <input type="password" id="passwordActual">
+                        </div>
+                        <div class="form-group">
+                            <label>Nueva contraseña</label>
+                            <input type="password" id="passwordNueva">
+                        </div>
+                        <div class="form-group">
+                            <label>Confirmar contraseña</label>
+                            <input type="password" id="passwordConfirm">
+                        </div>
+                        <button type="submit" class="btn-primary">🔑 Cambiar contraseña</button>
+                    </form>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Modal QR -->
+    <div id="modalQR" class="modal" style="display: none;">
+        <div class="modal-content">
+            <button class="modal-close" onclick="cerrarModalQR()">✕</button>
+            <div id="qrCode"></div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="chart.umd.min.js"></script>
+    <script>
+        // ────────── Funciones de storage ──────────
+        function getUsuarios() { return JSON.parse(localStorage.getItem('mac_usuarios')) || []; }
+        function setUsuarios(arr) { localStorage.setItem('mac_usuarios', JSON.stringify(arr)); }
+        function getReservas() { return JSON.parse(localStorage.getItem('mac_reservas')) || []; }
+        function setReservas(arr) { localStorage.setItem('mac_reservas', JSON.stringify(arr)); }
+        function getMensajes() { return JSON.parse(localStorage.getItem('mac_mensajes')) || []; }
+        function setMensajes(arr) { localStorage.setItem('mac_mensajes', JSON.stringify(arr)); }
+        function getSesion() { return JSON.parse(localStorage.getItem('mac_sesion')); }
+        function setSesion(usuario) { localStorage.setItem('mac_sesion', JSON.stringify(usuario)); }
+        function cerrarSesion() { localStorage.removeItem('mac_sesion'); window.location.href = 'login.html'; }
+
+        function protegerRuta(rolRequerido) {
+            const sesion = getSesion();
+            if (!sesion) {
+                window.location.href = 'login.html';
+                return;
+            }
+            if (rolRequerido && sesion.role !== rolRequerido) {
+                window.location.href = sesion.role === 'admin' ? 'erp.html' : 'crm.html';
+            }
+        }
+
+        let pasoActual = 1;
+        let reservaTemporal = {};
+        const HORARIOS = ['08:30', '09:00', '09:30', '10:00', '10:30', '11:00', '14:00', '14:30', '15:00', '15:30', '16:00'];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            protegerRuta();
+            const sesion = getSesion();
+
+            document.getElementById('sidebarUser').textContent = sesion.nombre;
+            document.getElementById('headerUser').textContent = sesion.nombre;
+            document.getElementById('welcomeTitle').textContent = `¡Hola, ${sesion.nombre}! 👋`;
+
+            // Actualizar fecha
+            const hoy = new Date();
+            const dias = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+            const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+            const fechaTexto = `${dias[hoy.getDay()]}, ${hoy.getDate()} de ${meses[hoy.getMonth()]} de ${hoy.getFullYear()}`;
+            document.getElementById('welcomeDate').textContent = fechaTexto;
+
+            // Naveg sidebar
+            document.querySelectorAll('.sidebar__item[data-section]').forEach(item => {
+                item.addEventListener('click', e => {
+                    e.preventDefault();
+                    navegar(item.dataset.section);
+                });
+            });
+
+            // Renderizar
+            renderizarDashboard();
+            renderizarGridEntidades();
+            renderizarMisReservas();
+            renderizarMensajes();
+            renderizarFidelizacion();
+            renderizarPerfil();
+
+            // Formularios
+            document.getElementById('formNuevoMensaje').addEventListener('submit', enviarMensaje);
+            document.getElementById('formEditarPerfil').addEventListener('submit', guardarPerfil);
+            document.getElementById('formCambiarPassword').addEventListener('submit', cambiarPassword);
+        });
+
+        function navegar(section) {
+            document.querySelectorAll('.crm-section').forEach(s => s.classList.remove('crm-section--active'));
+            document.getElementById(section).classList.add('crm-section--active');
+            document.querySelectorAll('.sidebar__item[data-section]').forEach(i => i.classList.remove('sidebar__item--active'));
+            document.querySelector(`[data-section="${section}"]`).classList.add('sidebar__item--active');
+        }
+
+        function renderizarDashboard() {
+            const sesion = getSesion();
+            const reservas = getReservas().filter(r => r.uid === sesion.uid);
+            const activos = reservas.filter(r => r.estado === 'pendiente').length;
+            const completados = reservas.filter(r => r.estado === 'atendido').length;
+            const proxima = reservas.find(r => r.estado === 'pendiente') || null;
+
+            document.getElementById('kpiActivos').textContent = activos;
+            document.getElementById('kpiCompletados').textContent = completados;
+            document.getElementById('kpiProxima').textContent = proxima ? `${proxima.fecha} en ${proxima.entidad}` : 'Sin citas';
+
+            // Gráfico
+            const ctx = document.getElementById('chartMisAtenciones').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'],
+                    datasets: [{
+                        label: 'Mis atenciones',
+                        data: [0, 1, 1, 2, 1, 0],
+                        backgroundColor: '#0057B8'
+                    }]
+                },
+                options: { responsive: true, plugins: { legend: { display: false } } }
+            });
+        }
+
+        function renderizarGridEntidades() {
+            const entidades = ['RENIEC', 'Migraciones', 'EsSalud', 'Banco Nación', 'ONP', 'SUNARP'];
+            const grid = document.getElementById('gridEntidades');
+            grid.innerHTML = entidades.map(e => `
+                <button class="entidad-card" onclick="seleccionarEntidad('${e}')">${e}</button>
+            `).join('');
+        }
+
+        function seleccionarEntidad(entidad) {
+            reservaTemporal.entidad = entidad;
+            pasoSiguiente();
+        }
+
+        function pasoSiguiente() {
+            if (pasoActual === 1 && !reservaTemporal.entidad) return alert('Selecciona una entidad');
+            if (pasoActual === 2 && !reservaTemporal.fecha) return alert('Selecciona fecha y hora');
+
+            pasoActual++;
+            actualizarVistaPasos();
+        }
+
+        function pasoAnterior() {
+            pasoActual--;
+            actualizarVistaPasos();
+        }
+
+        function actualizarVistaPasos() {
+            document.querySelectorAll('.paso-content').forEach(p => p.style.display = 'none');
+            document.getElementById(`paso${pasoActual}`).style.display = 'block';
+
+            document.querySelectorAll('.paso-item').forEach((p, i) => {
+                p.classList.toggle('active', i + 1 === pasoActual);
+            });
+
+            document.getElementById('btnAnterior').style.display = pasoActual > 1 ? 'block' : 'none';
+            document.getElementById('btnSiguiente').style.display = pasoActual < 3 ? 'block' : 'none';
+
+            if (pasoActual === 2) generarHorarios();
+            if (pasoActual === 3) precompletarFormulario();
+        }
+
+        function generarHorarios() {
+            const grid = document.getElementById('gridHorarios');
+            grid.innerHTML = HORARIOS.map(h => `
+                <button class="horario-btn" onclick="seleccionarHora('${h}', this)">${h}</button>
+            `).join('');
+        }
+
+        function seleccionarHora(hora, boton) {
+            const fecha = document.getElementById('fechaInput').value;
+            if (!fecha) return alert('Selecciona fecha primero');
+            reservaTemporal.fecha = fecha;
+            reservaTemporal.hora = hora;
+            document.querySelectorAll('.horario-btn').forEach(b => b.classList.remove('active'));
+            if (boton) boton.classList.add('active');
+        }
+
+        function precompletarFormulario() {
+            const sesion = getSesion();
+            document.getElementById('reservaNombre').value = sesion.nombre;
+            document.getElementById('reservaDNI').value = sesion.dni;
+            document.getElementById('reservaTelefono').value = sesion.telefono;
+        }
+
+        function confirmarReserva() {
+            const sesion = getSesion();
+            const reservas = getReservas();
+            const id = 'MAC-ANCASH-' + String(reservas.length + 1).padStart(4, '0');
+
+            const nueva = {
+                id,
+                uid: sesion.uid,
+                nombre: sesion.nombre,
+                dni: sesion.dni,
+                entidad: reservaTemporal.entidad,
+                fecha: reservaTemporal.fecha,
+                hora: reservaTemporal.hora,
+                motivo: 'Trámite general',
+                estado: 'pendiente',
+                creadoEn: new Date().toISOString().split('T')[0]
+            };
+
+            reservas.push(nueva);
+            setReservas(reservas);
+            alert(`✅ Turno reservado: ${id}`);
+            pasoActual = 1;
+            reservaTemporal = {};
+            renderizarMisReservas();
+            actualizarVistaPasos();
+        }
+
+        function renderizarMisReservas() {
+            const sesion = getSesion();
+            const reservas = getReservas().filter(r => r.uid === sesion.uid);
+            const tbody = document.getElementById('misReservasBody');
+
+            tbody.innerHTML = reservas.map(r => `
+                <tr>
+                    <td>${r.id}</td>
+                    <td>${r.entidad}</td>
+                    <td>${r.fecha}</td>
+                    <td>${r.hora}</td>
+                    <td><span class="badge badge--${r.estado}">${r.estado}</span></td>
+                    <td><button class="btn-accion" onclick="generarQR('${r.id}', '${r.entidad}', '${r.fecha}', '${r.hora}')">📱</button></td>
+                    <td>${r.estado === 'pendiente' ? `<button class="btn-accion" onclick="cancelarReserva('${r.id}')">❌</button>` : ''}</td>
+                </tr>
+            `).join('');
+        }
+
+        function generarQR(codigo, entidad, fecha, hora) {
+            const qrText = `MAC-CHIMBOTE | ${codigo} | ${entidad} | ${fecha} ${hora}`;
+            document.getElementById('qrCode').innerHTML = '';
+            new QRCode(document.getElementById('qrCode'), qrText);
+            document.getElementById('modalQR').style.display = 'flex';
+        }
+
+        function cerrarModalQR() {
+            document.getElementById('modalQR').style.display = 'none';
+        }
+
+        function cancelarReserva(id) {
+            if (window.confirm('¿Cancelar esta reserva?')) {
+                const reservas = getReservas();
+                const reserva = reservas.find(r => r.id === id);
+                if (reserva) {
+                    reserva.estado = 'cancelado';
+                    setReservas(reservas);
+                    renderizarMisReservas();
+                }
+            }
+        }
+
+        function renderizarMensajes() {
+            const sesion = getSesion();
+            const mensajes = getMensajes().filter(m => m.uid === sesion.uid);
+            const tbody = document.getElementById('mensajesBody');
+            const notLeidos = mensajes.filter(m => !m.leido).length;
+
+            document.getElementById('badgeNotif').textContent = notLeidos;
+            document.getElementById('badgeNotif').style.display = notLeidos > 0 ? 'block' : 'none';
+
+            tbody.innerHTML = mensajes.map(m => `
+                <tr class="${m.leido ? '' : 'msg-nuevo'}" onclick="mostrarMensaje('${m.id}', '${m.asunto}', '${m.mensaje}', '${m.fecha}')">
+                    <td>${m.leido ? '✓' : '●'}</td>
+                    <td>${m.asunto}</td>
+                    <td>${m.fecha}</td>
+                </tr>
+            `).join('');
+        }
+
+        function mostrarMensaje(id, asunto, mensaje, fecha) {
+            const mensajes = getMensajes();
+            const msg = mensajes.find(m => m.id === id);
+            if (msg) {
+                msg.leido = true;
+                setMensajes(mensajes);
+                renderizarMensajes();
+            }
+
+            document.getElementById('mensajeAsunto').textContent = asunto;
+            document.getElementById('mensajeFecha').textContent = fecha;
+            document.getElementById('mensajeContenido').textContent = mensaje;
+            document.getElementById('detallesMensaje').style.display = 'block';
+        }
+
+        function cerrarMensaje() {
+            document.getElementById('detallesMensaje').style.display = 'none';
+        }
+
+        function enviarMensaje(e) {
+            e.preventDefault();
+            const sesion = getSesion();
+            const mensajes = getMensajes();
+            const asunto = document.getElementById('nuevoAsunto').value;
+            const texto = document.getElementById('nuevoMensaje').value;
+
+            mensajes.push({
+                id: 'MSG-' + Date.now(),
+                uid: sesion.uid,
+                nombre: sesion.nombre,
+                asunto,
+                mensaje: texto,
+                fecha: new Date().toISOString().split('T')[0],
+                leido: false
+            });
+
+            setMensajes(mensajes);
+            alert('✅ Mensaje enviado');
+            document.getElementById('formNuevoMensaje').reset();
+            renderizarMensajes();
+        }
+
+        function renderizarFidelizacion() {
+            const sesion = getSesion();
+            const reservas = getReservas().filter(r => r.uid === sesion.uid && r.estado === 'atendido');
+            const count = reservas.length;
+
+            let nivel = 'Bronce', emoji = '🥉', proximo = 3;
+            if (count >= 7) { nivel = 'Oro'; emoji = '🥇'; proximo = null; }
+            else if (count >= 3) { nivel = 'Plata'; emoji = '🥈'; proximo = 7; }
+
+            document.getElementById('nivelEmoji').textContent = emoji;
+            document.getElementById('nivelNombre').textContent = nivel;
+            document.getElementById('nivelTramites').textContent = `${count} trámites completados`;
+            document.getElementById('barraProgreso').style.width = Math.min(100, (count / (proximo || count + 1)) * 100) + '%';
+            document.getElementById('nivelProximo').textContent = proximo ? `Falta ${proximo - count} para ${proximo === 3 ? 'Plata' : 'Oro'}` : '¡Nivel máximo alcanzado! 🏆';
+
+            // Historial
+            const tbody = document.getElementById('historialVisitasBody');
+            tbody.innerHTML = reservas.map(r => `
+                <tr>
+                    <td>${r.fecha}</td>
+                    <td>${r.entidad}</td>
+                    <td>${r.motivo}</td>
+                    <td>10 pts</td>
+                </tr>
+            `).join('');
+
+            // Insignias
+            const insigniasDef = [
+                { emoji: '🌟', nombre: 'Primera visita', desbloqueada: count >= 1 },
+                { emoji: '🔄', nombre: 'Ciudadano frecuente', desbloqueada: count >= 3 },
+                { emoji: '🏆', nombre: 'Experto en trámites', desbloqueada: true }, // simplificado
+                { emoji: '⚡', nombre: 'Madrugador', desbloqueada: reservas.some(r => r.hora === '08:30') },
+                { emoji: '📋', nombre: 'Planificador', desbloqueada: true },
+                { emoji: '💎', nombre: 'Nivel Oro', desbloqueada: nivel === 'Oro' }
+            ];
+
+            const container = document.getElementById('insigniasContainer');
+            container.innerHTML = insigniasDef.map(i => `
+                <div class="insignia ${i.desbloqueada ? '' : 'insignia--bloqueada'}">
+                    <div class="insignia-emoji">${i.emoji}</div>
+                    <p>${i.nombre}</p>
+                    ${!i.desbloqueada ? '<p class="insignia-bloqueada">🔒</p>' : ''}
+                </div>
+            `).join('');
+        }
+
+        function renderizarPerfil() {
+            const sesion = getSesion();
+            const iniciales = sesion.nombre.split(' ').map(p => p[0]).join('').toUpperCase();
+
+            document.getElementById('perfilAvatar').textContent = iniciales;
+            document.getElementById('perfilNombre').textContent = sesion.nombre;
+            document.getElementById('perfilDatos').textContent = `${sesion.dni} • ${sesion.email}`;
+            document.getElementById('perfilDNI').textContent = sesion.dni;
+            document.getElementById('perfilEmail').textContent = sesion.email;
+            document.getElementById('perfilTelefono').textContent = sesion.telefono;
+            document.getElementById('perfilMiembro').textContent = sesion.creadoEn;
+
+            document.getElementById('editNombre').value = sesion.nombre;
+            document.getElementById('editTelefono').value = sesion.telefono;
+        }
+
+        function guardarPerfil(e) {
+            e.preventDefault();
+            const usuarios = getUsuarios();
+            const sesion = getSesion();
+            const usuario = usuarios.find(u => u.uid === sesion.uid);
+
+            if (usuario) {
+                usuario.nombre = document.getElementById('editNombre').value;
+                usuario.telefono = document.getElementById('editTelefono').value;
+                sesion.nombre = usuario.nombre;
+                sesion.telefono = usuario.telefono;
+
+                setUsuarios(usuarios);
+                setSesion(sesion);
+                alert('✅ Perfil actualizado');
+                renderizarPerfil();
+            }
+        }
+
+        function cambiarPassword(e) {
+            e.preventDefault();
+            const usuarios = getUsuarios();
+            const sesion = getSesion();
+            const usuario = usuarios.find(u => u.uid === sesion.uid);
+            const actual = document.getElementById('passwordActual').value;
+            const nueva = document.getElementById('passwordNueva').value;
+            const confirm = document.getElementById('passwordConfirm').value;
+
+            if (usuario.password !== actual) return alert('❌ Contraseña actual incorrecta');
+            if (nueva !== confirm) return alert('❌ Las contraseñas no coinciden');
+            if (nueva.length < 6) return alert('❌ Mínimo 6 caracteres');
+
+            usuario.password = nueva;
+            setUsuarios(usuarios);
+            alert('✅ Contraseña actualizada');
+            document.getElementById('formCambiarPassword').reset();
+        }
+    </script>
+</body>
+</html>

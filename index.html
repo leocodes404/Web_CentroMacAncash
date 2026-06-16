@@ -22,7 +22,7 @@
     <div class="container navbar__inner">
       <a href="#inicio" class="brand" aria-label="Centro MAC Chimbote - Inicio">
         <div class="brand__mark" aria-hidden="true">
-          <img src="icon\MAC-LOGO.png" alt="mac_logo" class="brand__logo">
+          <img src="icon/MAC-LOGO.png" alt="mac_logo" class="brand__logo">
         </div>
       </a>
       <nav class="navbar__menu" id="navMenu" aria-label="Menú principal">
@@ -35,13 +35,13 @@
         <a href="#/dashboard" data-route="dashboard">Dashboard</a>
       </nav>
       <div class="navbar__right">
+        <a href="login.html?tab=register" class="btn btn-registro">Registrarse</a>
+        <a href="login.html" class="btn btn-login">Iniciar Sesión</a>
         <label class="theme-toggle" aria-label="Cambiar modo claro/oscuro" title="Modo claro/oscuro">
           <input type="checkbox" id="themeToggleInput">
           <span class="theme-toggle__track"></span>
           <span class="theme-toggle__thumb" id="themeIcon">☀️</span>
         </label>
-        <a href="login.html" id="btnLogin" style="margin: 0 10px;">Iniciar Sesión</a>
-        <button id="btnLogout" style="display: none; margin: 0 10px;">Cerrar Sesión</button>
         <button class="navbar__toggle" id="navToggle" aria-label="Abrir menú" aria-expanded="false">
           <span></span>
           <span></span>
@@ -657,10 +657,6 @@
   </a>
 
   <script src="chart.umd.min.js"></script>
-  
-  <!-- Firebase CDN (compat version for vanilla JS) -->
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
   
   <!-- QR Code library -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>

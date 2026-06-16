@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard ERP - Centro MAC Chimbote</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="erp.css">
+</head>
+<body class="erp-body">
+    <aside class="erp-sidebar" id="erpSidebar">
+        <div class="sidebar__header">
+            <h2 class="sidebar__brand">MAC Admin</h2>
+            <p class="sidebar__user" id="sidebarUser">Admin</p>
+        </div>
+
+        <nav class="sidebar__nav" id="sidebarNav">
+            <a href="#" data-section="dashboard" class="sidebar__item sidebar__item--active">📊 Dashboard</a>
+            <a href="#" data-section="usuarios" class="sidebar__item">👥 Gestión de Usuarios</a>
+            <a href="#" data-section="tickets" class="sidebar__item">🎫 Control de Tickets</a>
+            <a href="#" data-section="entidades" class="sidebar__item">🏢 Gestión de Entidades</a>
+            <div class="sidebar__divider"></div>
+            <a href="#" class="sidebar__item sidebar__logout" onclick="cerrarSesion(); return false;">🚪 Cerrar sesión</a>
+        </nav>
+    </aside>
+
+    <main class="erp-main">
+        <header class="erp-header">
+            <h1 class="erp-header__title" id="headerTitle">Dashboard</h1>
+            <div class="erp-header__right">
+                <span class="erp-header__user" id="headerUser">Admin</span>
+                <button class="erp-header__logout" onclick="cerrarSesion()">🚪 Cerrar sesión</button>
+            </div>
+        </header>
+
+        <div class="erp-content">
+            <!-- ────── SECCIÓN: DASHBOARD ────── -->
+            <section id="dashboard" class="erp-section erp-section--active">
+                <div class="kpi-grid">
+                    <div class="kpi-card">
+                        <div class="kpi-icon">📊</div>
+                        <div class="kpi-value" id="kpiAtendidosHoy">0</div>
+                        <div class="kpi-label">Atendidos hoy</div>
+                        <div class="kpi-variation positive">↑ 6%</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-icon">📅</div>
+                        <div class="kpi-value" id="kpiEstaSemana">0</div>
+                        <div class="kpi-label">Esta semana</div>
+                        <div class="kpi-variation positive">↑ 12%</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-icon">📆</div>
+                        <div class="kpi-value" id="kpiEsteMes">0</div>
+                        <div class="kpi-label">Este mes</div>
+                        <div class="kpi-variation positive">↑ 8%</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-icon">⏱️</div>
+                        <div class="kpi-value">14</div>
+                        <div class="kpi-label">Espera promedio (min)</div>
+                        <div class="kpi-variation negative">↓ 2%</div>
+                    </div>
+                </div>
+
+                <div class="dashboard-charts">
+                    <div class="chart-container">
+                        <h3>Atenciones mensuales — 2025</h3>
+                        <canvas id="chartBarras"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h3>Distribución por entidad</h3>
+                        <canvas id="chartDonut"></canvas>
+                    </div>
+                </div>
+
+                <div class="dashboard-table">
+                    <h3>Resumen por entidad</h3>
+                    <table class="table table--responsive">
+                        <thead>
+                            <th onclick="ordenarTabla('entidad')">Entidad ↑↓</th>
+                            <th onclick="ordenarTabla('atenciones')">Atenciones ↑↓</th>
+                            <th>% del total</th>
+                            <th>Satisfacción</th>
+                            <th>Estado</th>
+                        </thead>
+                        <tbody id="tableEntidadesBody">
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- ────── SECCIÓN: GESTIÓN DE USUARIOS ────── -->
+            <section id="usuarios" class="erp-section">
+                <div class="section-header">
+                    <input type="text" id="usuariosBusqueda" placeholder="Buscar por nombre o DNI..." class="search-input">
+                    <span class="result-counter" id="usuariosCounter">Mostrando 0 de 0 usuarios</span>
+                </div>
+
+                <div class="table-wrapper">
+                    <table class="table table--responsive">
+                        <thead>
+                            <th>#</th>
+                            <th>Nombre</th>
+                            <th>DNI</th>
+                            <th>Email</th>
+                            <th>Teléfono</th>
+                            <th>Rol</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </thead>
+                        <tbody id="usuariosTableBody">
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="pagination" id="usuariosPaginacion"></div>
+            </section>
+
+            <!-- ────── SECCIÓN: CONTROL DE TICKETS ────── -->
+            <section id="tickets" class="erp-section">
+                <div class="filters-row">
+                    <select id="filtroEntidad" class="filter-select">
+                        <option value="">Todas las entidades</option>
+                        <option value="RENIEC">RENIEC</option>
+                        <option value="Migraciones">Migraciones</option>
+                        <option value="EsSalud">EsSalud</option>
+                        <option value="Banco de la Nación">Banco de la Nación</option>
+                    </select>
+                    <select id="filtroEstado" class="filter-select">
+                        <option value="">Todos los estados</option>
+                        <option value="pendiente">Pendiente</option>
+                        <option value="atendido">Atendido</option>
+                        <option value="cancelado">Cancelado</option>
+                    </select>
+                    <input type="date" id="filtroFecha" class="filter-select">
+                    <button class="btn-filter" onclick="filtrarTickets()">🔍 Buscar</button>
+                    <button class="btn-filter btn-filter--secondary" onclick="limpiarFiltrosTickets()">✖ Limpiar</button>
+                </div>
+
+                <span class="result-counter" id="ticketsCounter">Mostrando 0 tickets</span>
+
+                <div class="table-wrapper">
+                    <table class="table table--responsive">
+                        <thead>
+                            <th>Código</th>
+                            <th>Ciudadano</th>
+                            <th>DNI</th>
+                            <th>Entidad</th>
+                            <th>Fecha</th>
+                            <th>Hora</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </thead>
+                        <tbody id="ticketsTableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- ────── SECCIÓN: GESTIÓN DE ENTIDADES ────── -->
+            <section id="entidades" class="erp-section">
+                <div class="table-wrapper">
+                    <table class="table table--responsive">
+                        <thead>
+                            <th>#</th>
+                            <th>Entidad</th>
+                            <th>Responsable</th>
+                            <th>Horario</th>
+                            <th>Cupo diario</th>
+                            <th>Trámites hoy</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </thead>
+                        <tbody id="entidadesTableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Modal para editar entidad -->
+    <div id="modalEditarEntidad" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Editar Entidad</h2>
+                <button class="modal-close" onclick="cerrarModal('modalEditarEntidad')">✕</button>
+            </div>
+            <form id="formEditarEntidad" class="form-modal">
+                <div class="form-group">
+                    <label>Responsable</label>
+                    <input type="text" id="editResponsable" required>
+                </div>
+                <div class="form-group">
+                    <label>Horario</label>
+                    <input type="text" id="editHorario" required>
+                </div>
+                <div class="form-group">
+                    <label>Cupo diario</label>
+                    <input type="number" id="editCupo" required>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary">Guardar</button>
+                    <button type="button" class="btn-secondary" onclick="cerrarModal('modalEditarEntidad')">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="chart.umd.min.js"></script>
+    <script>
+        // ────────── Funciones de storage ──────────
+        function getUsuarios() { return JSON.parse(localStorage.getItem('mac_usuarios')) || []; }
+        function setUsuarios(arr) { localStorage.setItem('mac_usuarios', JSON.stringify(arr)); }
+        function getReservas() { return JSON.parse(localStorage.getItem('mac_reservas')) || []; }
+        function setReservas(arr) { localStorage.setItem('mac_reservas', JSON.stringify(arr)); }
+        function getMensajes() { return JSON.parse(localStorage.getItem('mac_mensajes')) || []; }
+        function setMensajes(arr) { localStorage.setItem('mac_mensajes', JSON.stringify(arr)); }
+        function getSesion() { return JSON.parse(localStorage.getItem('mac_sesion')); }
+        function setSesion(usuario) { localStorage.setItem('mac_sesion', JSON.stringify(usuario)); }
+        function cerrarSesion() { localStorage.removeItem('mac_sesion'); window.location.href = 'login.html'; }
+
+        function protegerRuta(rolRequerido) {
+            const sesion = getSesion();
+            if (!sesion) {
+                window.location.href = 'login.html';
+                return;
+            }
+            if (rolRequerido && sesion.role !== rolRequerido) {
+                window.location.href = sesion.role === 'admin' ? 'erp.html' : 'crm.html';
+            }
+        }
+
+        function inicializarDatos() {
+            if (!localStorage.getItem('mac_usuarios')) {
+                setUsuarios([
+                    { uid: '001', nombre: 'Admin MAC', dni: '00000001', email: 'admin@mac.gob.pe', telefono: '981317379', role: 'admin', activo: true, creadoEn: '2025-01-01', password: 'admin2025' },
+                    { uid: '002', nombre: 'María López Torres', dni: '12345678', email: 'maria@gmail.com', telefono: '987654321', role: 'user', activo: true, creadoEn: '2025-03-10', password: 'mac2025' },
+                    { uid: '003', nombre: 'Carlos Ruiz Sánchez', dni: '87654321', email: 'carlos@gmail.com', telefono: '912345678', role: 'user', activo: true, creadoEn: '2025-04-05', password: 'mac2025' },
+                    { uid: '004', nombre: 'Ana Flores Pérez', dni: '11223344', email: 'ana@gmail.com', telefono: '945678901', role: 'user', activo: false, creadoEn: '2025-05-20', password: 'mac2025' }
+                ]);
+            }
+            if (!localStorage.getItem('mac_reservas')) {
+                setReservas([
+                    { id:'MAC-ANCASH-0001', uid:'002', nombre:'María López Torres', dni:'12345678', entidad:'RENIEC', fecha:'2025-06-20', hora:'09:00', motivo:'Renovación de DNI', estado:'pendiente', creadoEn:'2025-06-15' },
+                    { id:'MAC-ANCASH-0002', uid:'003', nombre:'Carlos Ruiz Sánchez', dni:'87654321', entidad:'Migraciones', fecha:'2025-06-18', hora:'10:30', motivo:'Pasaporte por primera vez', estado:'atendido', creadoEn:'2025-06-10' },
+                    { id:'MAC-ANCASH-0003', uid:'002', nombre:'María López Torres', dni:'12345678', entidad:'Banco de la Nación', fecha:'2025-06-22', hora:'11:00', motivo:'Apertura de cuenta', estado:'pendiente', creadoEn:'2025-06-14' },
+                    { id:'MAC-ANCASH-0004', uid:'004', nombre:'Ana Flores Pérez', dni:'11223344', entidad:'EsSalud', fecha:'2025-06-10', hora:'08:30', motivo:'Afiliación', estado:'cancelado', creadoEn:'2025-06-01' },
+                    { id:'MAC-ANCASH-0005', uid:'003', nombre:'Carlos Ruiz Sánchez', dni:'87654321', entidad:'RENIEC', fecha:'2025-06-25', hora:'14:00', motivo:'Partida de nacimiento', estado:'pendiente', creadoEn:'2025-06-16' }
+                ]);
+            }
+        }
+
+        // ────────── INICIALIZACIÓN ──────────
+        document.addEventListener('DOMContentLoaded', function() {
+            protegerRuta('admin');
+            inicializarDatos();
+
+            const sesion = getSesion();
+            document.getElementById('sidebarUser').textContent = sesion.nombre;
+            document.getElementById('headerUser').textContent = sesion.nombre;
+
+            // Navegación entre secciones
+            document.querySelectorAll('.sidebar__item[data-section]').forEach(item => {
+                item.addEventListener('click', e => {
+                    e.preventDefault();
+                    const section = item.dataset.section;
+                    document.querySelectorAll('.erp-section').forEach(s => s.classList.remove('erp-section--active'));
+                    document.getElementById(section).classList.add('erp-section--active');
+                    document.querySelectorAll('.sidebar__item[data-section]').forEach(i => i.classList.remove('sidebar__item--active'));
+                    item.classList.add('sidebar__item--active');
+                    document.getElementById('headerTitle').textContent = item.textContent.replace(/\d+/g, '').trim();
+                });
+            });
+
+            // Renderizar dashboard
+            renderizarDashboard();
+            renderizarUsuarios();
+            renderizarTickets();
+            renderizarEntidades();
+        });
+
+        function renderizarDashboard() {
+            const reservas = getReservas();
+            const hoy = new Date().toISOString().split('T')[0];
+            const atendidosHoy = reservas.filter(r => r.fecha === hoy && r.estado === 'atendido').length;
+            document.getElementById('kpiAtendidosHoy').textContent = atendidosHoy;
+
+            const hace7dias = new Date(Date.now() - 7*24*60*60*1000).toISOString().split('T')[0];
+            const estaSemana = reservas.filter(r => r.fecha >= hace7dias && r.estado === 'atendido').length;
+            document.getElementById('kpiEstaSemana').textContent = estaSemana;
+
+            const mesActual = hoy.slice(0, 7);
+            const esteMes = reservas.filter(r => r.fecha.startsWith(mesActual) && r.estado === 'atendido').length;
+            document.getElementById('kpiEsteMes').textContent = esteMes;
+
+            // Gráficos
+            dibujarGraficoBarras();
+            dibujarGraficoDonut();
+
+            // Tabla resumen
+            renderizarTablaEntidades();
+        }
+
+        function dibujarGraficoBarras() {
+            const ctx = document.getElementById('chartBarras').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'],
+                    datasets: [{
+                        label: 'Atenciones',
+                        data: [1820, 2150, 1980, 2340, 2100, 2480],
+                        backgroundColor: '#003087',
+                        borderColor: '#0057B8',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+        }
+
+        function dibujarGraficoDonut() {
+            const ctx = document.getElementById('chartDonut').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['RENIEC', 'Migraciones', 'EsSalud', 'Banco Nación', 'Otros'],
+                    datasets: [{
+                        data: [450, 380, 320, 280, 170],
+                        backgroundColor: ['#003087', '#0057B8', '#1B9E78', '#D4001A', '#F5B820']
+                    }]
+                },
+                options: { responsive: true }
+            });
+        }
+
+        function renderizarTablaEntidades() {
+            const entidades = ['RENIEC', 'Migraciones', 'EsSalud', 'Banco de la Nación', 'ONP', 'SUNARP'];
+            const tbody = document.getElementById('tableEntidadesBody');
+            tbody.innerHTML = entidades.map(e => `
+                <tr>
+                    <td>${e}</td>
+                    <td>450</td>
+                    <td>28%</td>
+                    <td>4.8 ⭐</td>
+                    <td><span class="badge badge--activo">Activo</span></td>
+                </tr>
+            `).join('');
+        }
+
+        function renderizarUsuarios() {
+            const usuarios = getUsuarios();
+            const tbody = document.getElementById('usuariosTableBody');
+            const counter = document.getElementById('usuariosCounter');
+
+            tbody.innerHTML = usuarios.map((u, idx) => `
+                <tr>
+                    <td>${idx + 1}</td>
+                    <td>${u.nombre}</td>
+                    <td>${u.dni}</td>
+                    <td>${u.email}</td>
+                    <td>${u.telefono}</td>
+                    <td><span class="badge badge--${u.role === 'admin' ? 'admin' : 'user'}">${u.role === 'admin' ? 'Admin' : 'Usuario'}</span></td>
+                    <td><span class="badge ${u.activo ? 'badge--activo' : 'badge--inactivo'}">${u.activo ? 'Activo' : 'Inactivo'}</span></td>
+                    <td>
+                        <button class="btn-accion" onclick="cambiarRol('${u.uid}')">🔄</button>
+                        <button class="btn-accion" onclick="toggleActivo('${u.uid}')">${u.activo ? '⛔' : '✅'}</button>
+                    </td>
+                </tr>
+            `).join('');
+
+            counter.textContent = `Mostrando ${usuarios.length} de ${usuarios.length} usuarios`;
+
+            document.getElementById('usuariosBusqueda').addEventListener('input', e => {
+                const filtro = e.target.value.toLowerCase();
+                const filtrados = usuarios.filter(u => 
+                    u.nombre.toLowerCase().includes(filtro) || u.dni.includes(filtro)
+                );
+                tbody.innerHTML = filtrados.map((u, idx) => `
+                    <tr>
+                        <td>${idx + 1}</td>
+                        <td>${u.nombre}</td>
+                        <td>${u.dni}</td>
+                        <td>${u.email}</td>
+                        <td>${u.telefono}</td>
+                        <td><span class="badge badge--${u.role === 'admin' ? 'admin' : 'user'}">${u.role === 'admin' ? 'Admin' : 'Usuario'}</span></td>
+                        <td><span class="badge ${u.activo ? 'badge--activo' : 'badge--inactivo'}">${u.activo ? 'Activo' : 'Inactivo'}</span></td>
+                        <td>
+                            <button class="btn-accion" onclick="cambiarRol('${u.uid}')">🔄</button>
+                            <button class="btn-accion" onclick="toggleActivo('${u.uid}')">${u.activo ? '⛔' : '✅'}</button>
+                        </td>
+                    </tr>
+                `).join('');
+                counter.textContent = `Mostrando ${filtrados.length} de ${usuarios.length} usuarios`;
+            });
+        }
+
+        function cambiarRol(uid) {
+            const usuarios = getUsuarios();
+            const usuario = usuarios.find(u => u.uid === uid);
+            if (usuario && window.confirm(`¿Cambiar rol de ${usuario.nombre} a ${usuario.role === 'admin' ? 'Usuario' : 'Admin'}?`)) {
+                usuario.role = usuario.role === 'admin' ? 'user' : 'admin';
+                setUsuarios(usuarios);
+                renderizarUsuarios();
+            }
+        }
+
+        function toggleActivo(uid) {
+            const usuarios = getUsuarios();
+            const usuario = usuarios.find(u => u.uid === uid);
+            if (usuario) {
+                usuario.activo = !usuario.activo;
+                setUsuarios(usuarios);
+                renderizarUsuarios();
+            }
+        }
+
+        function renderizarTickets() {
+            const reservas = getReservas();
+            const tbody = document.getElementById('ticketsTableBody');
+            const counter = document.getElementById('ticketsCounter');
+
+            function renderizar(tickets) {
+                tbody.innerHTML = tickets.map(r => `
+                    <tr>
+                        <td>${r.id}</td>
+                        <td>${r.nombre}</td>
+                        <td>${r.dni}</td>
+                        <td>${r.entidad}</td>
+                        <td>${r.fecha}</td>
+                        <td>${r.hora}</td>
+                        <td><span class="badge badge--${r.estado}">${r.estado}</span></td>
+                        <td>
+                            ${r.estado === 'pendiente' ? `<button class="btn-accion" onclick="cambiarEstadoTicket('${r.id}', 'atendido')">✅</button>` : ''}
+                            ${r.estado === 'pendiente' ? `<button class="btn-accion" onclick="cambiarEstadoTicket('${r.id}', 'cancelado')">❌</button>` : ''}
+                        </td>
+                    </tr>
+                `).join('');
+                counter.textContent = `Mostrando ${tickets.length} tickets`;
+            }
+
+            renderizar(reservas);
+        }
+
+        function cambiarEstadoTicket(id, nuevoEstado) {
+            const reservas = getReservas();
+            const reserva = reservas.find(r => r.id === id);
+            if (reserva) {
+                reserva.estado = nuevoEstado;
+                setReservas(reservas);
+                renderizarTickets();
+            }
+        }
+
+        function filtrarTickets() {
+            const entidad = document.getElementById('filtroEntidad').value;
+            const estado = document.getElementById('filtroEstado').value;
+            const fecha = document.getElementById('filtroFecha').value;
+
+            let reservas = getReservas();
+            if (entidad) reservas = reservas.filter(r => r.entidad === entidad);
+            if (estado) reservas = reservas.filter(r => r.estado === estado);
+            if (fecha) reservas = reservas.filter(r => r.fecha === fecha);
+
+            const tbody = document.getElementById('ticketsTableBody');
+            tbody.innerHTML = reservas.map(r => `
+                <tr>
+                    <td>${r.id}</td>
+                    <td>${r.nombre}</td>
+                    <td>${r.dni}</td>
+                    <td>${r.entidad}</td>
+                    <td>${r.fecha}</td>
+                    <td>${r.hora}</td>
+                    <td><span class="badge badge--${r.estado}">${r.estado}</span></td>
+                    <td>
+                        ${r.estado === 'pendiente' ? `<button class="btn-accion" onclick="cambiarEstadoTicket('${r.id}', 'atendido')">✅</button>` : ''}
+                    </td>
+                </tr>
+            `).join('');
+
+            document.getElementById('ticketsCounter').textContent = `Mostrando ${reservas.length} tickets`;
+        }
+
+        function limpiarFiltrosTickets() {
+            document.getElementById('filtroEntidad').value = '';
+            document.getElementById('filtroEstado').value = '';
+            document.getElementById('filtroFecha').value = '';
+            renderizarTickets();
+        }
+
+        function renderizarEntidades() {
+            const entidades = [
+                { nombre: 'RENIEC', responsable: 'Juan García', horario: '08:30 - 17:00', cupo: 40, tramitesHoy: 28, activo: true },
+                { nombre: 'Migraciones', responsable: 'María Pérez', horario: '08:30 - 17:00', cupo: 35, tramitesHoy: 32, activo: true },
+                { nombre: 'EsSalud', responsable: 'Carlos López', horario: '09:00 - 16:00', cupo: 50, tramitesHoy: 41, activo: true },
+                { nombre: 'Banco de la Nación', responsable: 'Ana Sánchez', horario: '09:00 - 17:00', cupo: 30, tramitesHoy: 25, activo: true }
+            ];
+
+            const tbody = document.getElementById('entidadesTableBody');
+            tbody.innerHTML = entidades.map((e, idx) => `
+                <tr>
+                    <td>${idx + 1}</td>
+                    <td>${e.nombre}</td>
+                    <td>${e.responsable}</td>
+                    <td>${e.horario}</td>
+                    <td>${e.cupo}</td>
+                    <td>${e.tramitesHoy}</td>
+                    <td><span class="badge ${e.activo ? 'badge--activo' : 'badge--inactivo'}">${e.activo ? 'Activo' : 'Inactivo'}</span></td>
+                    <td>
+                        <button class="btn-accion" onclick="abrirModalEditar('${e.nombre}')">✏️</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function abrirModalEditar(entidad) {
+            document.getElementById('editResponsable').value = '';
+            document.getElementById('editHorario').value = '';
+            document.getElementById('editCupo').value = '';
+            document.getElementById('modalEditarEntidad').style.display = 'flex';
+        }
+
+        function cerrarModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        function ordenarTabla(columna) {
+            console.log('Ordenar por:', columna);
+        }
+    </script>
+</body>
+</html>
