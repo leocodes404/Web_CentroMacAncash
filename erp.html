@@ -22,6 +22,7 @@
             <a href="#" data-section="tickets" class="sidebar__item">🎫 Control de Tickets</a>
             <a href="#" data-section="entidades" class="sidebar__item">🏢 Gestión de Entidades</a>
             <div class="sidebar__divider"></div>
+            <a href="index.html" class="sidebar__item">🌐 Volver a la Web</a>
             <a href="#" class="sidebar__item sidebar__logout" onclick="cerrarSesion(); return false;">🚪 Cerrar sesión</a>
         </nav>
     </aside>
@@ -223,6 +224,38 @@
         function setSesion(usuario) { localStorage.setItem('mac_sesion', JSON.stringify(usuario)); }
         function cerrarSesion() { localStorage.removeItem('mac_sesion'); window.location.href = 'login.html'; }
 
+        function getEntidades() {
+            let entities = localStorage.getItem('mac_entidades');
+            if (entities) {
+                try {
+                    const parsed = JSON.parse(entities);
+                    if (!Array.isArray(parsed) || parsed.length === 0 || !parsed[0].hasOwnProperty('responsable')) {
+                        localStorage.removeItem('mac_entidades');
+                        entities = null;
+                    }
+                } catch(e) {
+                    localStorage.removeItem('mac_entidades');
+                    entities = null;
+                }
+            }
+            if (!entities) {
+                const iniciales = [
+                    { nombre: 'RENIEC', responsable: 'Juan García', horario: '08:30 - 17:00', cupo: 40, tramitesHoy: 28, activo: true },
+                    { nombre: 'Migraciones', responsable: 'María Pérez', horario: '08:30 - 17:00', cupo: 35, tramitesHoy: 32, activo: true },
+                    { nombre: 'EsSalud', responsable: 'Carlos López', horario: '09:00 - 16:00', cupo: 50, tramitesHoy: 41, activo: true },
+                    { nombre: 'Banco de la Nación', responsable: 'Ana Sánchez', horario: '09:00 - 17:00', cupo: 30, tramitesHoy: 25, activo: true },
+                    { nombre: 'ONP', responsable: 'Luis Torres', horario: '08:30 - 17:00', cupo: 20, tramitesHoy: 12, activo: true },
+                    { nombre: 'SUNARP', responsable: 'Elena Díaz', horario: '09:00 - 16:30', cupo: 25, tramitesHoy: 18, activo: true }
+                ];
+                localStorage.setItem('mac_entidades', JSON.stringify(iniciales));
+                entities = JSON.stringify(iniciales);
+            }
+            return JSON.parse(entities);
+        }
+        function setEntidades(arr) {
+            localStorage.setItem('mac_entidades', JSON.stringify(arr));
+        }
+
         function protegerRuta(rolRequerido) {
             const sesion = getSesion();
             if (!sesion) {
@@ -252,6 +285,7 @@
                     { id:'MAC-ANCASH-0005', uid:'003', nombre:'Carlos Ruiz Sánchez', dni:'87654321', entidad:'RENIEC', fecha:'2025-06-25', hora:'14:00', motivo:'Partida de nacimiento', estado:'pendiente', creadoEn:'2025-06-16' }
                 ]);
             }
+            getEntidades(); // Asegurar inicialización de entidades
         }
 
         // ────────── INICIALIZACIÓN ──────────
@@ -281,6 +315,36 @@
             renderizarUsuarios();
             renderizarTickets();
             renderizarEntidades();
+
+            // Event listener para guardar la edición de entidad
+            const formEditar = document.getElementById('formEditarEntidad');
+            if (formEditar) {
+                formEditar.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    if (!entidadEnEdicion) return;
+
+                    const responsable = document.getElementById('editResponsable').value.trim();
+                    const horario = document.getElementById('editHorario').value.trim();
+                    const cupo = parseInt(document.getElementById('editCupo').value, 10);
+
+                    if (!responsable || !horario || isNaN(cupo)) {
+                        alert('Por favor, completa todos los campos correctamente.');
+                        return;
+                    }
+
+                    const entidades = getEntidades();
+                    const entidad = entidades.find(item => item.nombre.trim().toLowerCase() === entidadEnEdicion.trim().toLowerCase());
+                    if (entidad) {
+                        entidad.responsable = responsable;
+                        entidad.horario = horario;
+                        entidad.cupo = cupo;
+                        setEntidades(entidades);
+                        renderizarEntidades();
+                        renderizarTablaEntidades();
+                        cerrarModal('modalEditarEntidad');
+                    }
+                });
+            }
         });
 
         function renderizarDashboard() {
@@ -345,17 +409,43 @@
         }
 
         function renderizarTablaEntidades() {
-            const entidades = ['RENIEC', 'Migraciones', 'EsSalud', 'Banco de la Nación', 'ONP', 'SUNARP'];
+            const entidades = getEntidades();
             const tbody = document.getElementById('tableEntidadesBody');
-            tbody.innerHTML = entidades.map(e => `
-                <tr>
-                    <td>${e}</td>
-                    <td>450</td>
-                    <td>28%</td>
-                    <td>4.8 ⭐</td>
-                    <td><span class="badge badge--activo">Activo</span></td>
-                </tr>
-            `).join('');
+            const totalAtenciones = 450 + 380 + 320 + 280 + 110 + 60;
+            const atencionesSimuladas = {
+                'RENIEC': 450,
+                'Migraciones': 380,
+                'EsSalud': 320,
+                'Banco de la Nación': 280,
+                'ONP': 110,
+                'SUNARP': 60
+            };
+            const satisfaccionSimulada = {
+                'RENIEC': '4.8 ⭐',
+                'Migraciones': '4.5 ⭐',
+                'EsSalud': '4.2 ⭐',
+                'Banco de la Nación': '4.0 ⭐',
+                'ONP': '4.1 ⭐',
+                'SUNARP': '4.3 ⭐'
+            };
+
+            tbody.innerHTML = entidades.map(e => {
+                const atenciones = atencionesSimuladas[e.nombre] || 0;
+                const porcentaje = Math.round((atenciones / totalAtenciones) * 100) || 0;
+                const satisfaccion = satisfaccionSimulada[e.nombre] || '4.0 ⭐';
+                const statusBadge = e.activo 
+                    ? '<span class="badge badge--activo">Activo</span>' 
+                    : '<span class="badge badge--inactivo">Inactivo</span>';
+                return `
+                    <tr>
+                        <td>${e.nombre}</td>
+                        <td>${atenciones}</td>
+                        <td>${porcentaje}%</td>
+                        <td>${satisfaccion}</td>
+                        <td>${statusBadge}</td>
+                    </tr>
+                `;
+            }).join('');
         }
 
         function renderizarUsuarios() {
@@ -498,14 +588,10 @@
             renderizarTickets();
         }
 
-        function renderizarEntidades() {
-            const entidades = [
-                { nombre: 'RENIEC', responsable: 'Juan García', horario: '08:30 - 17:00', cupo: 40, tramitesHoy: 28, activo: true },
-                { nombre: 'Migraciones', responsable: 'María Pérez', horario: '08:30 - 17:00', cupo: 35, tramitesHoy: 32, activo: true },
-                { nombre: 'EsSalud', responsable: 'Carlos López', horario: '09:00 - 16:00', cupo: 50, tramitesHoy: 41, activo: true },
-                { nombre: 'Banco de la Nación', responsable: 'Ana Sánchez', horario: '09:00 - 17:00', cupo: 30, tramitesHoy: 25, activo: true }
-            ];
+        let entidadEnEdicion = null;
 
+        function renderizarEntidades() {
+            const entidades = getEntidades();
             const tbody = document.getElementById('entidadesTableBody');
             tbody.innerHTML = entidades.map((e, idx) => `
                 <tr>
@@ -517,17 +603,34 @@
                     <td>${e.tramitesHoy}</td>
                     <td><span class="badge ${e.activo ? 'badge--activo' : 'badge--inactivo'}">${e.activo ? 'Activo' : 'Inactivo'}</span></td>
                     <td>
-                        <button class="btn-accion" onclick="abrirModalEditar('${e.nombre}')">✏️</button>
+                        <button class="btn-accion" onclick="abrirModalEditar('${e.nombre}')" title="Editar">✏️</button>
+                        <button class="btn-accion" onclick="toggleActivoEntidad('${e.nombre}')" title="${e.activo ? 'Desactivar' : 'Activar'}">${e.activo ? '⛔' : '✅'}</button>
                     </td>
                 </tr>
             `).join('');
         }
 
         function abrirModalEditar(entidad) {
-            document.getElementById('editResponsable').value = '';
-            document.getElementById('editHorario').value = '';
-            document.getElementById('editCupo').value = '';
-            document.getElementById('modalEditarEntidad').style.display = 'flex';
+            const entidades = getEntidades();
+            const e = entidades.find(item => item.nombre.trim().toLowerCase() === entidad.trim().toLowerCase());
+            if (e) {
+                entidadEnEdicion = e.nombre;
+                document.getElementById('editResponsable').value = e.responsable;
+                document.getElementById('editHorario').value = e.horario;
+                document.getElementById('editCupo').value = e.cupo;
+                document.getElementById('modalEditarEntidad').style.display = 'flex';
+            }
+        }
+
+        function toggleActivoEntidad(nombreEntidad) {
+            const entidades = getEntidades();
+            const entidad = entidades.find(item => item.nombre.trim().toLowerCase() === nombreEntidad.trim().toLowerCase());
+            if (entidad) {
+                entidad.activo = !entidad.activo;
+                setEntidades(entidades);
+                renderizarEntidades();
+                renderizarTablaEntidades();
+            }
         }
 
         function cerrarModal(modalId) {

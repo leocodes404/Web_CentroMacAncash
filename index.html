@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
@@ -35,8 +35,9 @@
         <a href="#/dashboard" data-route="dashboard">Dashboard</a>
       </nav>
       <div class="navbar__right">
-        <a href="login.html?tab=register" class="btn btn-registro">Registrarse</a>
-        <a href="login.html" class="btn btn-login">Iniciar Sesión</a>
+        <div id="navbarAuthArea" style="display: flex; gap: 0.75rem; align-items: center;">
+          <a href="login.html" class="btn btn-login">Iniciar Sesión / Registrarse</a>
+        </div>
         <label class="theme-toggle" aria-label="Cambiar modo claro/oscuro" title="Modo claro/oscuro">
           <input type="checkbox" id="themeToggleInput">
           <span class="theme-toggle__track"></span>

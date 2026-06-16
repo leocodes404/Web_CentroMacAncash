@@ -1,4 +1,4 @@
-﻿// ── SPA ROUTER ──────────────────────────────────────────────
+// ── SPA ROUTER ──────────────────────────────────────────────
 const ROUTES = {
   '': 'page-inicio',
   'inicio': 'page-inicio',
@@ -21,6 +21,17 @@ function navigateTo(route) {
 
 function renderRoute() {
   const route = getRoute();
+
+  if (route === 'reservar') {
+    const sesion = JSON.parse(localStorage.getItem('mac_sesion'));
+    if (sesion) {
+      window.location.href = sesion.role === 'admin' ? 'erp.html' : 'crm.html';
+    } else {
+      window.location.href = 'login.html';
+    }
+    return;
+  }
+
   const pageId = ROUTES[route] || 'page-inicio';
 
   // Ocultar todas las páginas
@@ -1156,6 +1167,31 @@ function init() {
 
   if (contactForm) {
     contactForm.addEventListener('submit', handleFormSubmit);
+  }
+  updateNavbarAuth();
+}
+
+function updateNavbarAuth() {
+  const container = document.getElementById('navbarAuthArea');
+  if (!container) return;
+
+  const sesion = JSON.parse(localStorage.getItem('mac_sesion'));
+  if (sesion) {
+    const portalUrl = sesion.role === 'admin' ? 'erp.html' : 'crm.html';
+    container.innerHTML = `
+      <a href="${portalUrl}" class="btn btn-login">Mi Panel</a>
+      <a href="#" class="btn btn-registro" id="btnCerrarSesionLanding">Cerrar Sesión</a>
+    `;
+    document.getElementById('btnCerrarSesionLanding')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      localStorage.removeItem('mac_sesion');
+      updateNavbarAuth();
+      window.location.reload();
+    });
+  } else {
+    container.innerHTML = `
+      <a href="login.html" class="btn btn-login">Iniciar Sesión / Registrarse</a>
+    `;
   }
 }
 
