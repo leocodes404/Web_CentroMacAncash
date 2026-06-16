@@ -133,3 +133,27 @@ function escaparHTML(str) {
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#039;');
 }
+const inputTelefono = document.getElementById('registerTelefono');
+const inputDni = document.getElementById('registerDNI');
+
+inputTelefono.addEventListener('keypress', (evento) => {
+    const codigoTecla = evento.which || evento.keyCode;
+    if (codigoTecla < 48 || codigoTecla > 57) {
+        evento.preventDefault();
+    }
+});
+//para evitar pegar texto no numérico
+inputTelefono.addEventListener('input', () => {
+    inputTelefono.value = inputTelefono.value.replace(/\D/g, '');
+});
+
+inputDni.addEventListener('keypress', (evento) => {
+    const codigoTecla = evento.which || evento.keyCode;
+    if (codigoTecla < 48 || codigoTecla > 57) {
+        evento.preventDefault();
+    }
+});
+//para evitar pegar texto no numérico
+inputDni.addEventListener('input', () => {
+    inputDni.value = inputDni.value.replace(/\D/g, '');
+});

@@ -65,17 +65,17 @@
 
                     <div class="input-group">
                         <label for="registerTelefono">Teléfono</label>
-                        <input type="tel" id="registerTelefono" required placeholder="987654321">
+                        <input type="tel" id="registerTelefono" maxlength="9" pattern="\d{9}" required placeholder="987654321">
                     </div>
 
                     <div class="input-group input-group--password">
                         <label for="registerPassword">Contraseña</label>
-                        <input type="password" id="registerPassword" required placeholder="Mínimo 6 caracteres">
+                        <input type="password" id="registerPassword" minlength="6" required placeholder="Mínimo 6 caracteres">
                     </div>
 
                     <div class="input-group input-group--password">
                         <label for="registerConfirmPassword">Confirmar contraseña</label>
-                        <input type="password" id="registerConfirmPassword" required placeholder="Repite tu contraseña">
+                        <input type="password" id="registerConfirmPassword" minlength="6" required placeholder="Repite tu contraseña">
                     </div>
 
                     <button type="submit" class="btn-submit btn-submit--register">Crear cuenta</button>
