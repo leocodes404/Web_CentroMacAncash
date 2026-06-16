@@ -44,7 +44,7 @@
                         </div>
                     </div>
 
-                    <button type="submit" class="btn-submit btn-submit--login">Ingresar</button>
+                    <button type="submit" class="btn-submit btn-submit--login">Iniciar sesión</button>
                 </form>
 
                 <form id="registerForm" class="tab-panel" novalidate>
@@ -85,79 +85,13 @@
             <p id="statusMessage" class="form-message" aria-live="polite"></p>
 
             <div class="login-footer">
-                <a href="index.html" class="back-link">? Volver al inicio</a>
+                <a href="index.html" class="back-link">← Volver al inicio</a>
             </div>
         </div>
     </div>
 
+    <script src="dataService.js"></script>
     <script>
-        // ---------- Funciones de storage y datos iniciales ----------
-        function getUsuarios() {
-            return JSON.parse(localStorage.getItem('mac_usuarios')) || [];
-        }
-
-        function setUsuarios(arr) {
-            localStorage.setItem('mac_usuarios', JSON.stringify(arr));
-        }
-
-        function getReservas() {
-            return JSON.parse(localStorage.getItem('mac_reservas')) || [];
-        }
-
-        function setReservas(arr) {
-            localStorage.setItem('mac_reservas', JSON.stringify(arr));
-        }
-
-        function getMensajes() {
-            return JSON.parse(localStorage.getItem('mac_mensajes')) || [];
-        }
-
-        function setMensajes(arr) {
-            localStorage.setItem('mac_mensajes', JSON.stringify(arr));
-        }
-
-        function getSesion() {
-            return JSON.parse(localStorage.getItem('mac_sesion'));
-        }
-
-        function setSesion(usuario) {
-            localStorage.setItem('mac_sesion', JSON.stringify(usuario));
-        }
-
-        function cerrarSesion() {
-            localStorage.removeItem('mac_sesion');
-            window.location.href = 'login.html';
-        }
-
-        function inicializarDatos() {
-            if (!localStorage.getItem('mac_usuarios')) {
-                setUsuarios([
-                    { uid: '001', nombre: 'Admin MAC', dni: '00000001', email: 'admin@mac.gob.pe', telefono: '981317379', role: 'admin', activo: true, creadoEn: '2025-01-01', password: 'admin2025' },
-                    { uid: '002', nombre: 'María López Torres', dni: '12345678', email: 'maria@gmail.com', telefono: '987654321', role: 'user', activo: true, creadoEn: '2025-03-10', password: 'mac2025' },
-                    { uid: '003', nombre: 'Carlos Ruiz Sánchez', dni: '87654321', email: 'carlos@gmail.com', telefono: '912345678', role: 'user', activo: true, creadoEn: '2025-04-05', password: 'mac2025' },
-                    { uid: '004', nombre: 'Ana Flores Pérez', dni: '11223344', email: 'ana@gmail.com', telefono: '945678901', role: 'user', activo: false, creadoEn: '2025-05-20', password: 'mac2025' }
-                ]);
-            }
-
-            if (!localStorage.getItem('mac_reservas')) {
-                setReservas([
-                    { id:'MAC-ANCASH-0001', uid:'002', nombre:'María López Torres', dni:'12345678', entidad:'RENIEC', fecha:'2025-06-20', hora:'09:00', motivo:'Renovación de DNI', estado:'pendiente', creadoEn:'2025-06-15' },
-                    { id:'MAC-ANCASH-0002', uid:'003', nombre:'Carlos Ruiz Sánchez', dni:'87654321', entidad:'Migraciones', fecha:'2025-06-18', hora:'10:30', motivo:'Pasaporte por primera vez', estado:'atendido', creadoEn:'2025-06-10' },
-                    { id:'MAC-ANCASH-0003', uid:'002', nombre:'María López Torres', dni:'12345678', entidad:'Banco de la Nación', fecha:'2025-06-22', hora:'11:00', motivo:'Apertura de cuenta', estado:'pendiente', creadoEn:'2025-06-14' },
-                    { id:'MAC-ANCASH-0004', uid:'004', nombre:'Ana Flores Pérez', dni:'11223344', entidad:'EsSalud', fecha:'2025-06-10', hora:'08:30', motivo:'Afiliación', estado:'cancelado', creadoEn:'2025-06-01' },
-                    { id:'MAC-ANCASH-0005', uid:'003', nombre:'Carlos Ruiz Sánchez', dni:'87654321', entidad:'RENIEC', fecha:'2025-06-25', hora:'14:00', motivo:'Partida de nacimiento', estado:'pendiente', creadoEn:'2025-06-16' }
-                ]);
-            }
-
-            if (!localStorage.getItem('mac_mensajes')) {
-                setMensajes([
-                    { id:'MSG-001', uid:'002', nombre:'María López Torres', asunto:'Confirmación de turno RENIEC', mensaje:'Su turno MAC-ANCASH-0001 ha sido confirmado para el 20 de junio a las 09:00. Preséntese con su DNI original.', fecha:'2025-06-15', leido:false },
-                    { id:'MSG-002', uid:'002', nombre:'María López Torres', asunto:'Recordatorio de cita', mensaje:'Le recordamos que mañana tiene una cita en Banco de la Nación a las 11:00. No olvide llevar los documentos requeridos.', fecha:'2025-06-21', leido:true },
-                    { id:'MSG-003', uid:'003', nombre:'Carlos Ruiz Sánchez', asunto:'Turno atendido exitosamente', mensaje:'Su trámite en Migraciones ha sido completado exitosamente. Gracias por usar el Centro MAC Chimbote.', fecha:'2025-06-18', leido:false }
-                ]);
-            }
-        }
-
         function validarEmail(email) {
             return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
         }

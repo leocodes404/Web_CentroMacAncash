@@ -1,19 +1,22 @@
 /* ERP STYLES - Rediseño limpio */
 :root {
-    --primary: #003087;
-    --surface: #ffffff;
-    --background: #eef3fb;
-    --border: #d7e1ef;
-    --text: #1c293d;
-    --text-muted: #5c6e86;
-    --accent: #0057b8;
-    --success: #0f9d58;
-    --warning: #f59e0b;
-    --danger: #e53935;
+    --hue: 220;
+    --primary: hsl(var(--hue), 85%, 26%);
+    --primary-light: hsl(var(--hue), 80%, 36%);
+    --primary-soft: hsl(var(--hue), 90%, 94%);
+    --surface: rgba(255, 255, 255, 0.72);
+    --background: linear-gradient(135deg, hsl(var(--hue), 50%, 96%), hsl(255, 60%, 96%));
+    --border: rgba(218, 228, 245, 0.7);
+    --text: hsl(var(--hue), 40%, 15%);
+    --text-muted: hsl(var(--hue), 16%, 46%);
+    --success: hsl(142, 72%, 29%);
+    --warning: hsl(38, 92%, 50%);
+    --danger: hsl(350, 89%, 60%);
     --sidebar-width: 260px;
     --header-height: 72px;
-    --radius: 18px;
-    --shadow: 0 18px 40px rgba(0, 34, 105, 0.08);
+    --radius: 20px;
+    --shadow: 0 16px 36px rgba(10, 37, 92, 0.05);
+    --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.04);
 }
 
 * {
@@ -30,6 +33,7 @@ body {
     font-family: 'DM Sans', sans-serif;
     color: var(--text);
     background: var(--background);
+    background-attachment: fixed;
 }
 
 .erp-body {
@@ -186,8 +190,21 @@ body {
 .form-card {
     background: var(--surface);
     border: 1px solid var(--border);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     border-radius: 22px;
     box-shadow: var(--shadow);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s ease;
+}
+
+.kpi-card:hover,
+.chart-container:hover,
+.table-card:hover,
+.staff-card:hover,
+.dashboard-table:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 40px rgba(10, 37, 92, 0.08);
+    border-color: rgba(255, 255, 255, 0.65);
 }
 
 .kpi-card {
@@ -363,6 +380,8 @@ body {
 .badge--atendido { background: #dff3e8; color: #0b6b37; }
 .badge--en-proceso { background: #e5f2ff; color: #0f4b9d; }
 .badge--pendiente { background: #fff6dc; color: #b06b00; }
+.badge--llamado { background: #efe3ff; color: #6d28d9; }
+.badge--cancelado { background: #ffe4e6; color: #be123c; }
 
 .form-card {
     padding: 24px;

@@ -8,6 +8,7 @@ const ROUTES = {
   'noticias': 'page-noticias',
   'publicaciones': 'page-publicaciones',
   'dashboard': 'page-inicio',
+  'turnos': 'page-turnos',
 };
 
 function getRoute() {
@@ -86,6 +87,7 @@ function onRouteChange(route) {
   if (route === 'reservar') initReservasPage?.();
   if (route === 'pasaporte') initPasaportePage?.();
   if (route === 'publicaciones') initPublicacionesPage?.();
+  if (route === 'turnos') initTurnosPage?.();
 }
 
 // Event listeners para el router
@@ -420,7 +422,7 @@ const faqPasaporte = [
   { p: '¿Puedo pagar con tarjeta en el Banco de la Nación?', r: 'Depende de la agencia. Se recomienda llevar efectivo. También puedes pagar en Agentes BN o plataforma web del Banco de la Nación.' }
 ];
 
-const heroText = 'Tramites simples. Atencion rapida. Chimbote.';
+const heroText = 'Trámites simples. Atención rápida. Chimbote.';
 const heroTarget = document.getElementById('heroTypewriter');
 
 // ID del video de YouTube para la sección Sobre Nosotros
@@ -2306,6 +2308,91 @@ function initReservasPage() {
   initReservasSystem();
 }
 
+// ── TURNOS LOBBY PAGE INIT ──────────────────────────────────
+let turnosInitialized = false;
+let clockInterval = null;
+let updateInterval = null;
+let ultimoLlamadoTimestamp = 0;
+
+function initTurnosPage() {
+  if (turnosInitialized) return;
+  turnosInitialized = true;
+  
+  // Iniciar reloj
+  updateLobbyClock();
+  clockInterval = setInterval(updateLobbyClock, 1000);
+  
+  // Render inicial
+  actualizarPantallaTurnos();
+  // Verificar actualizaciones cada segundo
+  updateInterval = setInterval(actualizarPantallaTurnos, 1000);
+}
+
+function updateLobbyClock() {
+  const clockEl = document.getElementById('lobbyClock');
+  if (clockEl) {
+    const now = new Date();
+    clockEl.textContent = now.toLocaleTimeString('es-PE', { hour12: true });
+  }
+}
+
+function actualizarPantallaTurnos() {
+  const currentBody = document.getElementById('lobbyCurrentBody');
+  const historyList = document.getElementById('lobbyHistoryList');
+  if (!currentBody || !historyList) return;
+
+  // Obtener reservas y ordenar por llamadoEn desc (los más recientes primero)
+  const reservas = JSON.parse(localStorage.getItem('mac_reservas')) || [];
+  const llamados = reservas
+    .filter(r => r.estado === 'llamado')
+    .sort((a, b) => (b.llamadoEn || 0) - (a.llamadoEn || 0));
+
+  if (llamados.length === 0) {
+    currentBody.innerHTML = '<div class="lobby-empty-ticket">Esperando llamados...</div>';
+    historyList.innerHTML = '<div class="lobby-empty-history">Sin historial reciente</div>';
+    return;
+  }
+
+  const principal = llamados[0];
+  
+  // Flash de alerta si el ticket principal cambió (se llamó a uno nuevo)
+  if (principal.llamadoEn > ultimoLlamadoTimestamp) {
+    ultimoLlamadoTimestamp = principal.llamadoEn;
+    const currentCard = document.querySelector('.lobby-current-card');
+    if (currentCard) {
+      currentCard.style.animation = 'none';
+      void currentCard.offsetWidth; // trigger reflow
+      currentCard.style.animation = 'flashActive 1s ease';
+    }
+  }
+
+  // Render principal
+  const idEsc = principal.id;
+  const entidadEsc = principal.entidad;
+  const ventanillaEsc = principal.ventanilla || 1;
+  currentBody.innerHTML = `
+    <div class="current-ticket-code">${idEsc}</div>
+    <div class="current-ticket-entity">${entidadEsc}</div>
+    <div class="current-ticket-ventanilla">VENTANILLA ${ventanillaEsc}</div>
+  `;
+
+  // Render historial (los otros 4)
+  const historial = llamados.slice(1, 5);
+  if (historial.length === 0) {
+    historyList.innerHTML = '<div class="lobby-empty-history">Sin historial reciente</div>';
+  } else {
+    historyList.innerHTML = historial.map(r => `
+      <div class="history-item">
+        <div>
+          <div class="history-code">${r.id}</div>
+          <div class="history-entity">${r.entidad}</div>
+        </div>
+        <div class="history-ventanilla">Ventanilla ${r.ventanilla || 1}</div>
+      </div>
+    `).join('');
+  }
+}
+
 document.addEventListener('DOMContentLoaded', init);
 
 // ── CHATBOT DE ORIENTACIÓN (ÁRBOL DE DECISIONES) ──────────────
@@ -2315,11 +2402,16 @@ const chatFlow = {
   inicio: {
     text: "¡Hola! 👋 Soy tu asistente de orientación del Centro MAC Chimbote. ¿Qué trámite necesitas realizar o sobre qué entidad buscas información?",
     options: [
+      { label: "🔍 Consultar estado de mi ticket", next: "buscar_ticket" },
       { label: "🛂 Pasaporte (Migraciones)", next: "pasaporte" },
       { label: "🪪 Trámites de DNI (RENIEC)", next: "reniec" },
       { label: "🏥 Seguros (EsSalud)", next: "essalud" },
       { label: "🏢 Otros trámites", next: "otros" }
     ]
+  },
+  buscar_ticket: {
+    text: "Por favor, ingresa el código de tu ticket (ej. MAC-ANCASH-0001) o tu número de DNI de 8 dígitos para consultar el estado en tiempo real:",
+    input: true
   },
   pasaporte: {
     text: "Para tramitar tu **Pasaporte**, debes acercarte al módulo de **Migraciones**.\n\n📄 **Requisitos:**\n• DNI original y vigente.\n• Voucher de pago en el Banco de la Nación (Cód. 06512).\n\n⚠️ **Cita:** SÍ, necesitas reservar cita previa en la web oficial de Migraciones.",
@@ -2408,12 +2500,91 @@ function renderOptions(options) {
   });
 }
 
+function renderChatInput() {
+  chatbotOptions.innerHTML = `
+    <div class="chat-input-wrapper" style="display: flex; gap: 8px; width: 100%; padding: 4px; box-sizing: border-box;">
+      <input type="text" id="chatSearchInput" placeholder="Código de ticket o DNI..." style="flex: 1; padding: 10px 12px; border: 1px solid var(--border, #dde5ef); border-radius: 12px; font-family: inherit; font-size: 13px; outline: none; background: #fff; color: #1f2937;">
+      <button id="chatSearchBtn" class="chat-option-btn" style="margin: 0; padding: 10px 14px; font-weight: 700; background: var(--primary, #003087); color: white; border: none; border-radius: 12px; cursor: pointer;">🔍 Buscar</button>
+    </div>
+  `;
+  const inputEl = document.getElementById('chatSearchInput');
+  const btnEl = document.getElementById('chatSearchBtn');
+  
+  if (inputEl) inputEl.focus();
+
+  const handleSearch = () => {
+    const query = inputEl.value.trim();
+    if (!query) return;
+    
+    addMessage(query, 'user');
+    chatbotOptions.innerHTML = '';
+    
+    setTimeout(() => {
+      buscarTicketChatbot(query);
+    }, 400);
+  };
+
+  if (btnEl) btnEl.addEventListener('click', handleSearch);
+  if (inputEl) {
+    inputEl.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') handleSearch();
+    });
+  }
+}
+
+function buscarTicketChatbot(query) {
+  const queryUpper = query.toUpperCase();
+  const reservas = JSON.parse(localStorage.getItem('mac_reservas')) || [];
+  
+  // Buscar por id de ticket o por DNI
+  const resultados = reservas.filter(r => 
+    r.id.toUpperCase() === queryUpper || 
+    r.dni === query
+  );
+  
+  if (resultados.length === 0) {
+    addMessage("No encontré ningún ticket programado con ese código o DNI. Por favor verifique e intente nuevamente.", 'bot');
+  } else {
+    let respuesta = `Encontré **${resultados.length}** ticket(s) asociado(s):\n\n`;
+    resultados.forEach((r, idx) => {
+      let estadoTexto = r.estado.toUpperCase();
+      if (r.estado === 'llamado') {
+        estadoTexto = `📢 LLAMADO A VENTANILLA ${r.ventanilla || 1}`;
+      } else if (r.estado === 'pendiente') {
+        estadoTexto = `⏳ PENDIENTE`;
+      } else if (r.estado === 'atendido') {
+        estadoTexto = `✅ ATENDIDO`;
+      } else if (r.estado === 'cancelado') {
+        estadoTexto = `❌ CANCELADO`;
+      } else if (r.estado === 'vencido') {
+        estadoTexto = `⚠️ VENCIDO`;
+      }
+      
+      respuesta += `**${idx + 1}. ${r.id}** (${r.entidad})\n` +
+                   `• Fecha: ${r.fecha}\n` +
+                   `• Hora: ${r.hora}\n` +
+                   `• Estado: **${estadoTexto}**\n\n`;
+    });
+    addMessage(respuesta.trim(), 'bot');
+  }
+  
+  // Mostrar opciones finales
+  renderOptions([
+    { label: "🔍 Buscar otro ticket", next: "buscar_ticket" },
+    { label: "🏠 Volver al inicio", next: "inicio" }
+  ]);
+}
+
 function loadChatNode(nodeId) {
   const node = chatFlow[nodeId];
   if (!node) return;
   
   addMessage(node.text, 'bot');
-  renderOptions(node.options);
+  if (node.input) {
+    renderChatInput();
+  } else {
+    renderOptions(node.options);
+  }
 }
 
 // Event Listeners

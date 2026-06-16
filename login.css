@@ -67,6 +67,7 @@ input {
     border-radius: 14px;
     background: rgba(0, 48, 135, 0.08);
     padding: 10px;
+    filter: brightness(0);
 }
 
 .login-brand__text h1,

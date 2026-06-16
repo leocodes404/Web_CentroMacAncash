@@ -21,6 +21,7 @@
             <a href="#" data-section="usuarios" class="sidebar__item">👥 Gestión de Usuarios</a>
             <a href="#" data-section="tickets" class="sidebar__item">🎫 Control de Tickets</a>
             <a href="#" data-section="entidades" class="sidebar__item">🏢 Gestión de Entidades</a>
+            <a href="#" data-section="analiticas" class="sidebar__item">⭐ Analíticas de Feedback</a>
             <div class="sidebar__divider"></div>
             <a href="index.html" class="sidebar__item">🌐 Volver a la Web</a>
             <a href="#" class="sidebar__item sidebar__logout" onclick="cerrarSesion(); return false;">🚪 Cerrar sesión</a>
@@ -106,7 +107,7 @@
                             <th>#</th>
                             <th>Nombre</th>
                             <th>DNI</th>
-                            <th>Email</th>
+                            <th>Correo electrónico</th>
                             <th>Teléfono</th>
                             <th>Rol</th>
                             <th>Estado</th>
@@ -180,6 +181,42 @@
                     </table>
                 </div>
             </section>
+
+            <!-- ────── SECCIÓN: ANALÍTICAS Y FEEDBACK ────── -->
+            <section id="analiticas" class="erp-section">
+                <div class="kpi-grid">
+                    <div class="kpi-card">
+                        <div class="kpi-icon">⭐</div>
+                        <div class="kpi-value" id="kpiSatisfaccionPromedio">5.0</div>
+                        <div class="kpi-label">Satisfacción Promedio</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-icon">💬</div>
+                        <div class="kpi-value" id="kpiTotalOpiniones">0</div>
+                        <div class="kpi-label">Opiniones recibidas</div>
+                    </div>
+                </div>
+
+                <div class="table-card" style="margin-top: 24px; padding: 24px;">
+                    <h3 style="margin-bottom: 18px;">Historial de Calificaciones y Comentarios</h3>
+                    <div class="table-wrapper">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Ciudadano</th>
+                                    <th>Entidad</th>
+                                    <th>Calificación</th>
+                                    <th>Comentario</th>
+                                    <th>Fecha</th>
+                                </tr>
+                            </thead>
+                            <tbody id="calificacionesTableBody">
+                                <!-- Se llenará dinámicamente -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
         </div>
     </main>
 
@@ -212,50 +249,8 @@
     </div>
 
     <script src="chart.umd.min.js"></script>
+    <script src="dataService.js"></script>
     <script>
-        // ────────── Funciones de storage ──────────
-        function getUsuarios() { return JSON.parse(localStorage.getItem('mac_usuarios')) || []; }
-        function setUsuarios(arr) { localStorage.setItem('mac_usuarios', JSON.stringify(arr)); }
-        function getReservas() { return JSON.parse(localStorage.getItem('mac_reservas')) || []; }
-        function setReservas(arr) { localStorage.setItem('mac_reservas', JSON.stringify(arr)); }
-        function getMensajes() { return JSON.parse(localStorage.getItem('mac_mensajes')) || []; }
-        function setMensajes(arr) { localStorage.setItem('mac_mensajes', JSON.stringify(arr)); }
-        function getSesion() { return JSON.parse(localStorage.getItem('mac_sesion')); }
-        function setSesion(usuario) { localStorage.setItem('mac_sesion', JSON.stringify(usuario)); }
-        function cerrarSesion() { localStorage.removeItem('mac_sesion'); window.location.href = 'login.html'; }
-
-        function getEntidades() {
-            let entities = localStorage.getItem('mac_entidades');
-            if (entities) {
-                try {
-                    const parsed = JSON.parse(entities);
-                    if (!Array.isArray(parsed) || parsed.length === 0 || !parsed[0].hasOwnProperty('responsable')) {
-                        localStorage.removeItem('mac_entidades');
-                        entities = null;
-                    }
-                } catch(e) {
-                    localStorage.removeItem('mac_entidades');
-                    entities = null;
-                }
-            }
-            if (!entities) {
-                const iniciales = [
-                    { nombre: 'RENIEC', responsable: 'Juan García', horario: '08:30 - 17:00', cupo: 40, tramitesHoy: 28, activo: true },
-                    { nombre: 'Migraciones', responsable: 'María Pérez', horario: '08:30 - 17:00', cupo: 35, tramitesHoy: 32, activo: true },
-                    { nombre: 'EsSalud', responsable: 'Carlos López', horario: '09:00 - 16:00', cupo: 50, tramitesHoy: 41, activo: true },
-                    { nombre: 'Banco de la Nación', responsable: 'Ana Sánchez', horario: '09:00 - 17:00', cupo: 30, tramitesHoy: 25, activo: true },
-                    { nombre: 'ONP', responsable: 'Luis Torres', horario: '08:30 - 17:00', cupo: 20, tramitesHoy: 12, activo: true },
-                    { nombre: 'SUNARP', responsable: 'Elena Díaz', horario: '09:00 - 16:30', cupo: 25, tramitesHoy: 18, activo: true }
-                ];
-                localStorage.setItem('mac_entidades', JSON.stringify(iniciales));
-                entities = JSON.stringify(iniciales);
-            }
-            return JSON.parse(entities);
-        }
-        function setEntidades(arr) {
-            localStorage.setItem('mac_entidades', JSON.stringify(arr));
-        }
-
         function protegerRuta(rolRequerido) {
             const sesion = getSesion();
             if (!sesion) {
@@ -265,27 +260,6 @@
             if (rolRequerido && sesion.role !== rolRequerido) {
                 window.location.href = sesion.role === 'admin' ? 'erp.html' : 'crm.html';
             }
-        }
-
-        function inicializarDatos() {
-            if (!localStorage.getItem('mac_usuarios')) {
-                setUsuarios([
-                    { uid: '001', nombre: 'Admin MAC', dni: '00000001', email: 'admin@mac.gob.pe', telefono: '981317379', role: 'admin', activo: true, creadoEn: '2025-01-01', password: 'admin2025' },
-                    { uid: '002', nombre: 'María López Torres', dni: '12345678', email: 'maria@gmail.com', telefono: '987654321', role: 'user', activo: true, creadoEn: '2025-03-10', password: 'mac2025' },
-                    { uid: '003', nombre: 'Carlos Ruiz Sánchez', dni: '87654321', email: 'carlos@gmail.com', telefono: '912345678', role: 'user', activo: true, creadoEn: '2025-04-05', password: 'mac2025' },
-                    { uid: '004', nombre: 'Ana Flores Pérez', dni: '11223344', email: 'ana@gmail.com', telefono: '945678901', role: 'user', activo: false, creadoEn: '2025-05-20', password: 'mac2025' }
-                ]);
-            }
-            if (!localStorage.getItem('mac_reservas')) {
-                setReservas([
-                    { id:'MAC-ANCASH-0001', uid:'002', nombre:'María López Torres', dni:'12345678', entidad:'RENIEC', fecha:'2025-06-20', hora:'09:00', motivo:'Renovación de DNI', estado:'pendiente', creadoEn:'2025-06-15' },
-                    { id:'MAC-ANCASH-0002', uid:'003', nombre:'Carlos Ruiz Sánchez', dni:'87654321', entidad:'Migraciones', fecha:'2025-06-18', hora:'10:30', motivo:'Pasaporte por primera vez', estado:'atendido', creadoEn:'2025-06-10' },
-                    { id:'MAC-ANCASH-0003', uid:'002', nombre:'María López Torres', dni:'12345678', entidad:'Banco de la Nación', fecha:'2025-06-22', hora:'11:00', motivo:'Apertura de cuenta', estado:'pendiente', creadoEn:'2025-06-14' },
-                    { id:'MAC-ANCASH-0004', uid:'004', nombre:'Ana Flores Pérez', dni:'11223344', entidad:'EsSalud', fecha:'2025-06-10', hora:'08:30', motivo:'Afiliación', estado:'cancelado', creadoEn:'2025-06-01' },
-                    { id:'MAC-ANCASH-0005', uid:'003', nombre:'Carlos Ruiz Sánchez', dni:'87654321', entidad:'RENIEC', fecha:'2025-06-25', hora:'14:00', motivo:'Partida de nacimiento', estado:'pendiente', creadoEn:'2025-06-16' }
-                ]);
-            }
-            getEntidades(); // Asegurar inicialización de entidades
         }
 
         // ────────── INICIALIZACIÓN ──────────
@@ -307,6 +281,10 @@
                     document.querySelectorAll('.sidebar__item[data-section]').forEach(i => i.classList.remove('sidebar__item--active'));
                     item.classList.add('sidebar__item--active');
                     document.getElementById('headerTitle').textContent = item.textContent.replace(/\d+/g, '').trim();
+                    
+                    if (section === 'analiticas') {
+                        renderizarCalificaciones();
+                    }
                 });
             });
 
@@ -430,6 +408,7 @@
             };
 
             tbody.innerHTML = entidades.map(e => {
+                const nombreEscapado = escaparHTML(e.nombre);
                 const atenciones = atencionesSimuladas[e.nombre] || 0;
                 const porcentaje = Math.round((atenciones / totalAtenciones) * 100) || 0;
                 const satisfaccion = satisfaccionSimulada[e.nombre] || '4.0 ⭐';
@@ -438,11 +417,42 @@
                     : '<span class="badge badge--inactivo">Inactivo</span>';
                 return `
                     <tr>
-                        <td>${e.nombre}</td>
+                        <td>${nombreEscapado}</td>
                         <td>${atenciones}</td>
                         <td>${porcentaje}%</td>
                         <td>${satisfaccion}</td>
                         <td>${statusBadge}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function renderizarCalificaciones() {
+            const calificaciones = JSON.parse(localStorage.getItem('mac_calificaciones')) || [];
+            const tbody = document.getElementById('calificacionesTableBody');
+            if (!tbody) return;
+
+            if (calificaciones.length === 0) {
+                document.getElementById('kpiSatisfaccionPromedio').textContent = '5.0 ⭐';
+                document.getElementById('kpiTotalOpiniones').textContent = '0';
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted); font-weight: 600;">Aún no hay calificaciones registradas.</td></tr>';
+                return;
+            }
+
+            const suma = calificaciones.reduce((acc, c) => acc + c.estrellas, 0);
+            const promedio = (suma / calificaciones.length).toFixed(1);
+            document.getElementById('kpiSatisfaccionPromedio').textContent = `${promedio} / 5.0 ⭐`;
+            document.getElementById('kpiTotalOpiniones').textContent = calificaciones.length;
+
+            tbody.innerHTML = calificaciones.map(c => {
+                const estrellas = '⭐'.repeat(c.estrellas);
+                return `
+                    <tr>
+                        <td>${escaparHTML(c.nombreCiudadano)}</td>
+                        <td>${escaparHTML(c.entidad)}</td>
+                        <td style="color: #f59e0b; font-size: 16px;">${estrellas}</td>
+                        <td style="font-style: italic; font-weight: 600;">"${escaparHTML(c.comentario)}"</td>
+                        <td>${escaparHTML(c.fecha)}</td>
                     </tr>
                 `;
             }).join('');
@@ -453,22 +463,36 @@
             const tbody = document.getElementById('usuariosTableBody');
             const counter = document.getElementById('usuariosCounter');
 
-            tbody.innerHTML = usuarios.map((u, idx) => `
-                <tr>
-                    <td>${idx + 1}</td>
-                    <td>${u.nombre}</td>
-                    <td>${u.dni}</td>
-                    <td>${u.email}</td>
-                    <td>${u.telefono}</td>
-                    <td><span class="badge badge--${u.role === 'admin' ? 'admin' : 'user'}">${u.role === 'admin' ? 'Admin' : 'Usuario'}</span></td>
-                    <td><span class="badge ${u.activo ? 'badge--activo' : 'badge--inactivo'}">${u.activo ? 'Activo' : 'Inactivo'}</span></td>
-                    <td>
-                        <button class="btn-accion" onclick="cambiarRol('${u.uid}')">🔄</button>
-                        <button class="btn-accion" onclick="toggleActivo('${u.uid}')">${u.activo ? '⛔' : '✅'}</button>
-                    </td>
-                </tr>
-            `).join('');
+            function generarFila(u, idx) {
+                const nombreEscapado = escaparHTML(u.nombre);
+                const dniEscapado = escaparHTML(u.dni);
+                const emailEscapado = escaparHTML(u.email);
+                const telefonoEscapado = escaparHTML(u.telefono);
+                const uidEscapado = escaparHTML(u.uid);
+                const roleBadge = u.role === 'admin' ? 'admin' : 'user';
+                const roleLabel = u.role === 'admin' ? 'Admin' : 'Usuario';
+                const activeBadge = u.activo ? 'badge--activo' : 'badge--inactivo';
+                const activeLabel = u.activo ? 'Activo' : 'Inactivo';
+                const activeActionChar = u.activo ? '⛔' : '✅';
 
+                return `
+                    <tr>
+                        <td>${idx + 1}</td>
+                        <td>${nombreEscapado}</td>
+                        <td>${dniEscapado}</td>
+                        <td>${emailEscapado}</td>
+                        <td>${telefonoEscapado}</td>
+                        <td><span class="badge badge--${roleBadge}">${roleLabel}</span></td>
+                        <td><span class="badge ${activeBadge}">${activeLabel}</span></td>
+                        <td>
+                            <button class="btn-accion" onclick="cambiarRol('${uidEscapado}')">🔄</button>
+                            <button class="btn-accion" onclick="toggleActivo('${uidEscapado}')">${activeActionChar}</button>
+                        </td>
+                    </tr>
+                `;
+            }
+
+            tbody.innerHTML = usuarios.map((u, idx) => generarFila(u, idx)).join('');
             counter.textContent = `Mostrando ${usuarios.length} de ${usuarios.length} usuarios`;
 
             document.getElementById('usuariosBusqueda').addEventListener('input', e => {
@@ -476,21 +500,7 @@
                 const filtrados = usuarios.filter(u => 
                     u.nombre.toLowerCase().includes(filtro) || u.dni.includes(filtro)
                 );
-                tbody.innerHTML = filtrados.map((u, idx) => `
-                    <tr>
-                        <td>${idx + 1}</td>
-                        <td>${u.nombre}</td>
-                        <td>${u.dni}</td>
-                        <td>${u.email}</td>
-                        <td>${u.telefono}</td>
-                        <td><span class="badge badge--${u.role === 'admin' ? 'admin' : 'user'}">${u.role === 'admin' ? 'Admin' : 'Usuario'}</span></td>
-                        <td><span class="badge ${u.activo ? 'badge--activo' : 'badge--inactivo'}">${u.activo ? 'Activo' : 'Inactivo'}</span></td>
-                        <td>
-                            <button class="btn-accion" onclick="cambiarRol('${u.uid}')">🔄</button>
-                            <button class="btn-accion" onclick="toggleActivo('${u.uid}')">${u.activo ? '⛔' : '✅'}</button>
-                        </td>
-                    </tr>
-                `).join('');
+                tbody.innerHTML = filtrados.map((u, idx) => generarFila(u, idx)).join('');
                 counter.textContent = `Mostrando ${filtrados.length} de ${usuarios.length} usuarios`;
             });
         }
@@ -521,25 +531,102 @@
             const counter = document.getElementById('ticketsCounter');
 
             function renderizar(tickets) {
-                tbody.innerHTML = tickets.map(r => `
-                    <tr>
-                        <td>${r.id}</td>
-                        <td>${r.nombre}</td>
-                        <td>${r.dni}</td>
-                        <td>${r.entidad}</td>
-                        <td>${r.fecha}</td>
-                        <td>${r.hora}</td>
-                        <td><span class="badge badge--${r.estado}">${r.estado}</span></td>
-                        <td>
-                            ${r.estado === 'pendiente' ? `<button class="btn-accion" onclick="cambiarEstadoTicket('${r.id}', 'atendido')">✅</button>` : ''}
-                            ${r.estado === 'pendiente' ? `<button class="btn-accion" onclick="cambiarEstadoTicket('${r.id}', 'cancelado')">❌</button>` : ''}
-                        </td>
-                    </tr>
-                `).join('');
+                tbody.innerHTML = tickets.map(r => {
+                    const idEscapado = escaparHTML(r.id);
+                    const nombreEscapado = escaparHTML(r.nombre);
+                    const dniEscapado = escaparHTML(r.dni);
+                    const entidadEscapada = escaparHTML(r.entidad);
+                    const fechaEscapada = escaparHTML(r.fecha);
+                    const horaEscapada = escaparHTML(r.hora);
+                    const estadoEscapado = escaparHTML(r.estado);
+                    
+                    const isPendingOrCalled = r.estado === 'pendiente' || r.estado === 'llamado';
+                    const callBtn = isPendingOrCalled ? `<button class="btn-accion btn-accion--llamar" onclick="llamarTicket('${idEscapado}')" title="Llamar ticket">📢</button>` : '';
+                    const checkBtn = isPendingOrCalled ? `<button class="btn-accion" onclick="cambiarEstadoTicket('${idEscapado}', 'atendido')" title="Atendido">✅</button>` : '';
+                    const cancelBtn = isPendingOrCalled ? `<button class="btn-accion" onclick="cambiarEstadoTicket('${idEscapado}', 'cancelado')" title="Cancelar">❌</button>` : '';
+
+                    return `
+                        <tr>
+                            <td>${idEscapado}</td>
+                            <td>${nombreEscapado}</td>
+                            <td>${dniEscapado}</td>
+                            <td>${entidadEscapada}</td>
+                            <td>${fechaEscapada}</td>
+                            <td>${horaEscapada}</td>
+                            <td><span class="badge badge--${estadoEscapado}">${estadoEscapado}</span></td>
+                            <td>
+                                ${callBtn}
+                                ${checkBtn}
+                                ${cancelBtn}
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
                 counter.textContent = `Mostrando ${tickets.length} tickets`;
             }
 
             renderizar(reservas);
+        }
+
+        function llamarTicket(id) {
+            const reservas = getReservas();
+            const r = reservas.find(item => item.id === id);
+            if (r) {
+                r.estado = 'llamado';
+                r.ventanilla = Math.floor(Math.random() * 5) + 1;
+                r.llamadoEn = Date.now();
+                r.alertaMostrada = false; // Reset flag for citizen popup
+                setReservas(reservas);
+                renderizarTickets();
+                reproducirAudioLlamado(r);
+            }
+        }
+
+        function reproducirAudioLlamado(reserva) {
+            if ('speechSynthesis' in window) {
+                // Generar sonido clásico "Ding-Dong" usando Web Audio API
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                if (AudioContextClass) {
+                    try {
+                        const audioCtx = new AudioContextClass();
+                        const osc = audioCtx.createOscillator();
+                        const gain = audioCtx.createGain();
+                        osc.connect(gain);
+                        gain.connect(audioCtx.destination);
+                        
+                        // Primer tono (D5)
+                        osc.frequency.setValueAtTime(587.33, audioCtx.currentTime);
+                        gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+                        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.35);
+                        osc.start();
+                        osc.stop(audioCtx.currentTime + 0.35);
+                        
+                        // Segundo tono (A4)
+                        setTimeout(() => {
+                            const osc2 = audioCtx.createOscillator();
+                            const gain2 = audioCtx.createGain();
+                            osc2.connect(gain2);
+                            gain2.connect(audioCtx.destination);
+                            osc2.frequency.setValueAtTime(440.00, audioCtx.currentTime);
+                            gain2.gain.setValueAtTime(0.08, audioCtx.currentTime);
+                            gain2.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.45);
+                            osc2.start();
+                            osc2.stop(audioCtx.currentTime + 0.45);
+                        }, 220);
+                    } catch (e) {
+                        console.error('Error al reproducir timbre:', e);
+                    }
+                }
+
+                // Sintetizar voz en español con leve retraso
+                setTimeout(() => {
+                    const texto = `Ticket ${reserva.id.replace(/-/g, ' ')}, por favor acuda a la ventanilla ${reserva.ventanilla} para el trámite de ${reserva.entidad}.`;
+                    const utterance = new SpeechSynthesisUtterance(texto);
+                    utterance.lang = 'es-ES';
+                    utterance.rate = 0.92;
+                    window.speechSynthesis.speak(utterance);
+                }, 750);
+            }
         }
 
         function cambiarEstadoTicket(id, nuevoEstado) {
@@ -563,20 +650,37 @@
             if (fecha) reservas = reservas.filter(r => r.fecha === fecha);
 
             const tbody = document.getElementById('ticketsTableBody');
-            tbody.innerHTML = reservas.map(r => `
-                <tr>
-                    <td>${r.id}</td>
-                    <td>${r.nombre}</td>
-                    <td>${r.dni}</td>
-                    <td>${r.entidad}</td>
-                    <td>${r.fecha}</td>
-                    <td>${r.hora}</td>
-                    <td><span class="badge badge--${r.estado}">${r.estado}</span></td>
-                    <td>
-                        ${r.estado === 'pendiente' ? `<button class="btn-accion" onclick="cambiarEstadoTicket('${r.id}', 'atendido')">✅</button>` : ''}
-                    </td>
-                </tr>
-            `).join('');
+            tbody.innerHTML = reservas.map(r => {
+                const idEscapado = escaparHTML(r.id);
+                const nombreEscapado = escaparHTML(r.nombre);
+                const dniEscapado = escaparHTML(r.dni);
+                const entidadEscapada = escaparHTML(r.entidad);
+                const fechaEscapada = escaparHTML(r.fecha);
+                const horaEscapada = escaparHTML(r.hora);
+                const estadoEscapado = escaparHTML(r.estado);
+                
+                const isPendingOrCalled = r.estado === 'pendiente' || r.estado === 'llamado';
+                const callBtn = isPendingOrCalled ? `<button class="btn-accion btn-accion--llamar" onclick="llamarTicket('${idEscapado}')" title="Llamar ticket">📢</button>` : '';
+                const checkBtn = isPendingOrCalled ? `<button class="btn-accion" onclick="cambiarEstadoTicket('${idEscapado}', 'atendido')" title="Atendido">✅</button>` : '';
+                const cancelBtn = isPendingOrCalled ? `<button class="btn-accion" onclick="cambiarEstadoTicket('${idEscapado}', 'cancelado')" title="Cancelar">❌</button>` : '';
+
+                return `
+                    <tr>
+                        <td>${idEscapado}</td>
+                        <td>${nombreEscapado}</td>
+                        <td>${dniEscapado}</td>
+                        <td>${entidadEscapada}</td>
+                        <td>${fechaEscapada}</td>
+                        <td>${horaEscapada}</td>
+                        <td><span class="badge badge--${estadoEscapado}">${estadoEscapado}</span></td>
+                        <td>
+                            ${callBtn}
+                            ${checkBtn}
+                            ${cancelBtn}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
 
             document.getElementById('ticketsCounter').textContent = `Mostrando ${reservas.length} tickets`;
         }
@@ -593,21 +697,33 @@
         function renderizarEntidades() {
             const entidades = getEntidades();
             const tbody = document.getElementById('entidadesTableBody');
-            tbody.innerHTML = entidades.map((e, idx) => `
-                <tr>
-                    <td>${idx + 1}</td>
-                    <td>${e.nombre}</td>
-                    <td>${e.responsable}</td>
-                    <td>${e.horario}</td>
-                    <td>${e.cupo}</td>
-                    <td>${e.tramitesHoy}</td>
-                    <td><span class="badge ${e.activo ? 'badge--activo' : 'badge--inactivo'}">${e.activo ? 'Activo' : 'Inactivo'}</span></td>
-                    <td>
-                        <button class="btn-accion" onclick="abrirModalEditar('${e.nombre}')" title="Editar">✏️</button>
-                        <button class="btn-accion" onclick="toggleActivoEntidad('${e.nombre}')" title="${e.activo ? 'Desactivar' : 'Activar'}">${e.activo ? '⛔' : '✅'}</button>
-                    </td>
-                </tr>
-            `).join('');
+            tbody.innerHTML = entidades.map((e, idx) => {
+                const nombreEscapado = escaparHTML(e.nombre);
+                const responsableEscapado = escaparHTML(e.responsable);
+                const horarioEscapado = escaparHTML(e.horario);
+                const cupoEscapado = escaparHTML(e.cupo);
+                const tramitesHoyEscapado = escaparHTML(e.tramitesHoy);
+                const statusBadge = e.activo 
+                    ? '<span class="badge badge--activo">Activo</span>' 
+                    : '<span class="badge badge--inactivo">Inactivo</span>';
+                
+                const nombreParaJS = nombreEscapado.replace(/'/g, "\\'");
+                return `
+                    <tr>
+                        <td>${idx + 1}</td>
+                        <td>${nombreEscapado}</td>
+                        <td>${responsableEscapado}</td>
+                        <td>${horarioEscapado}</td>
+                        <td>${cupoEscapado}</td>
+                        <td>${tramitesHoyEscapado}</td>
+                        <td>${statusBadge}</td>
+                        <td>
+                            <button class="btn-accion" onclick="abrirModalEditar('${nombreParaJS}')" title="Editar">✏️</button>
+                            <button class="btn-accion" onclick="toggleActivoEntidad('${nombreParaJS}')" title="${e.activo ? 'Desactivar' : 'Activar'}">${e.activo ? '⛔' : '✅'}</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
         }
 
         function abrirModalEditar(entidad) {

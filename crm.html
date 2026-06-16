@@ -174,38 +174,95 @@
 
             <!-- ────── SECCIÓN: MENSAJES ────── -->
             <section id="mensajes" class="crm-section">
-                <div class="bandeja-entrada">
-                    <h2>Bandeja de Entrada</h2>
-                    <table class="table">
-                        <thead>
-                            <th style="width: 20px;"></th>
-                            <th>Asunto</th>
-                            <th>Fecha</th>
-                        </thead>
-                        <tbody id="mensajesBody"></tbody>
-                    </table>
+                <div class="email-container">
+                    <!-- Sidebar izquierdo de correo -->
+                    <div class="email-sidebar">
+                        <button class="btn-redactar" onclick="abrirModalRedactar()">📝 Redactar</button>
+                        <nav class="email-folders">
+                            <button class="folder-btn active" onclick="cambiarCarpeta('recibidos', this)">📥 Recibidos <span class="folder-badge" id="badgeRecibidos" style="display: none;">0</span></button>
+                            <button class="folder-btn" onclick="cambiarCarpeta('enviados', this)">📤 Enviados</button>
+                            <button class="folder-btn" onclick="cambiarCarpeta('notificaciones', this)">🔔 Notificaciones <span class="folder-badge folder-badge--blue" id="badgeNotifCrm" style="display: none;">0</span></button>
+                        </nav>
+                    </div>
+
+                    <!-- Panel principal de correos -->
+                    <div class="email-main-pane">
+                        <!-- Lista de mensajes (Split izquierdo del visualizador) -->
+                        <div class="email-list-pane">
+                            <div class="email-list-header">
+                                <input type="text" id="emailSearchInput" oninput="filtrarEmails()" placeholder="Buscar mensajes...">
+                            </div>
+                            <div class="email-list" id="emailListContainer">
+                                <!-- Se renderiza dinámicamente -->
+                            </div>
+                        </div>
+
+                        <!-- Detalle del mensaje (Split derecho del visualizador) -->
+                        <div class="email-detail-pane" id="emailDetailPane">
+                            <div class="email-detail-empty" id="emailDetailEmpty">
+                                <div class="empty-icon">✉️</div>
+                                <h3>Selecciona un mensaje</h3>
+                                <p>Elige un mensaje de la lista para leer su contenido completo</p>
+                            </div>
+                            <div class="email-detail-content" id="emailDetailContent" style="display: none;">
+                                <div class="email-detail-header">
+                                    <h2 id="detailAsunto">Asunto de prueba</h2>
+                                    <div class="email-detail-meta">
+                                        <div class="detail-avatar" id="detailAvatar">A</div>
+                                        <div class="detail-sender-info">
+                                            <strong id="detailRemitente">Remitente</strong>
+                                            <span id="detailDireccion">remitente@mac.gob.pe</span>
+                                        </div>
+                                        <span class="detail-date" id="detailFecha">2026-06-16</span>
+                                    </div>
+                                </div>
+                                <div class="email-detail-body" id="detailCuerpo">
+                                    Cuerpo del mensaje...
+                                </div>
+                                <div class="email-detail-reply" id="detailReplySection">
+                                    <h4>Responder a la consulta</h4>
+                                    <textarea id="detailReplyText" rows="3" placeholder="Escribe tu respuesta aquí..."></textarea>
+                                    <button class="btn-primary" id="btnEnviarRespuesta" style="margin-top: 8px;">📤 Enviar respuesta</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                <div id="detallesMensaje" class="mensaje-detalle" style="display: none;">
-                    <h3 id="mensajeAsunto"></h3>
-                    <p id="mensajeFecha" style="font-size: 12px; color: #666;"></p>
-                    <div id="mensajeContenido"></div>
-                    <button class="btn-secondary" onclick="cerrarMensaje()">✖ Cerrar</button>
-                </div>
-
-                <div class="nuevo-mensaje">
-                    <h2>Enviar Mensaje</h2>
-                    <form id="formNuevoMensaje">
-                        <div class="form-group">
-                            <label>Asunto</label>
-                            <input type="text" id="nuevoAsunto" required>
+                <!-- Modal para redactar nuevo mensaje -->
+                <div id="modalRedactar" class="modal" style="display: none;">
+                    <div class="modal-content" style="max-width: 600px;">
+                        <div class="modal-header">
+                            <h2>Nuevo Mensaje</h2>
+                            <button class="btn-close" onclick="cerrarModalRedactar()" style="background: none; border: none; font-size: 20px; cursor: pointer;">✖</button>
                         </div>
-                        <div class="form-group">
-                            <label>Mensaje</label>
-                            <textarea id="nuevoMensaje" rows="5" required></textarea>
-                        </div>
-                        <button type="submit" class="btn-primary">📤 Enviar mensaje</button>
-                    </form>
+                        <form id="formNuevoMensaje" onsubmit="enviarMensajeGmail(event)">
+                            <div class="form-group" style="margin-top: 16px;">
+                                <label for="redactarEntidad">Destinatario (Entidad)</label>
+                                <select id="redactarEntidad" class="filter-select" style="width: 100%; border-radius: 12px; padding: 12px; margin-top: 6px; border: 1px solid var(--border);" required>
+                                    <option value="General">Atención Ciudadana General</option>
+                                    <option value="RENIEC">RENIEC</option>
+                                    <option value="Migraciones">Migraciones</option>
+                                    <option value="EsSalud">EsSalud</option>
+                                    <option value="Banco de la Nación">Banco de la Nación</option>
+                                    <option value="ONP">ONP</option>
+                                    <option value="SUNARP">SUNARP</option>
+                                </select>
+                            </div>
+                            <div class="form-group" style="margin-top: 12px;">
+                                <label for="nuevoAsunto">Asunto</label>
+                                <input type="text" id="nuevoAsunto" style="width: 100%; border-radius: 12px; padding: 12px; margin-top: 6px; border: 1px solid var(--border);" placeholder="Ingresa el asunto del mensaje..." required>
+                            </div>
+                            <div class="form-group" style="margin-top: 12px;">
+                                <label for="nuevoMensaje">Mensaje</label>
+                                <textarea id="nuevoMensaje" rows="6" style="width: 100%; border-radius: 12px; padding: 12px; margin-top: 6px; border: 1px solid var(--border); resize: vertical;" placeholder="Escribe tu consulta detallada aquí..." required></textarea>
+                            </div>
+                            <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px;">
+                                <button type="button" class="btn-secondary" onclick="cerrarModalRedactar()">Cancelar</button>
+                                <button type="submit" class="btn-primary">📤 Enviar Mensaje</button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </section>
 
@@ -218,7 +275,7 @@
                     <div class="progreso-bar">
                         <div id="barraProgreso" class="progreso-fill"></div>
                     </div>
-                    <p id="nivelProximo">Falta 2 trámites para Nivel Plata</p>
+                    <p id="nivelProximo">Faltan 2 trámites para Nivel Plata</p>
                 </div>
 
                 <div class="historial-visitas">
@@ -249,7 +306,7 @@
 
                     <div class="perfil-info">
                         <p><strong>DNI:</strong> <span id="perfilDNI">00000000</span></p>
-                        <p><strong>Email:</strong> <span id="perfilEmail">email@example.com</span></p>
+                        <p><strong>Correo electrónico:</strong> <span id="perfilEmail">email@example.com</span></p>
                         <p><strong>Teléfono:</strong> <span id="perfilTelefono">987654321</span></p>
                         <p><strong>Miembro desde:</strong> <span id="perfilMiembro">2025-01-01</span></p>
                     </div>
@@ -302,18 +359,8 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="chart.umd.min.js"></script>
+    <script src="dataService.js"></script>
     <script>
-        // ────────── Funciones de storage ──────────
-        function getUsuarios() { return JSON.parse(localStorage.getItem('mac_usuarios')) || []; }
-        function setUsuarios(arr) { localStorage.setItem('mac_usuarios', JSON.stringify(arr)); }
-        function getReservas() { return JSON.parse(localStorage.getItem('mac_reservas')) || []; }
-        function setReservas(arr) { localStorage.setItem('mac_reservas', JSON.stringify(arr)); }
-        function getMensajes() { return JSON.parse(localStorage.getItem('mac_mensajes')) || []; }
-        function setMensajes(arr) { localStorage.setItem('mac_mensajes', JSON.stringify(arr)); }
-        function getSesion() { return JSON.parse(localStorage.getItem('mac_sesion')); }
-        function setSesion(usuario) { localStorage.setItem('mac_sesion', JSON.stringify(usuario)); }
-        function cerrarSesion() { localStorage.removeItem('mac_sesion'); window.location.href = 'login.html'; }
-
         function protegerRuta(rolRequerido) {
             const sesion = getSesion();
             if (!sesion) {
@@ -605,17 +652,26 @@
             const reservas = getReservas().filter(r => r.uid === sesion.uid);
             const tbody = document.getElementById('misReservasBody');
 
-            tbody.innerHTML = reservas.map(r => `
-                <tr>
-                    <td>${r.id}</td>
-                    <td>${r.entidad}</td>
-                    <td>${r.fecha}</td>
-                    <td>${r.hora}</td>
-                    <td><span class="badge badge--${r.estado}">${r.estado}</span></td>
-                    <td><button class="btn-accion" onclick="generarQR('${r.id}', '${r.entidad}', '${r.fecha}', '${r.hora}')">📱</button></td>
-                    <td>${r.estado === 'pendiente' ? `<button class="btn-accion" onclick="cancelarReserva('${r.id}')">❌</button>` : ''}</td>
-                </tr>
-            `).join('');
+            tbody.innerHTML = reservas.map(r => {
+                const idEscapado = escaparHTML(r.id);
+                const entidadEscapada = escaparHTML(r.entidad);
+                const fechaEscapada = escaparHTML(r.fecha);
+                const horaEscapada = escaparHTML(r.hora);
+                const estadoEscapado = escaparHTML(r.estado);
+                // Escapar comillas para los parámetros de la función en línea
+                const params = `'${idEscapado}', '${entidadEscapada.replace(/'/g, "\\'")}', '${fechaEscapada}', '${horaEscapada}'`;
+                return `
+                    <tr>
+                        <td>${idEscapado}</td>
+                        <td>${entidadEscapada}</td>
+                        <td>${fechaEscapada}</td>
+                        <td>${horaEscapada}</td>
+                        <td><span class="badge badge--${estadoEscapado}">${estadoEscapado}</span></td>
+                        <td><button class="btn-accion" onclick="generarQR(${params})">📱</button></td>
+                        <td>${r.estado === 'pendiente' ? `<button class="btn-accion" onclick="cancelarReserva('${idEscapado}')">❌</button>` : ''}</td>
+                    </tr>
+                `;
+            }).join('');
         }
 
         function generarQR(codigo, entidad, fecha, hora) {
@@ -641,64 +697,297 @@
             }
         }
 
-        function renderizarMensajes() {
-            const sesion = getSesion();
-            const mensajes = getMensajes().filter(m => m.uid === sesion.uid);
-            const tbody = document.getElementById('mensajesBody');
-            const notLeidos = mensajes.filter(m => !m.leido).length;
+        let carpetaActual = 'recibidos';
+        let mensajeSeleccionadoId = null;
+        let mensajeSeleccionadoTipo = 'mensaje'; // 'mensaje' o 'notificacion'
 
-            document.getElementById('badgeNotif').textContent = notLeidos;
-            document.getElementById('badgeNotif').style.display = notLeidos > 0 ? 'block' : 'none';
-
-            tbody.innerHTML = mensajes.map(m => `
-                <tr class="${m.leido ? '' : 'msg-nuevo'}" onclick="mostrarMensaje('${m.id}', '${m.asunto}', '${m.mensaje}', '${m.fecha}')">
-                    <td>${m.leido ? '✓' : '●'}</td>
-                    <td>${m.asunto}</td>
-                    <td>${m.fecha}</td>
-                </tr>
-            `).join('');
+        function abrirModalRedactar() {
+            document.getElementById('modalRedactar').style.display = 'flex';
         }
 
-        function mostrarMensaje(id, asunto, mensaje, fecha) {
-            const mensajes = getMensajes();
-            const msg = mensajes.find(m => m.id === id);
-            if (msg) {
-                msg.leido = true;
-                setMensajes(mensajes);
-                renderizarMensajes();
+        function cerrarModalRedactar() {
+            document.getElementById('modalRedactar').style.display = 'none';
+            document.getElementById('formNuevoMensaje').reset();
+        }
+
+        function cambiarCarpeta(carpeta, boton) {
+            carpetaActual = carpeta;
+            mensajeSeleccionadoId = null;
+            
+            // Cambiar clase activa en botones de carpeta
+            document.querySelectorAll('.folder-btn').forEach(btn => btn.classList.remove('active'));
+            if (boton) {
+                boton.classList.add('active');
+            } else {
+                const btns = document.querySelectorAll('.folder-btn');
+                if (btns.length >= 3) {
+                    if (carpeta === 'recibidos') btns[0].classList.add('active');
+                    else if (carpeta === 'enviados') btns[1].classList.add('active');
+                    else if (carpeta === 'notificaciones') btns[2].classList.add('active');
+                }
             }
 
-            document.getElementById('mensajeAsunto').textContent = asunto;
-            document.getElementById('mensajeFecha').textContent = fecha;
-            document.getElementById('mensajeContenido').textContent = mensaje;
-            document.getElementById('detallesMensaje').style.display = 'block';
+            // Reset de detalle
+            document.getElementById('emailDetailEmpty').style.display = 'flex';
+            document.getElementById('emailDetailContent').style.display = 'none';
+
+            renderizarMensajes();
         }
 
-        function cerrarMensaje() {
-            document.getElementById('detallesMensaje').style.display = 'none';
-        }
-
-        function enviarMensaje(e) {
-            e.preventDefault();
+        function renderizarMensajes() {
             const sesion = getSesion();
-            const mensajes = getMensajes();
+            if (!sesion) return;
+
+            // 1. Contar no leídos para los badges
+            const todosMensajes = getMensajes().filter(m => m.uid === sesion.uid);
+            const noLeidosRecibidos = todosMensajes.filter(m => !m.leido && !m.esEnviado).length;
+            
+            const todasNotifs = getNotificaciones().filter(n => n.usuario_id === sesion.uid);
+            const noLeidasNotifs = todasNotifs.filter(n => !n.leida).length;
+
+            // Actualizar badges
+            const badgeRecibidos = document.getElementById('badgeRecibidos');
+            if (badgeRecibidos) {
+                badgeRecibidos.textContent = noLeidosRecibidos;
+                badgeRecibidos.style.display = noLeidosRecibidos > 0 ? 'inline-block' : 'none';
+            }
+            
+            const crmBadgeNotif = document.getElementById('badgeNotif');
+            if (crmBadgeNotif) {
+                crmBadgeNotif.textContent = noLeidosRecibidos;
+                crmBadgeNotif.style.display = noLeidosRecibidos > 0 ? 'inline-block' : 'none';
+            }
+
+            const badgeNotifCrm = document.getElementById('badgeNotifCrm');
+            if (badgeNotifCrm) {
+                badgeNotifCrm.textContent = noLeidasNotifs;
+                badgeNotifCrm.style.display = noLeidasNotifs > 0 ? 'inline-block' : 'none';
+            }
+
+            // 2. Filtrar elementos de la carpeta actual
+            let items = [];
+            const searchInput = document.getElementById('emailSearchInput');
+            const searchQuery = (searchInput ? searchInput.value : '').toLowerCase();
+
+            if (carpetaActual === 'recibidos') {
+                items = todosMensajes.filter(m => !m.esEnviado).map(m => ({
+                    id: m.id,
+                    titulo: m.asunto,
+                    cuerpo: m.mensaje,
+                    fecha: m.fecha,
+                    leido: m.leido,
+                    remitente: 'Administrador MAC',
+                    email: 'soporte@mac.gob.pe',
+                    tipo: 'mensaje'
+                }));
+            } else if (carpetaActual === 'enviados') {
+                items = todosMensajes.filter(m => m.esEnviado).map(m => ({
+                    id: m.id,
+                    titulo: m.asunto,
+                    cuerpo: m.mensaje,
+                    fecha: m.fecha,
+                    leido: true,
+                    remitente: `Para: ${m.entidad || 'Atención General'}`,
+                    email: 'tramites@mac.gob.pe',
+                    tipo: 'mensaje'
+                }));
+            } else if (carpetaActual === 'notificaciones') {
+                items = todasNotifs.map(n => ({
+                    id: n.id,
+                    titulo: n.titulo,
+                    cuerpo: n.mensaje,
+                    fecha: n.fecha_creacion.split('T')[0],
+                    leido: n.leida,
+                    remitente: 'Sistema MAC (Notificación)',
+                    email: 'alertas@mac.gob.pe',
+                    tipo: 'notificacion'
+                }));
+            }
+
+            // Aplicar búsqueda
+            if (searchQuery) {
+                items = items.filter(item => 
+                    item.titulo.toLowerCase().includes(searchQuery) ||
+                    item.cuerpo.toLowerCase().includes(searchQuery) ||
+                    item.remitente.toLowerCase().includes(searchQuery)
+                );
+            }
+
+            // Renderizar la lista
+            const container = document.getElementById('emailListContainer');
+            if (!container) return;
+
+            if (items.length === 0) {
+                container.innerHTML = '<div class="email-list-empty" style="text-align: center; padding: 24px; color: var(--text-muted);">No hay mensajes en esta carpeta</div>';
+                return;
+            }
+
+            // Ordenar por id / fecha desc
+            items.sort((a, b) => b.id.localeCompare(a.id));
+
+            container.innerHTML = items.map(item => {
+                const initial = item.remitente[0].toUpperCase();
+                const unreadClass = item.leido ? '' : 'unread';
+                const activeClass = item.id === mensajeSeleccionadoId ? 'active' : '';
+                const snippet = item.cuerpo.substring(0, 60) + (item.cuerpo.length > 60 ? '...' : '');
+
+                const idEsc = escaparHTML(item.id);
+                const tituloEsc = escaparHTML(item.titulo);
+                const snippetEsc = escaparHTML(snippet);
+                const fechaEsc = escaparHTML(item.fecha);
+                const remitenteEsc = escaparHTML(item.remitente);
+
+                return `
+                    <div class="email-item ${unreadClass} ${activeClass}" onclick="mostrarDetalleMensaje('${idEsc}', '${item.tipo}')">
+                        <div class="email-item-avatar">${initial}</div>
+                        <div class="email-item-content">
+                            <div class="email-item-meta">
+                                <span class="email-item-sender">${remitenteEsc}</span>
+                                <span class="email-item-date">${fechaEsc}</span>
+                            </div>
+                            <div class="email-item-subject">${tituloEsc}</div>
+                            <div class="email-item-snippet">${snippetEsc}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function mostrarDetalleMensaje(id, tipo) {
+            mensajeSeleccionadoId = id;
+            mensajeSeleccionadoTipo = tipo;
+
+            // Volver a renderizar la lista para actualizar el item activo
+            renderizarMensajes();
+
+            // Buscar el item
+            let item = null;
+            if (tipo === 'mensaje') {
+                const mensajes = getMensajes();
+                const m = mensajes.find(msg => msg.id === id);
+                if (m) {
+                    m.leido = true;
+                    setMensajes(mensajes);
+                    
+                    const esEnviado = m.esEnviado;
+                    item = {
+                        id: m.id,
+                        titulo: m.asunto,
+                        cuerpo: m.mensaje,
+                        fecha: m.fecha,
+                        remitente: esEnviado ? 'Tú (Ciudadano)' : 'Administrador MAC',
+                        email: esEnviado ? 'usuario@mac.gob.pe' : 'soporte@mac.gob.pe',
+                        puedeResponder: !esEnviado
+                    };
+                }
+            } else if (tipo === 'notificacion') {
+                const notifs = getNotificaciones();
+                const n = notifs.find(notif => notif.id === id);
+                if (n) {
+                    n.leida = true;
+                    setNotificaciones(notifs);
+                    
+                    item = {
+                        id: n.id,
+                        titulo: n.titulo,
+                        cuerpo: n.mensaje,
+                        fecha: n.fecha_creacion.split('T')[0],
+                        remitente: 'Sistema MAC (Notificación)',
+                        email: 'alertas@mac.gob.pe',
+                        puedeResponder: false
+                    };
+                }
+            }
+
+            renderizarNotificaciones();
+
+            if (!item) return;
+
+            // Mostrar el detalle
+            document.getElementById('emailDetailEmpty').style.display = 'none';
+            const detailContent = document.getElementById('emailDetailContent');
+            detailContent.style.display = 'block';
+
+            document.getElementById('detailAsunto').textContent = item.titulo;
+            document.getElementById('detailRemitente').textContent = item.remitente;
+            document.getElementById('detailDireccion').textContent = `<${item.email}>`;
+            document.getElementById('detailFecha').textContent = item.fecha;
+            document.getElementById('detailAvatar').textContent = item.remitente[0].toUpperCase();
+            document.getElementById('detailCuerpo').textContent = item.cuerpo;
+
+            // Configurar sección de respuesta
+            const replySection = document.getElementById('detailReplySection');
+            if (item.puedeResponder) {
+                replySection.style.display = 'block';
+                document.getElementById('detailReplyText').value = '';
+                document.getElementById('btnEnviarRespuesta').onclick = function() {
+                    enviarRespuestaMensaje(item);
+                };
+            } else {
+                replySection.style.display = 'none';
+            }
+        }
+
+        function filtrarEmails() {
+            renderizarMensajes();
+        }
+
+        function enviarMensajeGmail(e) {
+            if (e) e.preventDefault();
+            const sesion = getSesion();
+            if (!sesion) return;
+
+            const entidad = document.getElementById('redactarEntidad').value;
             const asunto = document.getElementById('nuevoAsunto').value;
             const texto = document.getElementById('nuevoMensaje').value;
 
+            const mensajes = getMensajes();
             mensajes.push({
                 id: 'MSG-' + Date.now(),
                 uid: sesion.uid,
                 nombre: sesion.nombre,
-                asunto,
+                entidad: entidad,
+                asunto: asunto,
                 mensaje: texto,
                 fecha: new Date().toISOString().split('T')[0],
-                leido: false
+                leido: true,
+                esEnviado: true
             });
 
             setMensajes(mensajes);
-            alert('✅ Mensaje enviado');
-            document.getElementById('formNuevoMensaje').reset();
-            renderizarMensajes();
+            alert('✅ Mensaje enviado con éxito');
+            cerrarModalRedactar();
+            cambiarCarpeta('enviados');
+        }
+
+        function enviarMensaje(e) {
+            enviarMensajeGmail(e);
+        }
+
+        function enviarRespuestaMensaje(originalItem) {
+            const replyText = document.getElementById('detailReplyText').value.trim();
+            if (!replyText) return alert('Por favor, escribe una respuesta.');
+
+            const sesion = getSesion();
+            if (!sesion) return;
+
+            const mensajes = getMensajes();
+            mensajes.push({
+                id: 'MSG-' + Date.now(),
+                uid: sesion.uid,
+                nombre: sesion.nombre,
+                entidad: 'Administrador MAC',
+                asunto: 'Re: ' + originalItem.titulo,
+                mensaje: replyText,
+                fecha: new Date().toISOString().split('T')[0],
+                leido: true,
+                esEnviado: true
+            });
+
+            setMensajes(mensajes);
+            alert('✅ Respuesta enviada con éxito');
+            document.getElementById('detailReplyText').value = '';
+            cambiarCarpeta('enviados');
         }
 
         function renderizarFidelizacion() {
@@ -714,15 +1003,15 @@
             document.getElementById('nivelNombre').textContent = nivel;
             document.getElementById('nivelTramites').textContent = `${count} trámites completados`;
             document.getElementById('barraProgreso').style.width = Math.min(100, (count / (proximo || count + 1)) * 100) + '%';
-            document.getElementById('nivelProximo').textContent = proximo ? `Falta ${proximo - count} para ${proximo === 3 ? 'Plata' : 'Oro'}` : '¡Nivel máximo alcanzado! 🏆';
+            document.getElementById('nivelProximo').textContent = proximo ? `${proximo - count === 1 ? 'Falta' : 'Faltan'} ${proximo - count} ${proximo - count === 1 ? 'trámite' : 'trámites'} para ${proximo === 3 ? 'Plata' : 'Oro'}` : '¡Nivel máximo alcanzado! 🏆';
 
             // Historial
             const tbody = document.getElementById('historialVisitasBody');
             tbody.innerHTML = reservas.map(r => `
                 <tr>
-                    <td>${r.fecha}</td>
-                    <td>${r.entidad}</td>
-                    <td>${r.motivo}</td>
+                    <td>${escaparHTML(r.fecha)}</td>
+                    <td>${escaparHTML(r.entidad)}</td>
+                    <td>${escaparHTML(r.motivo)}</td>
                     <td>10 pts</td>
                 </tr>
             `).join('');
@@ -802,14 +1091,6 @@
         }
 
         // ────────── Funciones para el Sistema de Notificaciones y Tarjetas de Citas ──────────
-
-        function getNotificaciones() {
-            return JSON.parse(localStorage.getItem('mac_notificaciones')) || [];
-        }
-
-        function setNotificaciones(arr) {
-            localStorage.setItem('mac_notificaciones', JSON.stringify(arr));
-        }
 
         function hasSentNotification(reservaId, tipo) {
             const notifs = getNotificaciones();
@@ -926,13 +1207,16 @@
             listContainer.innerHTML = notifs.map(n => {
                 const timeStr = formatRelativeTime(new Date(n.fecha_creacion));
                 const unreadClass = n.leida ? '' : 'notif-item--unread';
-                const markReadBtn = n.leida ? '' : `<button class="notif-item__mark-read" onclick="marcarNotificacionLeida('${n.id}'); event.stopPropagation();" title="Marcar como leída">✓</button>`;
+                const idEscapado = escaparHTML(n.id);
+                const tituloEscapado = escaparHTML(n.titulo);
+                const mensajeEscapado = escaparHTML(n.mensaje);
+                const markReadBtn = n.leida ? '' : `<button class="notif-item__mark-read" onclick="marcarNotificacionLeida('${idEscapado}'); event.stopPropagation();" title="Marcar como leída">✓</button>`;
                 
                 return `
                     <div class="notif-item ${unreadClass}">
-                        <div class="notif-item__title">${n.titulo}</div>
-                        <div class="notif-item__msg">${n.mensaje}</div>
-                        <div class="notif-item__time">${timeStr}</div>
+                        <div class="notif-item__title">${tituloEscapado}</div>
+                        <div class="notif-item__msg">${mensajeEscapado}</div>
+                        <div class="notif-item__time">${escaparHTML(timeStr)}</div>
                         ${markReadBtn}
                     </div>
                 `;
@@ -973,7 +1257,7 @@
                         statusContent = `
                             <div class="cita-card__contador-box">
                                 <div class="cita-card__contador-label">Tiempo restante</div>
-                                <div class="cita-card__contador-val">${timeRemainingStr}</div>
+                                <div class="cita-card__contador-val">${escaparHTML(timeRemainingStr)}</div>
                             </div>
                         `;
                     } else {
@@ -994,31 +1278,59 @@
                 } else if (r.estado === 'atendido') {
                     badgeClass = 'badge--atendido';
                     estadoLabel = 'Atendido';
+                    if (r.calificada) {
+                        statusContent = `
+                            <div class="cita-card__msg cita-card__msg--atendido" style="background: #e6f4ea; color: #137333; border: 1px solid #b7e7c5;">
+                                ¡Gracias por calificar la atención! ⭐
+                            </div>
+                        `;
+                    } else {
+                        statusContent = `
+                            <div class="cita-card__msg cita-card__msg--atendido" id="rating_${r.id}" style="display: flex; flex-direction: column; gap: 6px; padding: 10px; border-radius: 12px; background: #fffbeb; border: 1px solid #fde68a;">
+                                <p style="margin: 0; font-weight: 700; font-size: 13px; color: #b45309;">Califica tu atención:</p>
+                                <div class="star-rating" style="display: flex; justify-content: center; gap: 8px; font-size: 22px; line-height: 1;">
+                                    <span onclick="calificarTicket('${r.id}', 1)" style="cursor: pointer; transition: transform 0.1s;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'">⭐</span>
+                                    <span onclick="calificarTicket('${r.id}', 2)" style="cursor: pointer; transition: transform 0.1s;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'">⭐</span>
+                                    <span onclick="calificarTicket('${r.id}', 3)" style="cursor: pointer; transition: transform 0.1s;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'">⭐</span>
+                                    <span onclick="calificarTicket('${r.id}', 4)" style="cursor: pointer; transition: transform 0.1s;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'">⭐</span>
+                                    <span onclick="calificarTicket('${r.id}', 5)" style="cursor: pointer; transition: transform 0.1s;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'">⭐</span>
+                                </div>
+                            </div>
+                        `;
+                    }
+                } else if (r.estado === 'llamado') {
+                    badgeClass = 'badge--llamado';
+                    estadoLabel = 'Llamado';
                     statusContent = `
-                        <div class="cita-card__msg cita-card__msg--atendido">
-                            Su atención fue completada.
+                        <div class="cita-card__msg" style="background: #efe3ff; color: #6d28d9; border: 1px solid #d8b4fe;">
+                            🔔 ¡Llamado a Ventanilla ${escaparHTML(r.ventanilla)}!
                         </div>
                     `;
                 }
 
+                const idEscapado = escaparHTML(r.id);
+                const entidadEscapada = escaparHTML(r.entidad);
+                const fechaEscapada = escaparHTML(r.fecha);
+                const horaEscapada = escaparHTML(r.hora);
+
                 return `
-                    <div class="cita-card" id="card_${r.id}">
+                    <div class="cita-card" id="card_${idEscapado}">
                         <div class="cita-card__header">
-                            <span class="cita-card__entidad">${r.entidad}</span>
+                            <span class="cita-card__entidad">${entidadEscapada}</span>
                             <span class="badge ${badgeClass}">${estadoLabel}</span>
                         </div>
                         <div class="cita-card__body">
                             <div class="cita-card__info-row">
                                 <span>Código:</span>
-                                <span class="cita-card__info-val">${r.id}</span>
+                                <span class="cita-card__info-val">${idEscapado}</span>
                             </div>
                             <div class="cita-card__info-row">
                                 <span>Fecha:</span>
-                                <span class="cita-card__info-val">${r.fecha}</span>
+                                <span class="cita-card__info-val">${fechaEscapada}</span>
                             </div>
                             <div class="cita-card__info-row">
                                 <span>Hora:</span>
-                                <span class="cita-card__info-val">${r.hora}</span>
+                                <span class="cita-card__info-val">${horaEscapada}</span>
                             </div>
                             ${statusContent}
                         </div>
@@ -1045,6 +1357,13 @@
                         r.estado = 'vencido';
                         hasChanges = true;
                     }
+                }
+
+                // Alerta de ticket llamado en tiempo real
+                if (r.uid === sesion.uid && r.estado === 'llamado' && !r.alertaMostrada) {
+                    r.alertaMostrada = true;
+                    hasChanges = true;
+                    mostrarAlertaLlamado(r);
                 }
             });
 
@@ -1096,6 +1415,92 @@
                 }
             });
 
+            renderizarTarjetasCitas();
+            renderizarMensajes();
+        }
+
+        function mostrarAlertaLlamado(reserva) {
+            let existing = document.getElementById('modalAlertaLlamado');
+            if (existing) existing.remove();
+
+            const modal = document.createElement('div');
+            modal.id = 'modalAlertaLlamado';
+            modal.className = 'modal';
+            modal.style.display = 'flex';
+            modal.style.zIndex = '2000';
+            modal.innerHTML = `
+                <div class="modal-content" style="border: 3px solid var(--warning); box-shadow: 0 20px 50px rgba(245, 158, 11, 0.25); animation: pulse 1s infinite alternate; max-width: 440px;">
+                    <div class="modal-header" style="background: var(--warning); color: #000; display: flex; justify-content: center; border-radius: 18px 18px 0 0; padding: 16px;">
+                        <h2 style="font-family: 'Sora', sans-serif; font-size: 22px; font-weight: 800; margin: 0;">🔔 ¡TU TURNO HA SIDO LLAMADO!</h2>
+                    </div>
+                    <div style="padding: 24px; text-align: center; display: flex; flex-direction: column; gap: 16px;">
+                        <p style="font-size: 16px; font-weight: 600; margin: 0; color: var(--text);">Estimado ciudadano, su turno ha sido llamado a atención:</p>
+                        <div class="kpi-card" style="border: 2px solid var(--warning); background: #fffbeb; box-shadow: none; display: flex; flex-direction: column; gap: 8px; align-items: center; justify-content: center; padding: 18px; border-radius: 16px; margin: 0 auto; width: 100%;">
+                            <span style="font-family: monospace; font-size: 24px; font-weight: 800; color: var(--primary);">${escaparHTML(reserva.id)}</span>
+                            <span style="font-size: 18px; font-weight: 700; color: var(--text);">${escaparHTML(reserva.entidad)}</span>
+                            <div style="background: var(--primary); color: white; padding: 10px 24px; border-radius: 12px; font-weight: 800; font-size: 22px; margin-top: 8px; box-shadow: 0 8px 16px rgba(0,48,135,0.2);">
+                                VENTANILLA ${escaparHTML(reserva.ventanilla)}
+                            </div>
+                        </div>
+                        <p style="font-size: 14px; color: var(--text-muted); font-weight: 600; margin: 0;">Por favor acérquese de inmediato al módulo correspondiente.</p>
+                        <button class="btn-primary" onclick="cerrarAlertaLlamado()" style="margin-top: 10px; width: 100%; border: none; padding: 14px; border-radius: 12px; cursor: pointer; font-weight: 700;">Entendido</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+
+            // Sonido de aviso tipo "Ding-Dong" usando Web Audio API
+            const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+            if (AudioContextClass) {
+                try {
+                    const audioCtx = new AudioContextClass();
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+                    gain.gain.setValueAtTime(0.06, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.4);
+                } catch(e) {
+                    console.error('Error al reproducir audio de aviso:', e);
+                }
+            }
+        }
+
+        function cerrarAlertaLlamado() {
+            const modal = document.getElementById('modalAlertaLlamado');
+            if (modal) modal.remove();
+        }
+
+        function calificarTicket(reservaId, estrellas) {
+            const comentario = window.prompt(`¿Deseas agregar algún comentario sobre tu atención (Calificación: ${estrellas} estrellas)?`);
+            const calificaciones = JSON.parse(localStorage.getItem('mac_calificaciones')) || [];
+            
+            const reservas = getReservas();
+            const r = reservas.find(item => item.id === reservaId);
+            const nombreCiudadano = r ? r.nombre : 'Anónimo';
+            const entidad = r ? r.entidad : 'General';
+            
+            const nuevaCalificacion = {
+                id: 'CAL-' + Date.now(),
+                reservaId: reservaId,
+                nombreCiudadano: nombreCiudadano,
+                entidad: entidad,
+                estrellas: estrellas,
+                comentario: comentario || 'Sin comentarios',
+                fecha: new Date().toISOString().split('T')[0]
+            };
+            calificaciones.push(nuevaCalificacion);
+            localStorage.setItem('mac_calificaciones', JSON.stringify(calificaciones));
+            
+            if (r) {
+                r.calificada = true;
+                setReservas(reservas);
+            }
+            
+            alert('¡Muchas gracias por su calificación! Nos ayuda a mejorar.');
             renderizarTarjetasCitas();
         }
     </script>

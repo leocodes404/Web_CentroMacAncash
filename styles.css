@@ -318,8 +318,10 @@ textarea:focus-visible {
   filter: brightness(0) invert(1) drop-shadow(0 2px 4px rgba(0,0,0,0.2));
 }
 
-[data-theme="light"] .brand__logo {
-  filter: none;
+[data-theme="light"] .brand__logo,
+[data-theme="light"] .navbar .brand__logo,
+[data-theme="light"] .navbar:not(.scrolled) .brand__logo {
+  filter: brightness(0);
 }
 
 [data-theme="dark"] .navbar.scrolled .brand__logo {
@@ -4370,4 +4372,207 @@ html.a11y-high-contrast .navbar.scrolled {
 html.a11y-high-contrast img, 
 html.a11y-high-contrast video {
   filter: contrast(120%);
+}
+
+/* ── LOBBY TV PANEL ── */
+.turnos-lobby {
+    background: radial-gradient(circle at center, #0b224e, #030a1c);
+    color: white;
+    min-height: 100vh;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    font-family: 'Sora', sans-serif;
+}
+
+.turnos-lobby__container {
+    max-width: 1400px;
+    margin: 0 auto;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+}
+
+.lobby-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 20px;
+}
+
+.lobby-brand {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+
+.lobby-logo {
+    height: 80px;
+    filter: drop-shadow(0 0 10px rgba(0, 87, 184, 0.5));
+}
+
+.lobby-brand h1 {
+    font-size: 32px;
+    font-weight: 800;
+    margin: 0;
+    letter-spacing: -0.02em;
+}
+
+.lobby-brand p {
+    margin: 4px 0 0;
+    font-size: 16px;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.lobby-time {
+    font-size: 38px;
+    font-weight: 700;
+    font-family: monospace;
+    background: rgba(255, 255, 255, 0.08);
+    padding: 10px 24px;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+}
+
+.lobby-content {
+    display: grid;
+    grid-template-columns: 1.8fr 1.2fr;
+    gap: 40px;
+}
+
+.lobby-current-card {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 32px;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    min-height: 480px;
+    backdrop-filter: blur(15px);
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
+    position: relative;
+    overflow: hidden;
+}
+
+.lobby-current-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(0, 87, 184, 0.15) 0%, transparent 60%);
+    pointer-events: none;
+}
+
+.current-card__title {
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    color: #38bdf8;
+    margin-bottom: 24px;
+}
+
+.current-ticket-code {
+    font-size: 84px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.02em;
+    text-shadow: 0 0 40px rgba(255, 255, 255, 0.3);
+    margin: 10px 0;
+    animation: flashActive 1.5s infinite alternate;
+}
+
+.current-ticket-entity {
+    font-size: 38px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.9);
+    margin-top: 10px;
+}
+
+.current-ticket-ventanilla {
+    background: #eab308;
+    color: #000;
+    font-size: 42px;
+    font-weight: 800;
+    padding: 12px 40px;
+    border-radius: 20px;
+    margin-top: 30px;
+    display: inline-block;
+    box-shadow: 0 10px 30px rgba(234, 179, 8, 0.3);
+}
+
+.lobby-history-card {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 32px;
+    padding: 30px;
+    backdrop-filter: blur(10px);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.lobby-history-card h3 {
+    font-size: 20px;
+    font-weight: 800;
+    color: rgba(255, 255, 255, 0.6);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 12px;
+    margin: 0;
+}
+
+.history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.history-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    padding: 18px 24px;
+    border-radius: 20px;
+    transition: transform 0.2s ease;
+}
+
+.history-item:hover {
+    transform: scale(1.02);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.history-code {
+    font-size: 22px;
+    font-weight: 800;
+}
+
+.history-entity {
+    font-size: 16px;
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 600;
+}
+
+.history-ventanilla {
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    font-size: 16px;
+    font-weight: 700;
+    padding: 6px 14px;
+    border-radius: 10px;
+}
+
+.lobby-empty-ticket, .lobby-empty-history {
+    font-size: 18px;
+    color: rgba(255, 255, 255, 0.4);
+    font-style: italic;
 }
