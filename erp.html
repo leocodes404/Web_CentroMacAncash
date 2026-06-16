@@ -943,14 +943,20 @@
             const entidades = getEntidades();
             const tbody = document.getElementById('tableEntidadesBody');
             if (!tbody) return; // Prevent crash since the dashboard table was removed
-            const totalAtenciones = 450 + 380 + 320 + 280 + 110 + 60;
+            const totalAtenciones = 450 + 380 + 320 + 280 + 110 + 60 + 150 + 120 + 80 + 220 + 90 + 180;
             const atencionesSimuladas = {
                 'RENIEC': 450,
                 'Migraciones': 380,
                 'EsSalud': 320,
                 'Banco de la Nación': 280,
                 'ONP': 110,
-                'SUNARP': 60
+                'SUNARP': 60,
+                'DRTC': 150,
+                'DRTPE': 120,
+                'INPE': 80,
+                'Poder Judicial': 220,
+                'SUNAFIL': 90,
+                'SUNAT': 180
             };
             const satisfaccionSimulada = {
                 'RENIEC': '4.8 ⭐',
@@ -958,7 +964,13 @@
                 'EsSalud': '4.2 ⭐',
                 'Banco de la Nación': '4.0 ⭐',
                 'ONP': '4.1 ⭐',
-                'SUNARP': '4.3 ⭐'
+                'SUNARP': '4.3 ⭐',
+                'DRTC': '4.6 ⭐',
+                'DRTPE': '4.4 ⭐',
+                'INPE': '4.0 ⭐',
+                'Poder Judicial': '4.2 ⭐',
+                'SUNAFIL': '4.1 ⭐',
+                'SUNAT': '4.5 ⭐'
             };
 
             tbody.innerHTML = entidades.map(e => {

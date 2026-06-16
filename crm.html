@@ -102,6 +102,12 @@
                             <option value="bn">Banco de la Nación</option>
                             <option value="onp">ONP</option>
                             <option value="sunarp">SUNARP</option>
+                            <option value="drtc">DRTC</option>
+                            <option value="drtpe">DRTPE</option>
+                            <option value="inpe">INPE</option>
+                            <option value="pj">Poder Judicial</option>
+                            <option value="sunafil">SUNAFIL</option>
+                            <option value="sunat">SUNAT</option>
                         </select>
                     </div>
                     <div class="dash-filter-item">
@@ -326,12 +332,12 @@
                     <div class="modal-content" style="max-width: 600px;">
                         <div class="modal-header">
                             <h2>Nuevo Mensaje</h2>
-                            <button class="btn-close" onclick="cerrarModalRedactar()" style="background: none; border: none; font-size: 20px; cursor: pointer;">✖</button>
+                            <button class="btn-close" onclick="cerrarModalRedactar()" aria-label="Cerrar modal">✖</button>
                         </div>
                         <form id="formNuevoMensaje">
-                            <div class="form-group" style="margin-top: 16px;">
+                            <div class="form-group">
                                 <label for="redactarEntidad">Destinatario (Entidad)</label>
-                                <select id="redactarEntidad" class="filter-select" style="width: 100%; border-radius: 12px; padding: 12px; margin-top: 6px; border: 1px solid var(--border);" required>
+                                <select id="redactarEntidad" class="crm-input filter-select" required>
                                     <option value="General">Atención Ciudadana General</option>
                                     <option value="RENIEC">RENIEC</option>
                                     <option value="Migraciones">Migraciones</option>
@@ -339,17 +345,23 @@
                                     <option value="Banco de la Nación">Banco de la Nación</option>
                                     <option value="ONP">ONP</option>
                                     <option value="SUNARP">SUNARP</option>
+                                    <option value="DRTC">DRTC</option>
+                                    <option value="DRTPE">DRTPE</option>
+                                    <option value="INPE">INPE</option>
+                                    <option value="Poder Judicial">Poder Judicial</option>
+                                    <option value="SUNAFIL">SUNAFIL</option>
+                                    <option value="SUNAT">SUNAT</option>
                                 </select>
                             </div>
-                            <div class="form-group" style="margin-top: 12px;">
+                            <div class="form-group">
                                 <label for="nuevoAsunto">Asunto</label>
-                                <input type="text" id="nuevoAsunto" style="width: 100%; border-radius: 12px; padding: 12px; margin-top: 6px; border: 1px solid var(--border);" placeholder="Ingresa el asunto del mensaje..." required>
+                                <input type="text" id="nuevoAsunto" class="crm-input" placeholder="Ingresa el asunto del mensaje..." required>
                             </div>
-                            <div class="form-group" style="margin-top: 12px;">
+                            <div class="form-group">
                                 <label for="nuevoMensaje">Mensaje</label>
-                                <textarea id="nuevoMensaje" rows="6" style="width: 100%; border-radius: 12px; padding: 12px; margin-top: 6px; border: 1px solid var(--border); resize: vertical;" placeholder="Escribe tu consulta detallada aquí..." required></textarea>
+                                <textarea id="nuevoMensaje" rows="6" class="crm-input" style="resize: vertical;" placeholder="Escribe tu consulta detallada aquí..." required></textarea>
                             </div>
-                            <div class="form-group" style="margin-top: 12px;">
+                            <div class="form-group">
                                 <label>Valoración</label>
                                 <div class="rating-stars" id="nuevoMensajeRating" style="font-size: 24px; cursor: pointer; user-select: none;">
                                     <span data-value="1">⭐</span>
@@ -360,7 +372,7 @@
                                 </div>
                                 <input type="hidden" id="nuevoMensajeValoracion" value="5">
                             </div>
-                            <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px;">
+                            <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px;">
                                 <button type="button" class="btn-secondary" onclick="cerrarModalRedactar()">Cancelar</button>
                                 <button type="submit" class="btn-primary">📤 Enviar Mensaje</button>
                             </div>
@@ -866,9 +878,18 @@
                 { nombre: 'EsSalud', icon: '⚕️' },
                 { nombre: 'Banco Nación', icon: '🏦' },
                 { nombre: 'ONP', icon: '👴' },
-                { nombre: 'SUNARP', icon: '📑' }
+                { nombre: 'SUNARP', icon: '📑' },
+                { nombre: 'DRTC', icon: '🚗' },
+                { nombre: 'DRTPE', icon: '💼' },
+                { nombre: 'INPE', icon: '🏢' },
+                { nombre: 'Poder Judicial', icon: '⚖️' },
+                { nombre: 'SUNAFIL', icon: '👷' },
+                { nombre: 'SUNAT', icon: '💰' }
             ];
-            const colores = ['#003087', '#0F766E', '#7C3AED', '#1D4ED8', '#B45309', '#9333EA'];
+            const colores = [
+                '#003087', '#0F766E', '#7C3AED', '#1D4ED8', '#B45309', '#9333EA',
+                '#059669', '#DC2626', '#4F46E5', '#D97706', '#DB2777', '#2563EB'
+            ];
             const grid = document.getElementById('gridEntidades');
             grid.innerHTML = entidades.map((e, index) => `
                 <button class="entidad-card" onclick="seleccionarEntidad('${e.nombre}')" style="--entity-color: ${colores[index]};">

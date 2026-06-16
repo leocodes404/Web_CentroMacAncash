@@ -67,7 +67,13 @@ function getEntidades() {
             { nombre: 'EsSalud', responsable: 'Carlos López', horario: '09:00 - 16:00', cupo: 50, tramitesHoy: 41, activo: true },
             { nombre: 'Banco de la Nación', responsable: 'Ana Sánchez', horario: '09:00 - 17:00', cupo: 30, tramitesHoy: 25, activo: true },
             { nombre: 'ONP', responsable: 'Luis Torres', horario: '08:30 - 17:00', cupo: 20, tramitesHoy: 12, activo: true },
-            { nombre: 'SUNARP', responsable: 'Elena Díaz', horario: '09:00 - 16:30', cupo: 25, tramitesHoy: 18, activo: true }
+            { nombre: 'SUNARP', responsable: 'Elena Díaz', horario: '09:00 - 16:30', cupo: 25, tramitesHoy: 18, activo: true },
+            { nombre: 'DRTC', responsable: 'Pedro Gómez', horario: '08:00 - 16:00', cupo: 20, tramitesHoy: 15, activo: true },
+            { nombre: 'DRTPE', responsable: 'Lucía Vargas', horario: '08:30 - 17:00', cupo: 15, tramitesHoy: 10, activo: true },
+            { nombre: 'INPE', responsable: 'Raúl Castro', horario: '09:00 - 17:00', cupo: 10, tramitesHoy: 5, activo: true },
+            { nombre: 'Poder Judicial', responsable: 'Marta Ruiz', horario: '08:00 - 16:00', cupo: 40, tramitesHoy: 22, activo: true },
+            { nombre: 'SUNAFIL', responsable: 'Jorge Luna', horario: '09:00 - 17:00', cupo: 15, tramitesHoy: 8, activo: true },
+            { nombre: 'SUNAT', responsable: 'Carla Silva', horario: '08:30 - 16:30', cupo: 35, tramitesHoy: 20, activo: true }
         ];
         localStorage.setItem('mac_entidades', JSON.stringify(iniciales));
         entities = JSON.stringify(iniciales);
@@ -85,7 +91,8 @@ function inicializarDatos() {
             { uid: '001', nombre: 'Admin MAC', dni: '00000001', email: 'admin@mac.gob.pe', telefono: '981317379', role: 'admin', activo: true, creadoEn: '2025-01-01', password: 'admin2025' },
             { uid: '002', nombre: 'María López Torres', dni: '12345678', email: 'maria@gmail.com', telefono: '987654321', role: 'user', activo: true, creadoEn: '2025-03-10', password: 'mac2025' },
             { uid: '003', nombre: 'Carlos Ruiz Sánchez', dni: '87654321', email: 'carlos@gmail.com', telefono: '912345678', role: 'user', activo: true, creadoEn: '2025-04-05', password: 'mac2025' },
-            { uid: '004', nombre: 'Ana Flores Pérez', dni: '11223344', email: 'ana@gmail.com', telefono: '945678901', role: 'user', activo: false, creadoEn: '2025-05-20', password: 'mac2025' }
+            { uid: '004', nombre: 'Ana Flores Pérez', dni: '11223344', email: 'ana@gmail.com', telefono: '945678901', role: 'user', activo: false, creadoEn: '2025-05-20', password: 'mac2025' },
+            { uid: '005', nombre: 'Juan Pérez Nuevo', dni: '99887766', email: 'nuevo@gmail.com', telefono: '999888777', role: 'user', activo: true, creadoEn: '2026-06-16', password: 'mac2025' }
         ]);
     }
 
