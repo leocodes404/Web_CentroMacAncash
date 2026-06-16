@@ -32,6 +32,21 @@
         <header class="crm-header">
             <h1 class="crm-header__title" id="headerTitle">Mi Dashboard</h1>
             <div class="crm-header__right">
+                <!-- Icono de Campana de Notificaciones -->
+                <div class="notif-dropdown-wrapper">
+                    <button class="btn-notif" id="btnNotifBell" onclick="toggleNotifDropdown()" aria-label="Notificaciones">
+                        🔔 <span class="badge-notif-bell" id="notifUnreadCount" style="display: none;">0</span>
+                    </button>
+                    <div class="notif-dropdown" id="notifDropdown" style="display: none;">
+                        <div class="notif-dropdown__header">
+                            <h3>Notificaciones</h3>
+                            <button onclick="marcarTodasLeidas()">Marcar todas como leídas</button>
+                        </div>
+                        <div class="notif-dropdown__body" id="notifList">
+                            <!-- Notificaciones dinámicas -->
+                        </div>
+                    </div>
+                </div>
                 <span class="crm-header__user" id="headerUser">Usuario</span>
                 <button class="crm-header__logout" onclick="cerrarSesion()">🚪</button>
             </div>
@@ -145,6 +160,14 @@
                             </thead>
                             <tbody id="misReservasBody"></tbody>
                         </table>
+                    </div>
+                </div>
+
+                <!-- Nueva sección: Estado de Mis Próximas Citas -->
+                <div class="estado-citas" id="seccionEstadoCitas">
+                    <h2>Estado de Mis Próximas Citas</h2>
+                    <div class="citas-cards-grid" id="citasCardsGrid">
+                        <!-- Las tarjetas se generarán dinámicamente -->
                     </div>
                 </div>
             </section>
@@ -336,6 +359,11 @@
             renderizarMensajes();
             renderizarFidelizacion();
             renderizarPerfil();
+
+            // Inicializar notificaciones y tarjetas de citas
+            renderizarNotificaciones();
+            renderizarTarjetasCitas();
+            setInterval(actualizarCitasYNotificaciones, 1000);
 
             // Formularios
             document.getElementById('formNuevoMensaje').addEventListener('submit', enviarMensaje);
@@ -771,6 +799,304 @@
             setUsuarios(usuarios);
             alert('✅ Contraseña actualizada');
             document.getElementById('formCambiarPassword').reset();
+        }
+
+        // ────────── Funciones para el Sistema de Notificaciones y Tarjetas de Citas ──────────
+
+        function getNotificaciones() {
+            return JSON.parse(localStorage.getItem('mac_notificaciones')) || [];
+        }
+
+        function setNotificaciones(arr) {
+            localStorage.setItem('mac_notificaciones', JSON.stringify(arr));
+        }
+
+        function hasSentNotification(reservaId, tipo) {
+            const notifs = getNotificaciones();
+            return notifs.some(n => n.reserva_id === reservaId && n.tipo === tipo);
+        }
+
+        function sendNotification(reserva, tipo, titulo, mensaje) {
+            const notifs = getNotificaciones();
+            const nueva = {
+                id: 'NOTIF-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5),
+                usuario_id: reserva.uid,
+                reserva_id: reserva.id,
+                titulo: titulo,
+                mensaje: mensaje,
+                tipo: tipo,
+                leida: false,
+                fecha_creacion: new Date().toISOString()
+            };
+            notifs.push(nueva);
+            setNotificaciones(notifs);
+            renderizarNotificaciones();
+        }
+
+        function toggleNotifDropdown() {
+            const dropdown = document.getElementById('notifDropdown');
+            if (dropdown) {
+                const isHidden = dropdown.style.display === 'none';
+                dropdown.style.display = isHidden ? 'block' : 'none';
+            }
+        }
+
+        // Cerrar dropdown al hacer click fuera
+        document.addEventListener('click', function(e) {
+            const wrapper = document.querySelector('.notif-dropdown-wrapper');
+            const dropdown = document.getElementById('notifDropdown');
+            if (wrapper && dropdown && !wrapper.contains(e.target)) {
+                dropdown.style.display = 'none';
+            }
+        });
+
+        function marcarNotificacionLeida(id) {
+            const notifs = getNotificaciones();
+            const notif = notifs.find(n => n.id === id);
+            if (notif) {
+                notif.leida = true;
+                setNotificaciones(notifs);
+                renderizarNotificaciones();
+            }
+        }
+
+        function marcarTodasLeidas() {
+            const sesion = getSesion();
+            if (!sesion) return;
+            const notifs = getNotificaciones();
+            notifs.forEach(n => {
+                if (n.usuario_id === sesion.uid) {
+                    n.leida = true;
+                }
+            });
+            setNotificaciones(notifs);
+            renderizarNotificaciones();
+        }
+
+        function formatRelativeTime(date) {
+            const now = new Date();
+            const diffMs = now - date;
+            const diffSecs = Math.floor(diffMs / 1000);
+            const diffMins = Math.floor(diffSecs / 60);
+            const diffHours = Math.floor(diffMins / 60);
+
+            if (diffSecs < 60) return 'Hace unos momentos';
+            if (diffMins < 60) return `Hace ${diffMins} min`;
+            if (diffHours < 24) return `Hace ${diffHours} h`;
+            return date.toLocaleDateString('es-PE', { day: 'numeric', month: 'short' });
+        }
+
+        function formatTimeRemaining(ms) {
+            const totalSecs = Math.floor(ms / 1000);
+            const secs = totalSecs % 60;
+            const totalMins = Math.floor(totalSecs / 60);
+            const mins = totalMins % 60;
+            const totalHours = Math.floor(totalMins / 60);
+            const hours = totalHours % 24;
+            const days = Math.floor(totalHours / 24);
+
+            const pad = (num) => String(num).padStart(2, '0');
+
+            return `${pad(days)} días ${pad(hours)} horas ${pad(mins)} minutos ${pad(secs)} segundos`;
+        }
+
+        function renderizarNotificaciones() {
+            const sesion = getSesion();
+            if (!sesion) return;
+
+            const notifs = getNotificaciones().filter(n => n.usuario_id === sesion.uid);
+            notifs.sort((a, b) => new Date(b.fecha_creacion) - new Date(a.fecha_creacion));
+
+            const unreadCount = notifs.filter(n => !n.leida).length;
+
+            const badge = document.getElementById('notifUnreadCount');
+            if (badge) {
+                badge.textContent = unreadCount;
+                badge.style.display = unreadCount > 0 ? 'flex' : 'none';
+            }
+
+            const listContainer = document.getElementById('notifList');
+            if (!listContainer) return;
+
+            if (notifs.length === 0) {
+                listContainer.innerHTML = '<div class="notif-empty">No tienes notificaciones.</div>';
+                return;
+            }
+
+            listContainer.innerHTML = notifs.map(n => {
+                const timeStr = formatRelativeTime(new Date(n.fecha_creacion));
+                const unreadClass = n.leida ? '' : 'notif-item--unread';
+                const markReadBtn = n.leida ? '' : `<button class="notif-item__mark-read" onclick="marcarNotificacionLeida('${n.id}'); event.stopPropagation();" title="Marcar como leída">✓</button>`;
+                
+                return `
+                    <div class="notif-item ${unreadClass}">
+                        <div class="notif-item__title">${n.titulo}</div>
+                        <div class="notif-item__msg">${n.mensaje}</div>
+                        <div class="notif-item__time">${timeStr}</div>
+                        ${markReadBtn}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderizarTarjetasCitas() {
+            const sesion = getSesion();
+            if (!sesion) return;
+
+            const reservas = getReservas().filter(r => r.uid === sesion.uid && r.estado !== 'cancelado');
+            const container = document.getElementById('citasCardsGrid');
+            if (!container) return;
+
+            if (reservas.length === 0) {
+                container.innerHTML = '<div class="notif-empty" style="grid-column: 1/-1;">No tienes citas programadas.</div>';
+                return;
+            }
+
+            const now = new Date();
+
+            container.innerHTML = reservas.map(r => {
+                let badgeClass = '';
+                let estadoLabel = '';
+                let statusContent = '';
+
+                if (r.estado === 'pendiente') {
+                    badgeClass = 'badge--pendiente';
+                    estadoLabel = 'Pendiente';
+                    
+                    const [year, month, day] = r.fecha.split('-').map(Number);
+                    const [hours, minutes] = r.hora.split(':').map(Number);
+                    const appointmentDate = new Date(year, month - 1, day, hours, minutes, 0, 0);
+                    const diffMs = appointmentDate - now;
+
+                    if (diffMs > 0) {
+                        const timeRemainingStr = formatTimeRemaining(diffMs);
+                        statusContent = `
+                            <div class="cita-card__contador-box">
+                                <div class="cita-card__contador-label">Tiempo restante</div>
+                                <div class="cita-card__contador-val">${timeRemainingStr}</div>
+                            </div>
+                        `;
+                    } else {
+                        statusContent = `
+                            <div class="cita-card__msg cita-card__msg--vencido">
+                                El turno ha vencido.
+                            </div>
+                        `;
+                    }
+                } else if (r.estado === 'vencido') {
+                    badgeClass = 'badge--vencido';
+                    estadoLabel = 'Vencido';
+                    statusContent = `
+                        <div class="cita-card__msg cita-card__msg--vencido">
+                            El turno ha vencido.
+                        </div>
+                    `;
+                } else if (r.estado === 'atendido') {
+                    badgeClass = 'badge--atendido';
+                    estadoLabel = 'Atendido';
+                    statusContent = `
+                        <div class="cita-card__msg cita-card__msg--atendido">
+                            Su atención fue completada.
+                        </div>
+                    `;
+                }
+
+                return `
+                    <div class="cita-card" id="card_${r.id}">
+                        <div class="cita-card__header">
+                            <span class="cita-card__entidad">${r.entidad}</span>
+                            <span class="badge ${badgeClass}">${estadoLabel}</span>
+                        </div>
+                        <div class="cita-card__body">
+                            <div class="cita-card__info-row">
+                                <span>Código:</span>
+                                <span class="cita-card__info-val">${r.id}</span>
+                            </div>
+                            <div class="cita-card__info-row">
+                                <span>Fecha:</span>
+                                <span class="cita-card__info-val">${r.fecha}</span>
+                            </div>
+                            <div class="cita-card__info-row">
+                                <span>Hora:</span>
+                                <span class="cita-card__info-val">${r.hora}</span>
+                            </div>
+                            ${statusContent}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function actualizarCitasYNotificaciones() {
+            const sesion = getSesion();
+            if (!sesion) return;
+
+            const reservas = getReservas();
+            let hasChanges = false;
+            const now = new Date();
+
+            reservas.forEach(r => {
+                if (r.uid === sesion.uid && r.estado === 'pendiente') {
+                    const [year, month, day] = r.fecha.split('-').map(Number);
+                    const [hours, minutes] = r.hora.split(':').map(Number);
+                    const appointmentDate = new Date(year, month - 1, day, hours, minutes, 0, 0);
+
+                    if (appointmentDate < now) {
+                        r.estado = 'vencido';
+                        hasChanges = true;
+                    }
+                }
+            });
+
+            if (hasChanges) {
+                setReservas(reservas);
+                renderizarMisReservas();
+                renderizarDashboard();
+            }
+
+            reservas.forEach(r => {
+                if (r.uid === sesion.uid) {
+                    const [year, month, day] = r.fecha.split('-').map(Number);
+                    const [hours, minutes] = r.hora.split(':').map(Number);
+                    const appointmentDate = new Date(year, month - 1, day, hours, minutes, 0, 0);
+                    const diffMs = appointmentDate - now;
+
+                    const ONE_HOUR = 60 * 60 * 1000;
+                    const SIX_HOURS = 6 * ONE_HOUR;
+                    const TWELVE_HOURS = 12 * ONE_HOUR;
+                    const ONE_DAY = 24 * ONE_HOUR;
+
+                    if (r.estado === 'vencido') {
+                        if (!hasSentNotification(r.id, 'vencida')) {
+                            sendNotification(r, 'vencida', 'Cita Vencida', `Su cita de ${r.entidad} ha vencido.`);
+                        }
+                    } else if (r.estado === 'atendido') {
+                        if (!hasSentNotification(r.id, 'atendida')) {
+                            sendNotification(r, 'atendida', 'Atención Completada', `Su cita de ${r.entidad} fue atendida exitosamente.`);
+                        }
+                    } else if (r.estado === 'pendiente') {
+                        if (diffMs <= ONE_HOUR && diffMs > 0) {
+                            if (!hasSentNotification(r.id, '1_hora')) {
+                                sendNotification(r, '1_hora', 'Cita próxima (1 hora)', `Su cita de ${r.entidad} será dentro de 1 hora.`);
+                            }
+                        } else if (diffMs <= SIX_HOURS && diffMs > 0) {
+                            if (!hasSentNotification(r.id, '6_horas')) {
+                                sendNotification(r, '6_horas', 'Cita próxima (6 horas)', `Su cita de ${r.entidad} será dentro de 6 horas.`);
+                            }
+                        } else if (diffMs <= TWELVE_HOURS && diffMs > 0) {
+                            if (!hasSentNotification(r.id, '12_horas')) {
+                                sendNotification(r, '12_horas', 'Cita próxima (12 horas)', `Su cita de ${r.entidad} será dentro de 12 horas.`);
+                            }
+                        } else if (diffMs <= ONE_DAY && diffMs > 0) {
+                            if (!hasSentNotification(r.id, '1_dia')) {
+                                sendNotification(r, '1_dia', 'Cita próxima (1 día)', `Su cita de ${r.entidad} será dentro de 1 día.`);
+                            }
+                        }
+                    }
+                }
+            });
+
+            renderizarTarjetasCitas();
         }
     </script>
 </body>
