@@ -3,6 +3,9 @@
 ## 🎯 Objetivo del Proyecto
 Diseñar, estructurar y desarrollar la página web oficial e informativa para el Centro MAC Áncash (ubicado en Megaplaza Chimbote), implementando un sistema de tramitología digital y aplicando buenas prácticas de desarrollo frontend, accesibilidad universal y control de versiones colaborativo.
 
+## GITHUB PAGE
+Enlace: https://leocodes404.github.io/Web_CentroMacAncash/
+
 ## 👥 Miembros del Grupo
 **Semestre Académico:** 2026-I
 
