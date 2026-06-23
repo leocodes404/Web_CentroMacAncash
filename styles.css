@@ -37,6 +37,20 @@
   --font-display: 'Sora', system-ui, sans-serif;
   --font-body: 'DM Sans', system-ui, sans-serif;
 
+  /* Espaciado responsivo (clamp) */
+  --spacing-xs: clamp(0.5rem, 1vw, 0.75rem);
+  --spacing-sm: clamp(0.75rem, 2vw, 1rem);
+  --spacing-md: clamp(1rem, 3vw, 1.5rem);
+  --spacing-lg: clamp(1.5rem, 4vw, 2.5rem);
+  --spacing-xl: clamp(2rem, 6vw, 4rem);
+
+  /* Tipografía fluida (clamp) */
+  --font-sm: clamp(0.75rem, 2vw, 0.875rem);
+  --font-base: clamp(0.875rem, 2.5vw, 1rem);
+  --font-lg: clamp(1rem, 3vw, 1.25rem);
+  --font-xl: clamp(1.25rem, 4vw, 2rem);
+  --font-hero: clamp(1.75rem, 6vw, 4rem);
+
   /* Espaciado y forma */
   --radius-sm: 10px;
   --radius-md: 16px;
@@ -179,8 +193,10 @@ textarea:focus-visible {
 }
 
 .container {
-  width: min(1140px, calc(100% - 2.5rem));
+  width: 100%;
+  max-width: 1140px;
   margin: 0 auto;
+  padding: 0 var(--spacing-sm);
 }
 
 /* ── EYEBROW ───────────────────────────────────────────── */
@@ -329,18 +345,36 @@ textarea:focus-visible {
 }
 
 .navbar__menu {
+  position: fixed;
+  top: 72px;
+  left: -100%;
+  width: 100%;
+  height: calc(100vh - 72px);
+  background: var(--color-surface);
+  flex-direction: column;
+  padding: var(--spacing-md);
+  transition: left var(--transition);
   display: flex;
-  gap: 0.25rem;
-  align-items: center;
+  gap: var(--spacing-sm);
+  align-items: flex-start;
+}
+
+.navbar__menu.open {
+  left: 0;
 }
 
 .navbar__menu a {
-  padding: 0.45rem 0.875rem;
-  border-radius: var(--radius-full);
-  font-size: 0.9rem;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-md);
+  font-size: 1.1rem;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.9);
+  width: 100%;
+  color: var(--color-text);
   transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+[data-theme="dark"] .navbar__menu {
+  background: var(--color-bg);
 }
 
 .navbar__menu a:hover {
@@ -383,6 +417,31 @@ textarea:focus-visible {
   font-weight: 700;
 }
 
+.nav-menu__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(150, 150, 150, 0.2);
+  width: 100%;
+}
+
+.nav-menu__auth {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.nav-menu__auth .btn {
+  width: 100%;
+}
+
+.nav-menu__actions .theme-toggle {
+  margin-top: 0.5rem;
+  align-self: flex-start;
+}
 .navbar__right {
   display: flex;
   align-items: center;
@@ -390,14 +449,15 @@ textarea:focus-visible {
 }
 
 .navbar__toggle {
-  display: none;
+  display: flex;
   border: none;
   background: transparent;
-  width: 42px;
-  height: 42px;
+  width: 44px;
+  height: 44px;
   flex-direction: column;
   justify-content: center;
-  gap: 5px;
+  align-items: center;
+  gap: 6px;
   cursor: pointer;
   padding: 0;
   border-radius: var(--radius-sm);
@@ -437,7 +497,10 @@ textarea:focus-visible {
 
 /* ── HERO ──────────────────────────────────────────────── */
 .hero {
-  padding: 9rem 0 7rem;
+  padding: var(--spacing-xl) 0;
+  min-height: 100svh;
+  display: flex;
+  align-items: center;
   background: #000;
   color: white;
   position: relative;
@@ -605,14 +668,14 @@ textarea:focus-visible {
 
 /* ── SECCIÓN SOBRE NOSOTROS ────────────────────────────── */
 .sobre {
-  padding: 7rem 0;
+  padding: var(--spacing-xl) 0;
   background: var(--color-bg);
 }
 
 .sobre__grid {
   display: grid;
-  grid-template-columns: minmax(0, 3fr) minmax(700px, 3fr);
-  gap: 0rem;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-md);
   align-items: start;
 }
 
@@ -651,12 +714,11 @@ textarea:focus-visible {
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-card);
-  padding: 1.75rem;
+  padding: var(--spacing-md);
   display: flex;
   flex-direction: column;
-  gap: 1.3rem;
+  gap: var(--spacing-sm);
   position: relative;
-  left: 150px;
 }
 
 .video-card__header {
@@ -796,7 +858,7 @@ textarea:focus-visible {
 }
 
 .slider-item {
-  flex: 0 0 calc((100% - 40px) / 3);
+  flex: 0 0 85%; /* Móvil: casi todo el ancho, deja ver el siguiente */
   scroll-snap-align: start;
   display: flex;
   justify-content: center;
@@ -2097,7 +2159,8 @@ input[type="date"]:disabled {
   padding: 1.75rem;
   box-shadow: var(--shadow-card);
   margin-top: 1.5rem;
-  overflow: hidden;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .entities-table__header {
@@ -2112,6 +2175,7 @@ input[type="date"]:disabled {
   width: 100%;
   border-collapse: collapse;
   color: var(--color-text);
+  min-width: 600px;
 }
 
 .entities-table th,
@@ -4017,7 +4081,7 @@ form {
 .chatbot-toggle {
   position: fixed;
   right: 1.5rem;
-  bottom: 6rem; /* Ubicado arriba del botón de WhatsApp */
+  bottom: 6.5rem; /* Aumentado para evitar colisión con WhatsApp */
   z-index: 998;
   display: inline-flex;
   align-items: center;
@@ -4046,7 +4110,7 @@ form {
 .chatbot-widget {
   position: fixed;
   right: 1.5rem;
-  bottom: 6rem;
+  bottom: 6.5rem;
   width: 350px;
   max-height: 550px;
   height: calc(100vh - 120px);
@@ -4610,4 +4674,111 @@ html.a11y-high-contrast video {
     0% { box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4); transform: scale(1); }
     50% { box-shadow: 0 0 80px rgba(56, 189, 248, 0.8); transform: scale(1.03); background: rgba(56, 189, 248, 0.1); }
     100% { box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4); transform: scale(1); }
+}
+
+/* ============================================================
+   RESPONSIVE LAYOUT (Mobile-First 6 Breakpoints)
+   ============================================================ */
+
+/* 1. Base / Móvil Pequeño (320px - 480px) */
+/* Los estilos base ya declarados arriba actúan como 320px mobile-first. */
+
+/* 2. Móvil Estándar (min-width: 481px) */
+@media (min-width: 481px) {
+  .slider-item {
+    flex: 0 0 calc((100% - 20px) / 2);
+  }
+}
+
+/* 3. Tablet (min-width: 768px) */
+@media (min-width: 768px) {
+  .sobre__grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .slider-item {
+    flex: 0 0 calc((100% - 40px) / 3);
+  }
+}
+
+/* 4. Laptop / PC (min-width: 1025px) */
+@media (min-width: 1025px) {
+  .sobre__grid {
+    grid-template-columns: minmax(0, 3fr) minmax(700px, 3fr);
+  }
+  
+  .navbar__toggle {
+    display: none;
+  }
+  
+  .navbar__menu {
+    position: static;
+    height: auto;
+    width: auto;
+    flex-direction: row;
+    background: transparent;
+    padding: 0;
+    gap: 0.25rem;
+    align-items: center;
+  }
+  
+  .navbar__menu a {
+    width: auto;
+    padding: 0.45rem 0.875rem;
+    font-size: 0.9rem;
+    border-radius: var(--radius-full);
+    color: rgba(255, 255, 255, 0.9);
+  }
+  
+  .nav-menu__actions {
+    flex-direction: row;
+    margin-top: 0;
+    padding-top: 0;
+    border-top: none;
+    width: auto;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  
+  .nav-menu__auth {
+    flex-direction: row;
+    width: auto;
+  }
+  
+  .nav-menu__auth .btn {
+    width: auto;
+  }
+  
+  .nav-menu__actions .theme-toggle {
+    margin-top: 0;
+    align-self: center;
+  }
+  
+  [data-theme="dark"] .navbar__menu {
+    background: transparent;
+  }
+}
+
+/* 5. Monitor Grande (min-width: 1441px) */
+@media (min-width: 1441px) {
+  
+}
+
+/* 6. TV / 4K (min-width: 1921px) */
+@media (min-width: 1921px) {
+  html { 
+    font-size: 20px; 
+  }
+  .container { 
+    max-width: 1800px; 
+  }
+}
+
+/* Ultra TV (min-width: 2560px) */
+@media (min-width: 2560px) {
+  html { 
+    font-size: 24px; 
+  }
+  .container { 
+    max-width: 2400px; 
+  }
 }

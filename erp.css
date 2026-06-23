@@ -52,6 +52,13 @@ body {
     display: flex;
     flex-direction: column;
     gap: 24px;
+    z-index: 1000;
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.erp-sidebar.open {
+    transform: translateX(0);
 }
 
 .sidebar__header {
@@ -110,8 +117,9 @@ body {
 }
 
 .erp-main {
-    margin-left: var(--sidebar-width);
+    margin-left: 0;
     min-height: 100vh;
+    transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .erp-header {
@@ -361,6 +369,19 @@ div.dash-card--gradient .kpi-val {
     font-size: 12px;
     color: var(--text-muted);
 }
+.erp-header__user {
+    font-weight: 600;
+    color: var(--text);
+}
+
+@media (max-width: 768px) {
+    .erp-header__user {
+        max-width: 100px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+}
 .list-item-value {
     font-weight: 700;
     font-size: 15px;
@@ -511,9 +532,10 @@ div.dash-card--gradient .kpi-val {
 }
 
 .table-wrapper {
-    overflow: hidden;
+    overflow-x: auto;
     border-radius: 22px;
     margin-bottom: 24px;
+    -webkit-overflow-scrolling: touch;
 }
 
 .staff-grid {
@@ -663,25 +685,14 @@ div.dash-card--gradient .kpi-val {
     font-size: 14px;
 }
 
-@media (max-width: 1120px) {
-    .erp-main { margin-left: 0; }
-    .erp-sidebar { position: relative; width: 100%; min-height: auto; }
-    .erp-content { padding: 24px; }
-    .kpi-grid, .dashboard-charts, .staff-grid { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
-}
-
-@media (max-width: 860px) {
-    .erp-header { padding: 18px; justify-content: center; }
-    .erp-content { padding: 22px; }
-    .sidebar__item { text-align: center; }
-}
-
-@media (max-width: 680px) {
-    .erp-sidebar { display: none; }
-    .erp-main { margin-left: 0; }
-    .erp-header { justify-content: center; }
-    .erp-content { padding: 18px; }
-    .table { min-width: 100%; }
+/* ── MEDIA QUERIES MOBILE-FIRST ── */
+@media (min-width: 1025px) {
+    .erp-sidebar {
+        transform: translateX(0);
+    }
+    .erp-main {
+        margin-left: var(--sidebar-width);
+    }
 }
 
 /* Modales */

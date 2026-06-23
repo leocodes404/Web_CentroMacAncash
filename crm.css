@@ -51,6 +51,13 @@ body {
     display: flex;
     flex-direction: column;
     gap: 24px;
+    z-index: 1000;
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.crm-sidebar.open {
+    transform: translateX(0);
 }
 
 .sidebar__header {
@@ -189,8 +196,9 @@ body {
 }
 
 .crm-main {
-    margin-left: var(--sidebar-width);
+    margin-left: 0;
     min-height: 100vh;
+    transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .crm-header {
@@ -230,17 +238,31 @@ body {
 }
 
 .crm-header__user {
-    font-weight: 700;
+    font-weight: 600;
+    color: var(--text);
 }
 
 .crm-header__logout {
-    border: none;
-    background: rgba(0, 48, 135, 0.1);
-    color: var(--primary);
-    padding: 12px 18px;
-    border-radius: 14px;
+    background: transparent;
+    border: 1px solid var(--border);
+    padding: 8px 16px;
+    border-radius: 8px;
+    color: var(--text-light);
     cursor: pointer;
-    font-weight: 700;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+@media (max-width: 768px) {
+    .crm-header__user {
+        max-width: 100px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .crm-header__logout {
+        display: none !important;
+    }
 }
 
 .crm-content {
@@ -455,20 +477,6 @@ body {
     transform: translateY(-1px);
 }
 
-.chart-container {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 22px;
-    box-shadow: var(--shadow);
-    padding: 24px;
-    margin-top: 28px;
-}
-
-.chart-container h3 {
-    margin: 0 0 18px;
-    font-size: 18px;
-}
-
 .formulario-reserva,
 .mis-reservas,
 .perfil-card,
@@ -563,9 +571,10 @@ body {
 }
 
 .table-wrapper {
-    overflow: hidden;
+    overflow-x: auto;
     border-radius: 22px;
     margin-top: 18px;
+    -webkit-overflow-scrolling: touch;
 }
 
 .table {
@@ -699,32 +708,14 @@ body {
     margin-bottom: 32px;
 }
 
-@media (max-width: 1120px) {
-    .crm-main { margin-left: 0; }
-    .crm-sidebar { position: relative; width: 100%; min-height: auto; }
-    .crm-content { padding: 24px; }
-    .kpi-grid { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
-}
-
-@media (max-width: 1120px) {
-    .crm-main { margin-left: 0; }
-    .crm-sidebar { position: relative; width: 100%; min-height: auto; }
-    .crm-content { padding: 24px; }
-    .kpi-grid { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
-}
-
-@media (max-width: 860px) {
-    .crm-header { padding: 18px; justify-content: center; }
-    .crm-content { padding: 22px; }
-    .sidebar__item { justify-content: center; }
-}
-
-@media (max-width: 680px) {
-    .crm-sidebar { display: none; }
-    .crm-main { margin-left: 0; }
-    .crm-header { justify-content: center; }
-    .crm-content { padding: 18px; }
-    .table { min-width: 100%; }
+/* ── MEDIA QUERIES MOBILE-FIRST ── */
+@media (min-width: 1025px) {
+    .crm-sidebar {
+        transform: translateX(0);
+    }
+    .crm-main {
+        margin-left: var(--sidebar-width);
+    }
 }
 
 /* Estilos adicionales para Estado de Mis Próximas Citas y Notificaciones */
@@ -1999,7 +1990,7 @@ body {
     position: fixed;
     top: 0;
     left: 0;
-    width: 100vw;
+    width: 100%;
     height: 100vh;
     background: rgba(0, 0, 0, 0.5);
     z-index: 1000;

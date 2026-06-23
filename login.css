@@ -10,6 +10,18 @@
     --mac-rojo: #842029;
     --radio: 18px;
     --sombra: 0 16px 48px rgba(0, 0, 0, 0.12);
+    
+    /* Espaciado responsivo (clamp) */
+    --spacing-xs: clamp(0.5rem, 1vw, 0.75rem);
+    --spacing-sm: clamp(0.75rem, 2vw, 1rem);
+    --spacing-md: clamp(1rem, 3vw, 1.5rem);
+    --spacing-lg: clamp(1.5rem, 4vw, 2.5rem);
+    
+    /* Tipografía fluida (clamp) */
+    --font-sm: clamp(0.75rem, 2vw, 0.875rem);
+    --font-base: clamp(0.875rem, 2.5vw, 1rem);
+    --font-lg: clamp(1rem, 3vw, 1.25rem);
+    --font-xl: clamp(1.25rem, 4vw, 1.5rem);
 }
 
 * {
@@ -144,11 +156,12 @@ input {
     border: 1px solid var(--mac-gris-borde);
     border-radius: 12px;
     padding: 14px 16px;
-    font-size: 15px;
+    font-size: var(--font-base);
     color: var(--mac-texto);
     background: #FFFFFF;
     outline: none;
     transition: border-color 0.25s ease, box-shadow 0.25s ease;
+    min-height: 44px;
 }
 
 .input-group input:focus {
@@ -182,10 +195,11 @@ input {
     border: none;
     border-radius: 12px;
     padding: 14px 18px;
-    font-size: 15px;
+    font-size: var(--font-base);
     font-weight: 700;
     cursor: pointer;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
+    min-height: 44px;
 }
 
 .btn-submit--login {
@@ -245,12 +259,14 @@ input {
 
 @media (max-width: 520px) {
     .login-card {
-        padding: 24px;
+        padding: var(--spacing-lg) var(--spacing-md);
+        border-radius: var(--radio);
     }
 
     .login-card__brand {
         flex-direction: column;
         align-items: flex-start;
+        gap: var(--spacing-sm);
     }
 
     .login-tabs {
@@ -259,6 +275,6 @@ input {
 
     .tab-button {
         padding: 12px 14px;
-        font-size: 14px;
+        font-size: var(--font-sm);
     }
 }

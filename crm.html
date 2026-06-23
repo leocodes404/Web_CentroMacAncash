@@ -42,7 +42,12 @@
 
     <main class="crm-main">
         <header class="crm-header">
-            <h1 class="crm-header__title" id="headerTitle">Mi Dashboard</h1>
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <button class="btn-secondary" onclick="document.getElementById('crmSidebar').classList.toggle('open')" style="display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; padding: 0; border-radius: 8px; font-size: 20px;" aria-label="Toggle Menu">
+                    ☰
+                </button>
+                <h1 class="crm-header__title" id="headerTitle">Mi Dashboard</h1>
+            </div>
             <div class="crm-header__right">
                 <!-- Toggle Theme -->
                 <button id="themeToggleCrm" class="btn-secondary" style="padding: 6px; font-size: 18px; border-radius: 50%; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; background: var(--surface); border: 1px solid var(--border); cursor: pointer;" aria-label="Alternar tema oscuro">🌙</button>
@@ -489,6 +494,8 @@
     <script src="chart.umd.min.js"></script>
     <script src="dataService.js"></script>
     <script>
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyxijNx193gJTBCvM4ypu5GBS9KTiIQcgKbuhRUkM4OIMwEZZRzI8A_oEkVlnosdU_4/exec';
+
         function protegerRuta(rolRequerido) {
             const sesion = getSesion();
             if (!sesion) {
@@ -956,7 +963,7 @@
             document.getElementById('reservaTelefono').value = sesion.telefono;
         }
 
-        function confirmarReserva() {
+        async function confirmarReserva() {
             const sesion = getSesion();
             const reservas = getReservas();
             
@@ -979,6 +986,8 @@
                 uid: sesion.uid,
                 nombre: sesion.nombre,
                 dni: sesion.dni,
+                telefono: sesion.telefono || '',
+                email: sesion.email || '',
                 entidad: reservaTemporal.entidad,
                 fecha: reservaTemporal.fecha,
                 hora: reservaTemporal.hora,
@@ -987,14 +996,48 @@
                 creadoEn: new Date().toISOString().split('T')[0]
             };
 
+            try {
+                const payload = {
+                    action: 'reservar',
+                    ticketCode: id,
+                    nombre: nueva.nombre,
+                    dni: nueva.dni,
+                    telefono: nueva.telefono,
+                    email: nueva.email,
+                    selectedEntity: nueva.entidad,
+                    selectedDate: nueva.fecha,
+                    selectedTime: nueva.hora,
+                    motivo: nueva.motivo,
+                    qrImage: ''
+                };
+                
+                const response = await fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify(payload)
+                });
+                
+                if (response.ok) {
+                    const resData = await response.json();
+                    if (!resData.success) throw new Error(resData.error || 'Error del servidor');
+                    mostrarToast('¡Tu turno fue reservado exitosamente! (Email enviado)', 'success');
+                } else {
+                    throw new Error('Error de conexión');
+                }
+            } catch (err) {
+                console.error(err);
+                mostrarToast('Reserva guardada localmente. Aviso: ' + err.message, 'error');
+            }
+
             reservas.push(nueva);
             setReservas(reservas);
-            mostrarToast('¡Tu turno fue reservado exitosamente!', 'success');
             
             pasoActual = 1;
             reservaTemporal = {};
             renderizarMisReservas();
             actualizarVistaPasos();
+            
+            // Actualizar tarjetas dinámicas
+            if (typeof renderizarTarjetasCitas === 'function') renderizarTarjetasCitas();
         }
 
         function renderizarMisReservas() {
@@ -1035,14 +1078,33 @@
             document.getElementById('modalQR').style.display = 'none';
         }
 
-        function cancelarReserva(id) {
+        async function cancelarReserva(id) {
             if (window.confirm('¿Cancelar esta reserva?')) {
                 const reservas = getReservas();
                 const reserva = reservas.find(r => r.id === id);
                 if (reserva) {
+                    try {
+                        const response = await fetch(APPS_SCRIPT_URL, {
+                            method: 'POST',
+                            body: JSON.stringify({ action: 'cancelar', ticketId: id })
+                        });
+                        if (response.ok) {
+                            const resData = await response.json();
+                            if (!resData.success) throw new Error(resData.error || 'Error del servidor');
+                            mostrarToast('Reserva cancelada exitosamente', 'success');
+                        } else {
+                            throw new Error('Error al conectar');
+                        }
+                    } catch (err) {
+                        console.error(err);
+                        mostrarToast('Cancelada localmente. Aviso: ' + err.message, 'error');
+                    }
+                    
                     reserva.estado = 'cancelado';
                     setReservas(reservas);
                     renderizarMisReservas();
+                    
+                    if (typeof renderizarTarjetasCitas === 'function') renderizarTarjetasCitas();
                 }
             }
         }

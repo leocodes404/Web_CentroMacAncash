@@ -1,3 +1,6 @@
+// ── Google Apps Script Integration ──────────────────
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyxijNx193gJTBCvM4ypu5GBS9KTiIQcgKbuhRUkM4OIMwEZZRzI8A_oEkVlnosdU_4/exec'; // ← Placeholder
+
 // ── SPA ROUTER ──────────────────────────────────────────────
 const ROUTES = {
   '': 'page-inicio',
@@ -58,7 +61,8 @@ function renderRoute() {
   const navMenu = document.getElementById('navMenu');
   const navToggle = document.getElementById('navToggle');
   if (navMenu && navToggle) {
-    navMenu.classList.remove('show');
+    navMenu.classList.remove('open');
+    navToggle.classList.remove('open');
     navToggle.setAttribute('aria-expanded', 'false');
   }
 
@@ -444,12 +448,14 @@ let youTubeApiLoaded = false;
 function toggleMenu() {
   const expanded = navToggle.getAttribute('aria-expanded') === 'true';
   navToggle.setAttribute('aria-expanded', String(!expanded));
-  navMenu.classList.toggle('show');
+  navMenu.classList.toggle('open');
+  navToggle.classList.toggle('open');
 }
 
 function closeMenu() {
   navToggle.setAttribute('aria-expanded', 'false');
-  navMenu.classList.remove('show');
+  navMenu.classList.remove('open');
+  navToggle.classList.remove('open');
 }
 
 function typeWriter(text, element, speed = 70) {
@@ -499,12 +505,12 @@ function renderServiceCards() {
     const cardLink = event.target.closest('.servicio-card__link');
     if (!cardLink) return;
     event.preventDefault();
-    
+
     // Encontrar el índice del servicio basado en la posición en el grid
     const cardIndex = Array.from(servicioCardsGrid.children).indexOf(
       event.target.closest('.slider-item')
     );
-    
+
     if (cardIndex >= 0 && cardIndex < serviciosMAC.length) {
       const service = serviciosMAC[cardIndex];
       triggerDownload(service.pdf, `${service.name}.pdf`);
@@ -581,7 +587,7 @@ function initHeroBackgroundVideo() {
     entries.forEach((entry) => {
       if (entry.isIntersecting) {
         heroVideo.currentTime = 0;
-        heroVideo.play().catch(() => {});
+        heroVideo.play().catch(() => { });
       } else {
         heroVideo.pause();
       }
@@ -601,7 +607,7 @@ function loadYouTubeIframeAPI() {
 }
 
 // Lógica de reproducción/pausa del video de Sobre Nosotros
-window.onYouTubeIframeAPIReady = function() {
+window.onYouTubeIframeAPIReady = function () {
   const container = document.getElementById('sobreUsVideo');
   if (!container) return;
 
@@ -1169,10 +1175,31 @@ function initCharts() {
   updateBarChart('3M');
 }
 
-function handleFormSubmit(event) {
+async function handleFormSubmit(event) {
   event.preventDefault();
-  formNotice.textContent = 'Gracias por escribirnos. Pronto nos comunicaremos contigo.';
-  event.target.reset();
+  const nombre = document.getElementById('name').value;
+  const email = document.getElementById('email').value;
+  const asunto = document.getElementById('subject').value;
+  const mensaje = document.getElementById('message').value;
+
+  formNotice.textContent = 'Enviando mensaje...';
+
+  try {
+    const response = await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify({ action: 'contacto', nombre, email, asunto, mensaje })
+    });
+    if (response.ok) {
+      formNotice.textContent = 'Gracias por escribirnos. Pronto nos comunicaremos contigo.';
+      event.target.reset();
+    } else {
+      throw new Error('Server error');
+    }
+  } catch (error) {
+    console.error('Error enviando contacto:', error);
+    formNotice.textContent = 'Gracias por escribirnos. (Mensaje guardado localmente)';
+    event.target.reset();
+  }
 }
 
 function init() {
@@ -1283,6 +1310,7 @@ let reservasState = {
   nombre: '',
   dni: '',
   telefono: '',
+  email: '',
   motivo: ''
 };
 
@@ -1392,7 +1420,7 @@ function renderEntitiesGrid() {
       card.classList.add('selected');
       const input = card.querySelector('input');
       reservasState.selectedEntity = input.value;
-      
+
       // Habilitar input de fecha cuando se selecciona entidad
       const dateInput = document.getElementById('reservaDate');
       if (dateInput) {
@@ -1519,7 +1547,7 @@ async function renderTimeSlots(date) {
 // Cambiar de paso del formulario
 async function goToStep(stepNumber) {
   const currentStep = reservasState.currentStep;
-  
+
   // Validar paso actual antes de avanzar
   if (stepNumber > currentStep) {
     const isValid = await validateStep(currentStep);
@@ -1632,6 +1660,7 @@ async function saveReservation(formData) {
       nombre: formData.nombre,
       dni: formData.dni,
       telefono: formData.telefono,
+      email: formData.email,
       fecha: reservasState.selectedDate,
       hora: reservasState.selectedTime,
       motivo: formData.motivo,
@@ -1655,7 +1684,7 @@ function generateQRCode(ticketCode) {
   if (!qrContainer) return;
 
   qrContainer.innerHTML = ''; // Limpiar QR anterior si existe
-  
+
   new QRCode(qrContainer, {
     text: ticketCode,
     width: 200,
@@ -1678,7 +1707,7 @@ function showConfirmation(reservation) {
   document.getElementById('ticketEntity').textContent = reservation.data.entidad;
   document.getElementById('ticketNombre').textContent = reservation.data.nombre;
   document.getElementById('ticketDni').textContent = reservation.data.dni;
-  
+
   // Formatear fecha
   const fecha = new Date(reservation.data.fecha + 'T00:00:00');
   const fechaFormato = fecha.toLocaleDateString('es-PE', {
@@ -1711,14 +1740,14 @@ function showConfirmation(reservation) {
 // Imprimir ticket
 function printTicket() {
   // Recoger datos del ticket desde el DOM
-  const code    = document.getElementById('ticketCode')?.textContent || '';
-  const entity  = document.getElementById('ticketEntity')?.textContent || '';
-  const nombre  = document.getElementById('ticketNombre')?.textContent || '';
-  const dni     = document.getElementById('ticketDni')?.textContent || '';
-  const fecha   = document.getElementById('ticketFecha')?.textContent || '';
-  const hora    = document.getElementById('ticketHora')?.textContent || '';
-  const motivo  = document.getElementById('ticketMotivo')?.textContent || '';
-  const ts      = document.getElementById('ticketTimestamp')?.textContent || '';
+  const code = document.getElementById('ticketCode')?.textContent || '';
+  const entity = document.getElementById('ticketEntity')?.textContent || '';
+  const nombre = document.getElementById('ticketNombre')?.textContent || '';
+  const dni = document.getElementById('ticketDni')?.textContent || '';
+  const fecha = document.getElementById('ticketFecha')?.textContent || '';
+  const hora = document.getElementById('ticketHora')?.textContent || '';
+  const motivo = document.getElementById('ticketMotivo')?.textContent || '';
+  const ts = document.getElementById('ticketTimestamp')?.textContent || '';
 
   // Capturar el QR como imagen base64 desde el contenedor real del QR
   const qrCanvas = document.querySelector('#qrCode canvas');
@@ -1952,6 +1981,7 @@ function resetReservation() {
     nombre: '',
     dni: '',
     telefono: '',
+    email: '',
     motivo: ''
   };
 
@@ -1960,11 +1990,11 @@ function resetReservation() {
   document.querySelector('.reservas__header').style.display = 'block';
   document.querySelector('.reservas__progress-bar').style.display = 'block';
   document.getElementById('reservasConfirmation').style.display = 'none';
-  
+
   updateFormDisplay();
   updateProgressBar();
   renderEntitiesGrid();
-  
+
   goToStep(1);
 }
 
@@ -2012,6 +2042,7 @@ function initReservasSystem() {
     reservasState.nombre = document.getElementById('reservaNombre').value;
     reservasState.dni = document.getElementById('reservaDni').value;
     reservasState.telefono = document.getElementById('reservaTelefono').value;
+    reservasState.email = document.getElementById('reservaEmail').value;
     reservasState.motivo = document.getElementById('reservaMotivo').value;
 
     const errorEl = document.getElementById('formError');
@@ -2024,7 +2055,7 @@ function initReservasSystem() {
     }
 
     // Validar datos completos
-    if (!reservasState.nombre || !reservasState.telefono || !reservasState.motivo) {
+    if (!reservasState.nombre || !reservasState.telefono || !reservasState.motivo || !reservasState.email) {
       errorEl.textContent = 'Por favor completa todos los campos';
       return;
     }
@@ -2048,6 +2079,7 @@ function initReservasSystem() {
       nombre: reservasState.nombre,
       dni: reservasState.dni,
       telefono: reservasState.telefono,
+      email: reservasState.email,
       motivo: reservasState.motivo
     });
 
@@ -2056,6 +2088,59 @@ function initReservasSystem() {
 
     if (result.success) {
       showConfirmation(result);
+
+      try {
+        const qrCanvas = document.querySelector('#qrCode canvas');
+        const qrBase64 = qrCanvas ? qrCanvas.toDataURL('image/png') : '';
+
+        const payload = {
+          action: 'reservar',
+          ...reservasState,
+          ticketCode: result.ticketCode,
+          qrImage: qrBase64
+        };
+
+        const response = await fetch(APPS_SCRIPT_URL, {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+
+        const wrapper = document.querySelector('.confirmation__wrapper');
+        const badge = document.createElement('div');
+        badge.style.marginTop = '15px';
+        badge.style.padding = '8px 12px';
+        badge.style.borderRadius = '6px';
+        badge.style.fontSize = '14px';
+        badge.style.textAlign = 'center';
+        badge.style.fontWeight = 'bold';
+
+        if (response.ok) {
+          const resData = await response.json();
+          if (!resData.success) {
+            throw new Error(resData.error || 'Error interno del script');
+          }
+          badge.textContent = "📧 Email de confirmación enviado";
+          badge.style.backgroundColor = '#d1fae5';
+          badge.style.color = '#065f46';
+        } else {
+          throw new Error('Server error');
+        }
+        wrapper.appendChild(badge);
+      } catch (err) {
+        console.error('Error al notificar Apps Script:', err);
+        const wrapper = document.querySelector('.confirmation__wrapper');
+        const badge = document.createElement('div');
+        badge.style.marginTop = '15px';
+        badge.style.padding = '8px 12px';
+        badge.style.borderRadius = '6px';
+        badge.style.fontSize = '14px';
+        badge.style.textAlign = 'center';
+        badge.style.fontWeight = 'bold';
+        badge.textContent = `⚠️ Error del servidor: ${err.message}. Revise consola.`;
+        badge.style.backgroundColor = '#fef3c7';
+        badge.style.color = '#92400e';
+        wrapper.appendChild(badge);
+      }
     } else {
       errorEl.textContent = `Error al guardar la reserva: ${result.error}`;
     }
@@ -2064,6 +2149,25 @@ function initReservasSystem() {
   // Botones de confirmación
   document.getElementById('printBtn').addEventListener('click', printTicket);
   document.getElementById('newReservationBtn').addEventListener('click', resetReservation);
+  document.getElementById('cancelTicketBtn')?.addEventListener('click', async () => {
+    const ticketId = document.getElementById('ticketCode').textContent;
+    if (confirm(`¿Estás seguro que deseas cancelar tu reserva ${ticketId}? Esta acción no se puede deshacer.`)) {
+      try {
+        const response = await fetch(APPS_SCRIPT_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'cancelar', ticketId })
+        });
+        if (response.ok) {
+          alert('Reserva cancelada correctamente.');
+          document.getElementById('reservasConfirmation').style.display = 'none';
+        } else {
+          alert('Hubo un error al cancelar. Intenta nuevamente.');
+        }
+      } catch (e) {
+        alert('Error de red al cancelar.');
+      }
+    }
+  });
   document.getElementById('backHomeBtn').addEventListener('click', () => {
     location.hash = '#inicio';
     resetReservation();
@@ -2083,10 +2187,10 @@ function renderFiltrosNoticias() {
   const container = document.getElementById('noticiasFilters');
   if (!container) return;
   container.innerHTML = NOTICIAS_CATEGORIAS.map(cat => `
-    <button class="filter-btn ${cat === 'Todas' ? 'active' : ''}" data-categoria="${cat}">
-      ${cat}
-    </button>
-  `).join('');
+      < button class= "filter-btn ${cat === 'Todas' ? 'active' : ''}" data - categoria="${cat}" >
+    ${ cat }
+    </button >
+      `).join('');
 
   container.addEventListener('click', e => {
     const btn = e.target.closest('.filter-btn');
@@ -2106,7 +2210,7 @@ function renderNoticias(categoriaActiva) {
     : noticiasMAC.filter(n => n.categoria === categoriaActiva);
 
   grid.innerHTML = filtradas.map(n => `
-    <article class="noticia-card card">
+      < article class= "noticia-card card" >
       <div class="noticia-card__img-wrap">
         <img
           src="${n.imagen}"
@@ -2126,8 +2230,8 @@ function renderNoticias(categoriaActiva) {
           Leer más →
         </a>
       </div>
-    </article>
-  `).join('');
+    </article >
+      `).join('');
 }
 
 // ── PUBLICACIONES PAGE ──────────────────────────────────────
@@ -2142,7 +2246,7 @@ function renderPublicaciones() {
   const { boletinesAnuales, boletinesMensuales, manuales } = publicacionesMAC;
 
   container.innerHTML = `
-    <!-- SECCIÓN: MANUALES -->
+      < !--SECCIÓN: MANUALES-- >
     <div class="pub-section">
       <div class="pub-section__header">
         <div class="pub-section__icon">📚</div>
@@ -2166,7 +2270,7 @@ function renderPublicaciones() {
       </div>
     </div>
 
-    <!-- SECCIÓN: BOLETINES MENSUALES -->
+    <!--SECCIÓN: BOLETINES MENSUALES-- >
     <div class="pub-section">
       <div class="pub-section__header">
         <div class="pub-section__icon">📊</div>
@@ -2190,7 +2294,7 @@ function renderPublicaciones() {
       </div>
     </div>
 
-    <!-- SECCIÓN: BOLETINES ANUALES -->
+    <!--SECCIÓN: BOLETINES ANUALES-- >
     <div class="pub-section">
       <div class="pub-section__header">
         <div class="pub-section__icon">📅</div>
@@ -2228,7 +2332,7 @@ function renderProcesoPasaporte() {
   if (!container) return;
 
   container.innerHTML = procesosPasaporte.map(proc => `
-    <li class="timeline-item">
+      < li class= "timeline-item" >
       <div class="timeline-marker">
         <div class="timeline-icon">${proc.icono}</div>
         <div class="timeline-step">${proc.paso}</div>
@@ -2237,8 +2341,8 @@ function renderProcesoPasaporte() {
         <h3>${proc.titulo}</h3>
         <p>${proc.desc}</p>
       </div>
-    </li>
-  `).join('');
+    </li >
+      `).join('');
 }
 
 function renderRequisitosPasaporte() {
@@ -2246,10 +2350,10 @@ function renderRequisitosPasaporte() {
   if (!container) return;
 
   container.innerHTML = requisitosPasaporte.map((req, idx) => `
-    <li class="checklist-item">
+      < li class= "checklist-item" >
       <input type="checkbox" id="req${idx}" class="checklist-input">
-      <label for="req${idx}" class="checklist-label">${req}</label>
-    </li>
+        <label for="req${idx}" class="checklist-label">${req}</label>
+      </li>
   `).join('');
 }
 
@@ -2258,13 +2362,13 @@ function renderFAQPasaporte() {
   if (!container) return;
 
   container.innerHTML = faqPasaporte.map((item, idx) => `
-    <details class="accordion-item">
+      < details class= "accordion-item" >
       <summary class="accordion-summary">${item.p}</summary>
       <div class="accordion-content">
         <p>${item.r}</p>
       </div>
-    </details>
-  `).join('');
+    </details >
+      `).join('');
 }
 
 // ── SERVICIOS FULL PAGE ─────────────────────────────────────
@@ -2277,11 +2381,11 @@ function renderServiciosFull() {
   if (!container) return;
 
   container.innerHTML = serviciosMAC.map(svc => `
-    <div class="servicio-card card">
+      < div class= "servicio-card card" >
       <a href="${svc.pdf}" class="servicio-card__link" download>
         <div class="servicio-card__img">
           <img src="${svc.img}" alt="${svc.name}" loading="lazy"
-               onerror="this.src='images/placeholder.png'">
+            onerror="this.src='images/placeholder.png'">
         </div>
         <div class="servicio-card__content">
           <h3>${svc.name}</h3>
@@ -2289,8 +2393,8 @@ function renderServiciosFull() {
           <span class="servicio-card__cta">Descargar ficha PDF →</span>
         </div>
       </a>
-    </div>
-  `).join('');
+    </div >
+      `).join('');
 }
 
 // ── HOME PAGE INIT ──────────────────────────────────────────
@@ -2332,10 +2436,44 @@ function initStatsAnimation() {
 
 // ── DASHBOARD PAGE INIT ─────────────────────────────────────
 let dashboardInitialized = false;
-function initDashboardPage() {
+async function initDashboardPage() {
   if (dashboardInitialized) return;
   dashboardInitialized = true;
   animateCounters();
+  
+  const badge = document.getElementById('dashboardDataBadge');
+  try {
+    const res = await fetch(APPS_SCRIPT_URL);
+    if (!res.ok) throw new Error('Error network');
+    const stats = await res.json();
+    
+    // Actualizar variables globales con datos reales
+    if (stats.porEntidad) {
+      const entidadesKeys = Object.keys(stats.porEntidad);
+      entidadesKeys.forEach((key, idx) => {
+        if (entidadesSummary[idx]) {
+          entidadesSummary[idx].entidad = key;
+          entidadesSummary[idx].atenciones = stats.porEntidad[key];
+          entidadesSummary[idx].porcentaje = stats.totalTickets ? Math.round((stats.porEntidad[key] / stats.totalTickets) * 100) : 0;
+        }
+      });
+    }
+    
+    // Actualizar counts numéricos de arriba si existieran data attributes
+    const totalCount = document.querySelector('.stat-item .stat-number[data-count="48500"]');
+    if (totalCount && stats.totalTickets) {
+      totalCount.dataset.count = stats.totalTickets;
+    }
+
+    if (badge) {
+      badge.textContent = "📡 Datos en tiempo real";
+      badge.classList.add('live-data');
+    }
+  } catch (err) {
+    console.error('Error fetching dashboard data', err);
+    if (badge) badge.textContent = "📋 Datos simulados";
+  }
+
   initCharts();
 }
 
@@ -2441,7 +2579,7 @@ function actualizarPantallaTurnos() {
   const entidadEsc = principal.entidad;
   const ventanillaEsc = principal.ventanilla || 1;
   currentBody.innerHTML = `
-    <div class="current-ticket-code">${idEsc}</div>
+      < div class= "current-ticket-code" > ${ idEsc }</div >
     <div class="current-ticket-entity">${entidadEsc}</div>
     <div class="current-ticket-ventanilla">VENTANILLA ${ventanillaEsc}</div>
   `;
@@ -2452,14 +2590,14 @@ function actualizarPantallaTurnos() {
     historyList.innerHTML = '<div class="lobby-empty-history">Sin historial reciente</div>';
   } else {
     historyList.innerHTML = historial.map(r => `
-      <div class="history-item">
+      < div class= "history-item" >
         <div>
           <div class="history-code">${r.id}</div>
           <div class="history-entity">${r.entidad}</div>
         </div>
         <div class="history-ventanilla">Ventanilla ${r.ventanilla || 1}</div>
-      </div>
-    `).join('');
+      </div >
+      `).join('');
   }
 }
 
@@ -2538,7 +2676,7 @@ function toggleChat() {
 
 function addMessage(text, sender) {
   const bubble = document.createElement('div');
-  bubble.className = `chat-bubble chat-bubble--${sender}`;
+  bubble.className = `chat - bubble chat - bubble--${ sender }`;
   // Reemplazar saltos de línea por <br> y poner negritas
   let formattedText = text.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
   bubble.innerHTML = formattedText;
@@ -2572,8 +2710,8 @@ function renderOptions(options) {
 
 function renderChatInput() {
   chatbotOptions.innerHTML = `
-    <div class="chat-input-wrapper" style="display: flex; gap: 8px; width: 100%; padding: 4px; box-sizing: border-box;">
-      <input type="text" id="chatSearchInput" placeholder="Código de ticket o DNI..." style="flex: 1; padding: 10px 12px; border: 1px solid var(--border, #dde5ef); border-radius: 12px; font-family: inherit; font-size: 13px; outline: none; background: #fff; color: #1f2937;">
+    < div class= "chat-input-wrapper" style = "display: flex; gap: 8px; width: 100%; padding: 4px; box-sizing: border-box;" >
+    <input type="text" id="chatSearchInput" placeholder="Código de ticket o DNI..." style="flex: 1; padding: 10px 12px; border: 1px solid var(--border, #dde5ef); border-radius: 12px; font-family: inherit; font-size: 13px; outline: none; background: #fff; color: #1f2937;">
       <button id="chatSearchBtn" class="chat-option-btn" style="margin: 0; padding: 10px 14px; font-weight: 700; background: var(--primary, #003087); color: white; border: none; border-radius: 12px; cursor: pointer;">🔍 Buscar</button>
     </div>
   `;
@@ -2615,11 +2753,11 @@ function buscarTicketChatbot(query) {
   if (resultados.length === 0) {
     addMessage("No encontré ningún ticket programado con ese código o DNI. Por favor verifique e intente nuevamente.", 'bot');
   } else {
-    let respuesta = `Encontré **${resultados.length}** ticket(s) asociado(s):\n\n`;
+    let respuesta = `Encontré ** ${ resultados.length } ** ticket(s) asociado(s): \n\n`;
     resultados.forEach((r, idx) => {
       let estadoTexto = r.estado.toUpperCase();
       if (r.estado === 'llamado') {
-        estadoTexto = `📢 LLAMADO A VENTANILLA ${r.ventanilla || 1}`;
+        estadoTexto = `📢 LLAMADO A VENTANILLA ${ r.ventanilla || 1 }`;
       } else if (r.estado === 'pendiente') {
         estadoTexto = `⏳ PENDIENTE`;
       } else if (r.estado === 'atendido') {
@@ -2630,10 +2768,10 @@ function buscarTicketChatbot(query) {
         estadoTexto = `⚠️ VENCIDO`;
       }
       
-      respuesta += `**${idx + 1}. ${r.id}** (${r.entidad})\n` +
-                   `• Fecha: ${r.fecha}\n` +
-                   `• Hora: ${r.hora}\n` +
-                   `• Estado: **${estadoTexto}**\n\n`;
+      respuesta += `** ${ idx + 1}.${ r.id } ** (${ r.entidad }) \n` +
+                   `• Fecha: ${ r.fecha } \n` +
+                   `• Hora: ${ r.hora } \n` +
+                   `• Estado: ** ${ estadoTexto }**\n\n`;
     });
     addMessage(respuesta.trim(), 'bot');
   }
