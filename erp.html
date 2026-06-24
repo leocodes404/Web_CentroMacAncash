@@ -6,8 +6,8 @@
     <title>Dashboard ERP - Centro MAC Chimbote</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="erp.css">
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="erp.css?v=3">
     <script>
         const savedTheme = localStorage.getItem('mac-theme') || 'light';
         document.documentElement.setAttribute('data-theme', savedTheme);
@@ -405,6 +405,12 @@
                     
                     if (section === 'analiticas') {
                         renderizarCalificaciones();
+                    }
+
+                    // Cerrar menú en móviles
+                    if (window.innerWidth <= 768) {
+                        const sidebar = document.getElementById('erpSidebar');
+                        if (sidebar) sidebar.classList.remove('open');
                     }
                 });
             });

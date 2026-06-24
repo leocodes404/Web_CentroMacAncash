@@ -157,6 +157,15 @@ html {
   -webkit-text-size-adjust: 100%;
 }
 
+html, body {
+  overflow-x: hidden;
+  overflow-y: auto;
+  height: auto;
+  width: 100%;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+}
+
 body {
   margin: 0;
   font-family: var(--font-body);
@@ -166,7 +175,6 @@ body {
   color: var(--color-text);
   transition: background var(--transition), color var(--transition);
   -webkit-font-smoothing: antialiased;
-  overflow-x: hidden;
 }
 
 img, iframe, video {
@@ -224,10 +232,11 @@ textarea:focus-visible {
 /* ── DARK MODE TOGGLE ──────────────────────────────────── */
 .theme-toggle {
   position: relative;
-  width: 48px;
-  height: 26px;
+  width: 56px;
+  height: 30px;
   cursor: pointer;
   flex-shrink: 0;
+  display: block;
 }
 
 .theme-toggle input {
@@ -240,49 +249,76 @@ textarea:focus-visible {
 .theme-toggle__track {
   position: absolute;
   inset: 0;
-  background: var(--toggle-track);
   border-radius: var(--radius-full);
-  transition: background var(--transition);
+  transition: background 0.4s, border-color 0.4s, box-shadow 0.4s;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="light"] .theme-toggle__track {
+  background: linear-gradient(135deg, #bae6fd, #fef08a);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="dark"] .theme-toggle__track {
+  background: linear-gradient(135deg, #0f172a, #1e1b4b);
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .theme-toggle__thumb {
   position: absolute;
-  top: 3px;
-  left: 3px;
-  width: 20px;
-  height: 20px;
-  background: var(--toggle-thumb);
+  top: 2px;
+  left: 2px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
-  transition: transform var(--transition);
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.3s, box-shadow 0.3s;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 11px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  font-size: 13px;
+  user-select: none;
+}
+
+[data-theme="light"] .theme-toggle__thumb {
+  background: #ffffff;
+  box-shadow: 0 3px 8px rgba(245, 184, 32, 0.3), 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="dark"] .theme-toggle__thumb {
+  background: #1e293b;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .theme-toggle input:checked ~ .theme-toggle__thumb {
-  transform: translateX(22px);
+  transform: translateX(26px);
 }
 
-/* ── NAVBAR ────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════
+   NAVBAR — Sistema definitivo sin conflictos
+   ═══════════════════════════════════════════════════ */
+
+/* ─── 1. BARRA PRINCIPAL ─────────────────────────── */
 .navbar {
   position: fixed;
   inset: 0 0 auto;
-  z-index: 1000;
+  z-index: 100;           /* z-index bajo — el menú irá por encima */
   width: 100%;
   background: transparent;
   transition: background var(--transition), box-shadow var(--transition);
+  /* SIN backdrop-filter aquí — se pone en ::before para evitar stacking context */
 }
 
-.navbar.scrolled {
-  background: var(--nav-bg-scrolled);
-  backdrop-filter: var(--nav-blur);
-  -webkit-backdrop-filter: var(--nav-blur);
-  box-shadow: 0 1px 0 var(--color-border), var(--shadow-sm);
+/* Pseudo-elemento para el efecto glass (no crea stacking context en el padre) */
+.navbar::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  transition: background var(--transition), backdrop-filter var(--transition), box-shadow var(--transition);
 }
 
-[data-theme="light"] .navbar {
+[data-theme="light"] .navbar::before {
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -290,9 +326,22 @@ textarea:focus-visible {
   box-shadow: 0 2px 20px rgba(0, 0, 0, 0.06);
 }
 
-[data-theme="light"] .navbar.scrolled {
-  background: rgba(255, 255, 255, 0.98);
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+[data-theme="dark"] .navbar::before {
+  background: rgba(10, 15, 30, 0.82);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.navbar.scrolled::before {
+  background: var(--nav-bg-scrolled);
+  backdrop-filter: var(--nav-blur);
+  -webkit-backdrop-filter: var(--nav-blur);
+  box-shadow: 0 1px 0 var(--color-border), var(--shadow-sm);
+}
+
+.navbar.hidden {
+  transform: translateY(-100%);
 }
 
 .navbar__inner {
@@ -301,14 +350,16 @@ textarea:focus-visible {
   justify-content: space-between;
   gap: 1rem;
   min-height: 72px;
-  padding: 0 0.5rem;
+  padding: 0 1rem;
 }
 
+/* ─── 2. LOGO / BRAND ────────────────────────────── */
 .brand {
   display: flex;
   align-items: center;
   gap: 0.75rem;
   flex-shrink: 0;
+  z-index: 1;
 }
 
 .brand__mark {
@@ -328,8 +379,6 @@ textarea:focus-visible {
   filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));
 }
 
-/* Logo blanco en hero (sobre fondo oscuro) */
-.hero + * ~ * .brand__logo,
 .navbar:not(.scrolled) .brand__logo {
   filter: brightness(0) invert(1) drop-shadow(0 2px 4px rgba(0,0,0,0.2));
 }
@@ -344,108 +393,13 @@ textarea:focus-visible {
   filter: brightness(0) invert(1) drop-shadow(0 2px 4px rgba(0,0,0,0.3));
 }
 
-.navbar__menu {
-  position: fixed;
-  top: 72px;
-  left: -100%;
-  width: 100%;
-  height: calc(100vh - 72px);
-  background: var(--color-surface);
-  flex-direction: column;
-  padding: var(--spacing-md);
-  transition: left var(--transition);
-  display: flex;
-  gap: var(--spacing-sm);
-  align-items: flex-start;
-}
-
-.navbar__menu.open {
-  left: 0;
-}
-
-.navbar__menu a {
-  padding: 0.75rem 1rem;
-  border-radius: var(--radius-md);
-  font-size: 1.1rem;
-  font-weight: 600;
-  width: 100%;
-  color: var(--color-text);
-  transition: background var(--transition-fast), color var(--transition-fast);
-}
-
-[data-theme="dark"] .navbar__menu {
-  background: var(--color-bg);
-}
-
-.navbar__menu a:hover {
-  background: rgba(255,255,255,0.12);
-  color: white;
-}
-
-.navbar__menu a.active {
-  background: rgba(255,255,255,0.2);
-  color: white;
-}
-
-[data-theme="light"] .navbar__menu a {
-  color: var(--color-text);
-}
-
-[data-theme="light"] .navbar__menu a:hover {
-  color: var(--color-primary);
-  background: var(--color-primary-light);
-}
-
-[data-theme="light"] .navbar__menu a.active,
-[data-theme="light"] .navbar__menu a[aria-current] {
-  background: var(--color-primary);
-  color: #ffffff;
-}
-
-.navbar.scrolled .navbar__menu a {
-  color: var(--nav-text);
-}
-
-.navbar.scrolled .navbar__menu a:hover {
-  background: var(--color-primary-light);
-  color: var(--nav-text);
-}
-
-.navbar.scrolled .navbar__menu a.active {
-  background: var(--color-primary-light);
-  color: var(--color-primary);
-  font-weight: 700;
-}
-
-.nav-menu__actions {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  margin-top: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid rgba(150, 150, 150, 0.2);
-  width: 100%;
-}
-
-.nav-menu__auth {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  width: 100%;
-}
-
-.nav-menu__auth .btn {
-  width: 100%;
-}
-
-.nav-menu__actions .theme-toggle {
-  margin-top: 0.5rem;
-  align-self: flex-start;
-}
+/* ─── 3. BOTÓN HAMBURGUESA ───────────────────────── */
 .navbar__right {
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  position: relative;
+  z-index: 1;
 }
 
 .navbar__toggle {
@@ -461,27 +415,30 @@ textarea:focus-visible {
   cursor: pointer;
   padding: 0;
   border-radius: var(--radius-sm);
+  position: relative;
+  z-index: 1;
 }
 
 .navbar__toggle span {
   display: block;
   height: 2.5px;
+  width: 24px;
   border-radius: 999px;
   background: white;
-  transition: transform var(--transition), opacity var(--transition), width var(--transition);
-  transform-origin: left;
+  transition: transform 0.3s ease, opacity 0.3s ease, width 0.3s ease;
+  transform-origin: left center;
 }
 
 [data-theme="light"] .navbar__toggle span {
+  background: #0f172a;
+}
+
+.navbar.scrolled .navbar__toggle span {
   background: var(--color-text);
 }
 
 .navbar__toggle span:nth-child(2) {
   width: 70%;
-}
-
-.navbar.scrolled .navbar__toggle span {
-  background: var(--color-text);
 }
 
 .navbar__toggle.open span:nth-child(1) {
@@ -494,6 +451,316 @@ textarea:focus-visible {
 .navbar__toggle.open span:nth-child(3) {
   transform: rotate(-45deg) translate(1px, 1px);
 }
+
+/* ─── 4. MENÚ DE NAVEGACIÓN (DRAWER MÓVIL) ──────── */
+
+/* El nav ahora está FUERA del header — sin stacking context problems */
+.navbar__menu {
+  /* Posición: panel lateral que entra desde la izquierda */
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: min(320px, 85vw);
+  height: 100dvh;
+  height: 100vh; /* Fallback */
+
+  /* Oculto por defecto con transform (no con left) */
+  transform: translateX(-110%);
+  /* La transición se aplica SOLO en .open para evitar el flash */
+  transition: none;
+
+  /* Layout interno */
+  display: flex;
+  flex-direction: column;
+  padding: 0 0 2rem;
+  overflow-y: auto;
+
+  /* Z-index: MUY ALTO para estar encima de absolutamente todo */
+  z-index: 9000;
+  box-shadow: 4px 0 40px rgba(0, 0, 0, 0.15);
+}
+
+[data-theme="light"] .navbar__menu {
+  background: rgba(244, 246, 250, 0.82);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-right: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+[data-theme="dark"] .navbar__menu {
+  background: rgba(13, 17, 23, 0.85);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Abierto — añade transición Y quita el translateX */
+.navbar__menu.open {
+  transform: translateX(0);
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ─── 4.5. CABECERA INTERNA DEL MENÚ ─────────── */
+.nav-menu__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 1.25rem 1.25rem 1.25rem 1.5rem;
+  margin-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(150, 150, 150, 0.12);
+  box-sizing: border-box;
+}
+
+[data-theme="light"] .nav-menu__header {
+  border-bottom: 1px solid rgba(0, 64, 168, 0.08);
+}
+
+.nav-menu__header .brand__mark {
+  width: 120px;
+  height: 38px;
+}
+
+.nav-menu__close {
+  border: none;
+  background: rgba(150, 150, 150, 0.1);
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  color: var(--color-text);
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.25s, transform 0.25s, color 0.25s;
+}
+
+.nav-menu__close:hover {
+  background: rgba(212, 0, 26, 0.1);
+  color: var(--color-secondary);
+  transform: rotate(90deg);
+}
+
+[data-theme="dark"] .nav-menu__close {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+[data-theme="dark"] .nav-menu__close:hover {
+  background: rgba(255, 40, 64, 0.15);
+}
+
+/* ─── 5. OVERLAY ─────────────────────────────────── */
+#navOverlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 8999;   /* Justo debajo del menú */
+}
+#navOverlay.show {
+  display: block;
+}
+
+/* ─── 6. LINKS DENTRO DEL MENÚ ───────────────────── */
+.navbar__menu a {
+  padding: 0.85rem 1.25rem;
+  margin: 0.15rem 0.75rem;
+  width: calc(100% - 1.5rem);
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-text);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-sizing: border-box;
+}
+
+.navbar__menu a:hover {
+  background: rgba(0, 64, 168, 0.06);
+  color: var(--color-primary);
+  transform: translateX(4px);
+}
+
+.navbar__menu a.active {
+  background: linear-gradient(135deg, var(--mac-blue-700), var(--mac-blue-500));
+  color: #fff !important;
+  box-shadow: 0 4px 12px rgba(0, 64, 168, 0.22);
+}
+
+[data-theme="dark"] .navbar__menu a {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+[data-theme="dark"] .navbar__menu a:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+}
+
+[data-theme="dark"] .navbar__menu a.active {
+  background: linear-gradient(135deg, var(--mac-blue-600), var(--mac-blue-400));
+  color: #fff !important;
+  box-shadow: 0 4px 12px rgba(26, 93, 200, 0.3);
+}
+
+/* ─── 7. ACCIONES (botón login + toggle tema) ────── */
+.nav-menu__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  margin-top: auto; /* Empuja las acciones al fondo del menú lateral */
+  padding: 1.5rem 1.25rem 0;
+  border-top: 1px solid rgba(150, 150, 150, 0.12);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.nav-menu__auth {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  width: 100%;
+}
+
+.nav-menu__auth .btn {
+  width: 100%;
+  text-align: center;
+}
+
+.nav-menu__actions .theme-toggle {
+  margin-top: 0.25rem;
+  align-self: flex-start;
+}
+
+/* ══════════════════════════════════════════════════
+   DESKTOP (≥ 1025px): Menú horizontal en el header
+   ══════════════════════════════════════════════════ */
+@media (min-width: 1025px) {
+
+  /* Ocultar hamburguesa y overlay en desktop */
+  .navbar__toggle {
+    display: none;
+  }
+  #navOverlay {
+    display: none !important;
+  }
+
+  /* Ocultar la cabecera interna del drawer móvil en desktop */
+  .nav-menu__header {
+    display: none;
+  }
+
+  /* El nav pasa a ser una BARRA HORIZONTAL en el header */
+  .navbar__menu {
+    /* Reset de móvil */
+    position: fixed;
+    top: 0;
+    left: clamp(160px, 15vw, 220px);
+    right: 0;
+    width: auto;
+    height: 72px;
+    transform: none !important;   /* Nunca ocultar en desktop */
+    transition: none !important;  /* Sin animaciones de drawer en desktop */
+
+    /* Layout horizontal */
+    flex-direction: row;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0 1.5rem;
+
+    /* Visual: transparente (el header pone el fondo) */
+    background: transparent;
+    box-shadow: none;
+    overflow: visible;
+
+    /* Z-index: por encima del fondo del header (que tiene z-index: 100)
+       para que los enlaces sean visibles */
+    z-index: 101;
+
+    /* Evitar capturar clics en áreas vacías (como encima del logo) */
+    pointer-events: none;
+  }
+
+  /* Links horizontales en desktop */
+  .navbar__menu a {
+    width: auto;
+    margin: 0; /* Resetear margen de móvil */
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    border-radius: var(--radius-full);
+    white-space: nowrap;
+    pointer-events: auto;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .navbar__menu a:hover:not(.active) {
+    transform: translateY(-1.5px);
+  }
+
+  /* En desktop dark, los links van en blanco */
+  [data-theme="dark"] .navbar__menu a {
+    color: rgba(255, 255, 255, 0.85);
+  }
+  [data-theme="dark"] .navbar__menu a:hover:not(.active) {
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+  }
+  [data-theme="dark"] .navbar__menu a.active {
+    background: var(--mac-blue-500);
+    color: #fff;
+    box-shadow: 0 4px 16px rgba(26, 93, 200, 0.35);
+  }
+
+  /* En desktop light, links en color texto oscuro */
+  [data-theme="light"] .navbar__menu a {
+    color: var(--color-text);
+  }
+  [data-theme="light"] .navbar__menu a:hover:not(.active) {
+    background: rgba(0, 64, 168, 0.06);
+    color: var(--color-primary);
+  }
+  [data-theme="light"] .navbar__menu a.active {
+    background: var(--color-primary);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(0, 64, 168, 0.25);
+  }
+
+  /* Acciones: en fila y al extremo derecho */
+  .nav-menu__actions {
+    display: flex;
+    flex-direction: row;
+    margin-top: 0;
+    padding-top: 0;
+    border-top: none;
+    width: auto;
+    align-items: center;
+    gap: 0.75rem;
+    margin-left: auto;
+    pointer-events: auto;
+  }
+
+  .nav-menu__auth {
+    display: flex;
+    flex-direction: row;
+    width: auto;
+    gap: 0.5rem;
+  }
+
+  .nav-menu__auth .btn {
+    width: auto;
+    white-space: nowrap;
+  }
+
+  .nav-menu__actions .theme-toggle {
+    margin-top: 0;
+    align-self: center;
+  }
+}
+
 
 /* ── HERO ──────────────────────────────────────────────── */
 .hero {
@@ -3046,9 +3313,7 @@ form {
     height: 34px;
   }
 
-  .theme-toggle {
-    width: 42px;
-  }
+
 
   .hero {
     padding: 6.25rem 0 3.25rem;
@@ -4704,57 +4969,6 @@ html.a11y-high-contrast video {
 @media (min-width: 1025px) {
   .sobre__grid {
     grid-template-columns: minmax(0, 3fr) minmax(700px, 3fr);
-  }
-  
-  .navbar__toggle {
-    display: none;
-  }
-  
-  .navbar__menu {
-    position: static;
-    height: auto;
-    width: auto;
-    flex-direction: row;
-    background: transparent;
-    padding: 0;
-    gap: 0.25rem;
-    align-items: center;
-  }
-  
-  .navbar__menu a {
-    width: auto;
-    padding: 0.45rem 0.875rem;
-    font-size: 0.9rem;
-    border-radius: var(--radius-full);
-    color: rgba(255, 255, 255, 0.9);
-  }
-  
-  .nav-menu__actions {
-    flex-direction: row;
-    margin-top: 0;
-    padding-top: 0;
-    border-top: none;
-    width: auto;
-    align-items: center;
-    gap: 0.75rem;
-  }
-  
-  .nav-menu__auth {
-    flex-direction: row;
-    width: auto;
-  }
-  
-  .nav-menu__auth .btn {
-    width: auto;
-  }
-  
-  .nav-menu__actions .theme-toggle {
-    margin-top: 0;
-    align-self: center;
-  }
-  
-  [data-theme="dark"] .navbar__menu {
-    background: transparent;
   }
 }
 

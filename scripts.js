@@ -70,11 +70,12 @@ function renderRoute() {
   const navbar = document.getElementById('navbar');
   if (navbar) {
     if (route === 'turnos') {
-      navbar.style.transform = 'translateY(-100%)';
-      navbar.style.transition = 'transform 0.3s ease';
+      navbar.classList.add('hidden');
     } else {
-      navbar.style.transform = 'translateY(0)';
+      navbar.classList.remove('hidden');
     }
+    // Removemos cualquier estilo residual que pudiera haber quedado (por compatibilidad)
+    navbar.style.transform = '';
   }
 
   // Ejecutar init de cada página si es necesario
@@ -450,12 +451,18 @@ function toggleMenu() {
   navToggle.setAttribute('aria-expanded', String(!expanded));
   navMenu.classList.toggle('open');
   navToggle.classList.toggle('open');
+  const overlay = document.getElementById('navOverlay');
+  if (overlay) overlay.classList.toggle('show');
+  document.body.style.overflow = !expanded ? 'hidden' : '';
 }
 
 function closeMenu() {
   navToggle.setAttribute('aria-expanded', 'false');
   navMenu.classList.remove('open');
   navToggle.classList.remove('open');
+  const overlay = document.getElementById('navOverlay');
+  if (overlay) overlay.classList.remove('show');
+  document.body.style.overflow = '';
 }
 
 function typeWriter(text, element, speed = 70) {
@@ -682,30 +689,28 @@ function handleNavbarScroll() {
 
   // Lógica para página de Turnos (ocultar hacia abajo, mostrar hacia arriba)
   if (route === 'turnos') {
-    // Si la página es escroleable
-    if (currentScrollY > lastScrollY) {
-      navbar.style.transform = 'translateY(-100%)'; // Scrolling down, hide navbar
-    } else if (currentScrollY < lastScrollY) {
-      navbar.style.transform = 'translateY(0)'; // Scrolling up, show navbar
+    if (currentScrollY > lastScrollY && currentScrollY > 80) {
+      navbar.classList.add('hidden'); // Scrolling down, hide navbar
+    } else {
+      navbar.classList.remove('hidden'); // Scrolling up, show navbar
     }
   } else {
-    navbar.style.transform = 'translateY(0)';
+    navbar.classList.remove('hidden');
   }
 
   lastScrollY = currentScrollY;
 }
 
-// Escuchar la rueda del ratón explícitamente para la página de turnos (en caso de que no haya overflow)
 window.addEventListener('wheel', (e) => {
   const navbar = document.getElementById('navbar');
   if (!navbar) return;
   if (getRoute() === 'turnos') {
     if (e.deltaY < 0) {
       // Scroll up
-      navbar.style.transform = 'translateY(0)';
+      navbar.classList.remove('hidden');
     } else if (e.deltaY > 0) {
       // Scroll down
-      navbar.style.transform = 'translateY(-100%)';
+      navbar.classList.add('hidden');
     }
   }
 }, { passive: true });
@@ -1230,9 +1235,37 @@ function init() {
     navToggle.addEventListener('click', toggleMenu);
   }
 
+  const navMenuClose = document.getElementById('navMenuClose');
+  if (navMenuClose) {
+    navMenuClose.addEventListener('click', closeMenu);
+  }
+
+  const navOverlay = document.getElementById('navOverlay');
+  if (navOverlay) {
+    navOverlay.addEventListener('click', closeMenu);
+  }
+
   if (navMenu) {
     navMenu.querySelectorAll('a').forEach((link) => {
       link.addEventListener('click', closeMenu);
+    });
+  }
+
+  const crmSidebar = document.getElementById('crmSidebar');
+  if (crmSidebar) {
+    crmSidebar.querySelectorAll('a').forEach((link) => {
+      link.addEventListener('click', () => {
+        if (window.innerWidth <= 768) crmSidebar.classList.remove('open');
+      });
+    });
+  }
+
+  const erpSidebar = document.getElementById('erpSidebar');
+  if (erpSidebar) {
+    erpSidebar.querySelectorAll('a').forEach((link) => {
+      link.addEventListener('click', () => {
+        if (window.innerWidth <= 768) erpSidebar.classList.remove('open');
+      });
     });
   }
 

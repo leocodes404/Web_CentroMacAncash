@@ -464,7 +464,7 @@ div.dash-card--gradient .kpi-val {
 .kpi-variation.negative { color: var(--danger); }
 
 .dashboard-charts {
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
     margin-bottom: 28px;
 }
 
@@ -834,4 +834,134 @@ div.dash-card--gradient .kpi-val {
 }
 [data-theme="dark"] .kpi-card.highlight {
     background: #020617;
+}
+
+/* =====================================================
+   RESPONSIVIDAD MOBILE-FIRST — ERP
+   ===================================================== */
+
+@media (max-width: 768px) {
+    .erp-content {
+        padding: 16px;
+    }
+
+    .erp-header {
+        padding: 0 16px;
+        min-height: 60px;
+    }
+
+    /* KPI Cards: 2 columnas */
+    .kpi-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+
+    /* Modern dashboard: todo apilado */
+    .modern-dash-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .col-span-3, .col-span-4, .col-span-5,
+    .col-span-6, .col-span-7, .col-span-8,
+    .col-span-12 {
+        grid-column: span 1;
+    }
+
+    /* Section header */
+    .section-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .section-header h2 {
+        font-size: 20px;
+    }
+
+    /* Filter row: se enrolla */
+    .filter-row {
+        gap: 8px;
+    }
+
+    .filter-btn,
+    .btn-primary,
+    .btn-secondary,
+    .btn-accion,
+    .erp-filter-select,
+    .btn-limpiar-erp {
+        font-size: 13px;
+        padding: 10px 14px;
+    }
+
+    /* Search input */
+    .search-input {
+        max-width: 100%;
+    }
+
+    /* Staff grid: 1 columna */
+    .staff-grid {
+        grid-template-columns: 1fr;
+    }
+
+    /* Chart containers */
+    .dashboard-charts {
+        grid-template-columns: 1fr;
+    }
+
+    /* Table: scroll horizontal */
+    .table-card {
+        overflow-x: auto;
+    }
+
+    /* Modal */
+    .modal-content {
+        width: 95%;
+        padding: 20px;
+    }
+
+    /* Dash cards */
+    .dash-card {
+        padding: 16px;
+    }
+
+    .kpi-val {
+        font-size: 24px !important;
+    }
+
+    /* User dropdown: reposicionar */
+    .user-dropdown-menu {
+        right: -10px;
+        width: 200px;
+    }
+}
+
+@media (max-width: 480px) {
+    .erp-content {
+        padding: 12px;
+    }
+
+    .kpi-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .filter-row {
+        flex-direction: column;
+    }
+
+    .erp-filter-select {
+        width: 100%;
+    }
+
+    .btn-limpiar-erp {
+        width: 100%;
+        text-align: center;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .form-actions button {
+        width: 100%;
+    }
 }

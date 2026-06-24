@@ -51,7 +51,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=6">
   <script>
     // Aplica tema antes de renderizar para evitar flash
     (function() {
@@ -68,26 +68,6 @@
           <img src="icon/MAC-LOGO.png" alt="mac_logo" class="brand__logo">
         </div>
       </a>
-      <nav class="navbar__menu" id="navMenu" aria-label="Menú principal">
-        <a href="#/" data-route="">Inicio</a>
-        <a href="#/servicios" data-route="servicios">Servicios</a>
-        <a href="#/pasaporte" data-route="pasaporte">Cita Pasaporte</a>
-        <a href="#/noticias" data-route="noticias">Noticias</a>
-        <a href="#/publicaciones" data-route="publicaciones">Publicaciones</a>
-        <a href="#/dashboard" data-route="dashboard">Dashboard</a>
-        <a href="#/turnos" data-route="turnos">Pantalla de Turnos</a>
-        
-        <div class="nav-menu__actions">
-          <div id="navbarAuthArea" class="nav-menu__auth">
-            <a href="login.html" class="btn btn-login">Iniciar Sesión / Registrarse</a>
-          </div>
-          <label class="theme-toggle" aria-label="Cambiar modo claro/oscuro" title="Modo claro/oscuro">
-            <input type="checkbox" id="themeToggleInput">
-            <span class="theme-toggle__track"></span>
-            <span class="theme-toggle__thumb" id="themeIcon">☀️</span>
-          </label>
-        </div>
-      </nav>
       <div class="navbar__right">
         <button class="navbar__toggle" id="navToggle" aria-label="Abrir menú" aria-expanded="false">
           <span></span>
@@ -97,6 +77,37 @@
       </div>
     </div>
   </header>
+
+  <!-- Menú de navegación fuera del header para evitar problemas de stacking context -->
+  <nav class="navbar__menu" id="navMenu" aria-label="Menú principal">
+    <div class="nav-menu__header">
+      <div class="brand__mark" aria-hidden="true">
+        <img src="icon/MAC-LOGO.png" alt="mac_logo" class="brand__logo">
+      </div>
+      <button class="nav-menu__close" id="navMenuClose" aria-label="Cerrar menú">✕</button>
+    </div>
+    <a href="#/" data-route="">Inicio</a>
+    <a href="#/servicios" data-route="servicios">Servicios</a>
+    <a href="#/pasaporte" data-route="pasaporte">Cita Pasaporte</a>
+    <a href="#/noticias" data-route="noticias">Noticias</a>
+    <a href="#/publicaciones" data-route="publicaciones">Publicaciones</a>
+    <a href="#/dashboard" data-route="dashboard">Dashboard</a>
+    <a href="#/turnos" data-route="turnos">Pantalla de Turnos</a>
+
+    <div class="nav-menu__actions">
+      <div id="navbarAuthArea" class="nav-menu__auth">
+        <a href="login.html" class="btn btn-login">Iniciar Sesión / Registrarse</a>
+      </div>
+      <label class="theme-toggle" aria-label="Cambiar modo claro/oscuro" title="Modo claro/oscuro">
+        <input type="checkbox" id="themeToggleInput">
+        <span class="theme-toggle__track"></span>
+        <span class="theme-toggle__thumb" id="themeIcon">☀️</span>
+      </label>
+    </div>
+  </nav>
+
+  <!-- Overlay para cerrar menú al tocar fuera -->
+  <div id="navOverlay" aria-hidden="true"></div>
 
   <main>
     <!-- ── PAGE: INICIO ──────────────────────────────── -->
@@ -695,7 +706,7 @@
   <!-- QR Code library -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   
-  <script src="scripts.js" defer></script>
+  <script src="scripts.js?v=6" defer></script>
   <script>
     // ── Dark/Light Mode Toggle ──────────────────────────
     (function() {

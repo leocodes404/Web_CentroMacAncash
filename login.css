@@ -277,4 +277,11 @@ input {
         padding: 12px 14px;
         font-size: var(--font-sm);
     }
+
+}
+
+@media (max-width: 400px) {
+    .login-card {
+        padding: 24px 16px;
+    }
 }
