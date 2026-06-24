@@ -58,13 +58,7 @@ function renderRoute() {
   });
 
   // Cerrar menú móvil después de navegar
-  const navMenu = document.getElementById('navMenu');
-  const navToggle = document.getElementById('navToggle');
-  if (navMenu && navToggle) {
-    navMenu.classList.remove('open');
-    navToggle.classList.remove('open');
-    navToggle.setAttribute('aria-expanded', 'false');
-  }
+  closeMenu();
 
   // Ocultar navbar por defecto si es turnos
   const navbar = document.getElementById('navbar');
@@ -447,22 +441,32 @@ let youTubePlayer = null;
 let youTubeApiLoaded = false;
 
 function toggleMenu() {
+  if (!navToggle || !navMenu) return;
   const expanded = navToggle.getAttribute('aria-expanded') === 'true';
   navToggle.setAttribute('aria-expanded', String(!expanded));
   navMenu.classList.toggle('open');
   navToggle.classList.toggle('open');
   const overlay = document.getElementById('navOverlay');
   if (overlay) overlay.classList.toggle('show');
-  document.body.style.overflow = !expanded ? 'hidden' : '';
+  
+  if (!expanded) {
+    document.documentElement.classList.add('nav-open');
+  } else {
+    document.documentElement.classList.remove('nav-open');
+  }
 }
 
 function closeMenu() {
-  navToggle.setAttribute('aria-expanded', 'false');
-  navMenu.classList.remove('open');
-  navToggle.classList.remove('open');
+  if (navToggle) {
+    navToggle.setAttribute('aria-expanded', 'false');
+    navToggle.classList.remove('open');
+  }
+  if (navMenu) {
+    navMenu.classList.remove('open');
+  }
   const overlay = document.getElementById('navOverlay');
   if (overlay) overlay.classList.remove('show');
-  document.body.style.overflow = '';
+  document.documentElement.classList.remove('nav-open');
 }
 
 function typeWriter(text, element, speed = 70) {
