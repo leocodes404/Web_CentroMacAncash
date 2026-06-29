@@ -32,9 +32,13 @@ html {
 }
 
 body {
-    font-family: 'Inter', 'DM Sans', sans-serif;
+    font-family: 'DM Sans', sans-serif;
     color: var(--text);
     background: var(--admin-bg);
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Sora', sans-serif;
 }
 
 .erp-body {
@@ -692,6 +696,9 @@ div.dash-card--gradient .kpi-val {
     }
     .erp-main {
         margin-left: var(--sidebar-width);
+    }
+    .erp-hamburger-btn {
+        display: none !important;
     }
 }
 

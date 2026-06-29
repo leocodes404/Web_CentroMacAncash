@@ -2224,9 +2224,9 @@ function renderFiltrosNoticias() {
   const container = document.getElementById('noticiasFilters');
   if (!container) return;
   container.innerHTML = NOTICIAS_CATEGORIAS.map(cat => `
-      < button class= "filter-btn ${cat === 'Todas' ? 'active' : ''}" data - categoria="${cat}" >
-    ${ cat }
-    </button >
+    <button class="filter-btn ${cat === 'Todas' ? 'active' : ''}" data-categoria="${cat}">
+      ${cat}
+    </button>
       `).join('');
 
   container.addEventListener('click', e => {
@@ -2247,7 +2247,7 @@ function renderNoticias(categoriaActiva) {
     : noticiasMAC.filter(n => n.categoria === categoriaActiva);
 
   grid.innerHTML = filtradas.map(n => `
-      < article class= "noticia-card card" >
+    <article class="noticia-card card">
       <div class="noticia-card__img-wrap">
         <img
           src="${n.imagen}"
@@ -2267,7 +2267,7 @@ function renderNoticias(categoriaActiva) {
           Leer más →
         </a>
       </div>
-    </article >
+    </article>
       `).join('');
 }
 
@@ -2283,7 +2283,7 @@ function renderPublicaciones() {
   const { boletinesAnuales, boletinesMensuales, manuales } = publicacionesMAC;
 
   container.innerHTML = `
-      < !--SECCIÓN: MANUALES-- >
+    <!-- SECCIÓN: MANUALES -->
     <div class="pub-section">
       <div class="pub-section__header">
         <div class="pub-section__icon">📚</div>
@@ -2307,7 +2307,7 @@ function renderPublicaciones() {
       </div>
     </div>
 
-    <!--SECCIÓN: BOLETINES MENSUALES-- >
+    <!-- SECCIÓN: BOLETINES MENSUALES -->
     <div class="pub-section">
       <div class="pub-section__header">
         <div class="pub-section__icon">📊</div>
@@ -2331,7 +2331,7 @@ function renderPublicaciones() {
       </div>
     </div>
 
-    <!--SECCIÓN: BOLETINES ANUALES-- >
+    <!-- SECCIÓN: BOLETINES ANUALES -->
     <div class="pub-section">
       <div class="pub-section__header">
         <div class="pub-section__icon">📅</div>
@@ -2369,7 +2369,7 @@ function renderProcesoPasaporte() {
   if (!container) return;
 
   container.innerHTML = procesosPasaporte.map(proc => `
-      < li class= "timeline-item" >
+    <li class="timeline-item">
       <div class="timeline-marker">
         <div class="timeline-icon">${proc.icono}</div>
         <div class="timeline-step">${proc.paso}</div>
@@ -2378,7 +2378,7 @@ function renderProcesoPasaporte() {
         <h3>${proc.titulo}</h3>
         <p>${proc.desc}</p>
       </div>
-    </li >
+    </li>
       `).join('');
 }
 
@@ -2387,8 +2387,8 @@ function renderRequisitosPasaporte() {
   if (!container) return;
 
   container.innerHTML = requisitosPasaporte.map((req, idx) => `
-      < li class= "checklist-item" >
-      <input type="checkbox" id="req${idx}" class="checklist-input">
+      <li class="checklist-item">
+        <input type="checkbox" id="req${idx}" class="checklist-input">
         <label for="req${idx}" class="checklist-label">${req}</label>
       </li>
   `).join('');

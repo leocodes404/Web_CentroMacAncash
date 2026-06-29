@@ -4985,3 +4985,26 @@ html.a11y-high-contrast video {
     max-width: 2400px; 
   }
 }
+
+/* ─── FIX LOGO DESKTOP ─── */
+@media (min-width: 1024px) {
+  .navbar .brand,
+  .navbar .brand__mark,
+  .navbar .brand__logo {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+  .navbar .brand__mark {
+    width: auto !important;
+    min-width: 180px;
+    justify-content: flex-start !important;
+  }
+  
+  .navbar .brand__logo {
+    display: block !important;
+    width: auto !important;
+    height: 40px !important;
+    max-height: 40px !important;
+  }
+}
