@@ -29,12 +29,16 @@
 
 html {
     scroll-behavior: smooth;
+    overflow-x: hidden;
+    width: 100%;
 }
 
 body {
     font-family: 'DM Sans', sans-serif;
     color: var(--text);
     background: var(--admin-bg);
+    overflow-x: hidden;
+    width: 100%;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -968,7 +972,227 @@ div.dash-card--gradient .kpi-val {
         flex-direction: column;
     }
 
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+}
+
+.form-modal input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.form-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 32px;
+}
+
+.form-actions button {
+    flex: 1;
+}
+
+/* DARK MODE - Rediseño limpio (solo colores de fondo) */
+[data-theme="dark"] {
+    --admin-bg: #0f172a;
+    --admin-sidebar: #020617;
+    --surface: #1e293b;
+    --border: #334155;
+    --text: #f1f5f9;
+    --text-muted: #94a3b8;
+}
+[data-theme="dark"] .erp-header {
+    background: #1e293b;
+    border-color: #334155;
+}
+[data-theme="dark"] .user-dropdown-menu {
+    background: #1e293b;
+    border-color: #334155;
+}
+[data-theme="dark"] .user-dropdown-menu a:hover {
+    background: #0f172a;
+}
+[data-theme="dark"] .search-input,
+[data-theme="dark"] .erp-filter-select,
+[data-theme="dark"] .btn-limpiar-erp {
+    background: #0f172a;
+    color: #f1f5f9;
+    border-color: #334155;
+}
+[data-theme="dark"] .table thead th {
+    background: #152238;
+    color: #cbd5e1;
+    border-bottom: 2px solid #0f172a;
+}
+[data-theme="dark"] .modal-content {
+    background: #1e293b;
+}
+[data-theme="dark"] .form-modal input,
+[data-theme="dark"] .form-modal select,
+[data-theme="dark"] .form-modal textarea {
+    background: #0f172a;
+    color: #f1f5f9;
+    border-color: #334155;
+}
+[data-theme="dark"] .dash-card {
+    background: #1e293b;
+    border-color: #334155;
+}
+[data-theme="dark"] .kpi-card.highlight {
+    background: #020617;
+}
+
+/* =====================================================
+   RESPONSIVIDAD MOBILE-FIRST — ERP
+   ===================================================== */
+
+@media (max-width: 768px) {
+    .erp-content {
+        padding: 16px;
+    }
+
+    .erp-header {
+        padding: 0 16px;
+        min-height: 60px;
+    }
+
+    /* KPI Cards: 2 columnas */
+    .kpi-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+
+    /* Modern dashboard: todo apilado */
+    .modern-dash-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .col-span-3, .col-span-4, .col-span-5,
+    .col-span-6, .col-span-7, .col-span-8,
+    .col-span-12 {
+        grid-column: span 1;
+    }
+
+    /* Section header */
+    .section-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .section-header h2 {
+        font-size: 20px;
+    }
+
+    /* Filter row: se enrolla */
+    .filter-row {
+        gap: 8px;
+    }
+
+    .filter-btn,
+    .btn-primary,
+    .btn-secondary,
+    .btn-accion,
+    .erp-filter-select,
+    .btn-limpiar-erp {
+        font-size: 13px;
+        padding: 10px 14px;
+    }
+
+    /* Search input */
+    .search-input {
+        max-width: 100%;
+    }
+
+    /* Staff grid: 1 columna */
+    .staff-grid {
+        grid-template-columns: 1fr;
+    }
+
+    /* Chart containers */
+    .dashboard-charts {
+        grid-template-columns: 1fr;
+    }
+
+    /* Table: scroll horizontal */
+    .table-card {
+        overflow-x: auto;
+    }
+
+    /* Modal */
+    .modal-content {
+        width: 95%;
+        padding: 20px;
+    }
+
+    /* Dash cards */
+    .dash-card {
+        padding: 16px;
+    }
+
+    .kpi-val {
+        font-size: 24px !important;
+    }
+
+    /* User dropdown: reposicionar */
+    .user-dropdown-menu {
+        right: -10px;
+        width: 200px;
+    }
+}
+
+@media (max-width: 480px) {
+    .erp-content {
+        padding: 12px;
+    }
+
+    .kpi-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .filter-row {
+        flex-direction: column;
+    }
+
+    .erp-filter-select {
+        width: 100%;
+    }
+
+    .btn-limpiar-erp {
+        width: 100%;
+        text-align: center;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
     .form-actions button {
         width: 100%;
+    }
+}
+
+/* Optimización móvil adicional para dropdowns y cabecera */
+@media (max-width: 768px) {
+    .erp-header {
+        flex-wrap: nowrap;
+        gap: 8px;
+    }
+    .erp-header__title {
+        font-size: 18px;
+    }
+    .erp-header__right {
+        gap: 8px;
+    }
+}
+
+@media (max-width: 480px) {
+    .notif-dropdown, .user-dropdown-menu {
+        position: fixed;
+        top: 70px;
+        left: 16px;
+        right: 16px;
+        width: auto;
+        max-width: none;
     }
 }
