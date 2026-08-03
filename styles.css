@@ -5008,3 +5008,407 @@ html.a11y-high-contrast video {
     max-height: 40px !important;
   }
 }
+
+/* ═══════════════════════════════════════════════════
+   PANEL DE FELICITACIONES
+   ═══════════════════════════════════════════════════ */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.felicitaciones-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  border-radius: var(--radius-md);
+  margin-bottom: 2rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.felicitaciones-alert--error {
+  background: rgba(232, 0, 28, 0.08);
+  border: 1px solid rgba(232, 0, 28, 0.25);
+  color: var(--color-text);
+}
+
+.felicitaciones-alert--info {
+  background: rgba(0, 64, 168, 0.08);
+  border: 1px solid rgba(0, 64, 168, 0.25);
+  color: var(--color-text);
+}
+
+.alert__icon {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.alert__content strong {
+  display: block;
+  font-size: 1rem;
+  font-family: var(--font-display);
+  margin-bottom: 0.25rem;
+}
+
+.alert__content p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--color-muted);
+}
+
+.badge-entidad {
+  display: inline-block;
+  padding: 0.25rem 0.65rem;
+  border-radius: var(--radius-full);
+  font-size: 0.78rem;
+  font-weight: 600;
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+  border: 1px solid var(--color-border);
+}
+
+.ranking-item__main {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--color-text);
+}
+
+.ranking-item__sub {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--color-muted);
+}
+
+.felicitaciones-messages-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.25rem;
+}
+
+.message-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+  box-shadow: var(--shadow-card);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.message-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--color-border-strong);
+}
+
+.message-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.message-card__user {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--color-primary-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.user-name {
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-text);
+  line-height: 1.2;
+}
+
+.user-doc {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--color-muted);
+}
+
+.message-card__date {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--color-muted);
+  white-space: nowrap;
+  background: var(--color-surface-2);
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--radius-sm);
+}
+
+.message-card__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.tag {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--radius-sm);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.tag--entidad {
+  background: rgba(0, 64, 168, 0.08);
+  color: var(--color-primary);
+}
+
+.tag--modulo {
+  background: rgba(245, 184, 32, 0.12);
+  color: var(--mac-gold-600);
+}
+
+[data-theme="dark"] .tag--modulo {
+  color: var(--mac-gold-400);
+}
+
+.tag--asesor {
+  background: rgba(34, 160, 91, 0.1);
+  color: var(--color-success);
+}
+
+.message-card__body {
+  background: var(--color-bg);
+  padding: 0.85rem 1rem;
+  border-radius: var(--radius-sm);
+  border-left: 3px solid var(--color-primary);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--color-text-2);
+  font-style: italic;
+}
+
+.message-card__body p {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+/* ── COMPATIBILIDAD HÍBRIDA CHART-CARD Y FELICITACIONES (ERP / CRM / INDEX) ── */
+.felicitaciones-body-section {
+  padding: 2rem 0;
+  background: var(--admin-bg, var(--color-bg, #f4f6fa));
+  color: var(--text, var(--color-text, #1e293b));
+  min-height: 65vh;
+  transition: background var(--transition), color var(--transition);
+}
+
+.felicitaciones-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 2.5rem;
+}
+
+.felicitaciones-kpi-card {
+  background: var(--surface, var(--color-surface, #ffffff));
+  border: 1px solid var(--border, var(--color-border, #e2e8f0));
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background 0.3s ease;
+}
+
+[data-theme="dark"] .felicitaciones-kpi-card {
+  background: #1e293b;
+  border-color: rgba(255, 255, 255, 0.12);
+  color: #e2e8f0;
+}
+
+.felicitaciones-kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+}
+
+.felicitaciones-kpi-icon {
+  font-size: 1.8rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.felicitaciones-kpi-title {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text, var(--color-text, #1e293b));
+  margin-bottom: 0.25rem;
+}
+
+[data-theme="dark"] .felicitaciones-kpi-title {
+  color: #e2e8f0;
+}
+
+.felicitaciones-kpi-value {
+  display: block;
+  font-family: 'Sora', sans-serif;
+  font-size: 1.85rem;
+  font-weight: 800;
+  color: var(--admin-primary, var(--color-primary, #0040a8));
+  line-height: 1.1;
+  margin-bottom: 0.25rem;
+}
+
+.felicitaciones-kpi-sub {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--text-muted, var(--color-muted, #64748b));
+}
+
+[data-theme="dark"] .felicitaciones-kpi-sub {
+  color: #94a3b8;
+}
+
+/* Contenedor Grid de Gráficos Analíticos */
+.dashboard__charts {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.25rem;
+  margin-top: 1rem;
+}
+
+@media (max-width: 768px) {
+  .dashboard__charts {
+    grid-template-columns: 1fr;
+  }
+}
+
+.chart-card {
+  position: relative;
+  background: var(--surface, var(--color-surface, #ffffff));
+  border: 1px solid var(--border, var(--color-border, #e2e8f0));
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+[data-theme="dark"] .chart-card {
+  background: #1e293b;
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.chart-card h3 {
+  font-family: 'Sora', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text, var(--color-text, #1e293b));
+  margin: 0 0 0.25rem 0;
+}
+
+[data-theme="dark"] .chart-card h3 {
+  color: #f8fafc;
+}
+
+.chart-period {
+  font-size: 0.8rem;
+  color: var(--text-muted, var(--color-muted, #64748b));
+}
+
+[data-theme="dark"] .chart-period {
+  color: #94a3b8;
+}
+
+.message-card {
+  background: var(--surface, var(--color-surface, #ffffff));
+  border: 1px solid var(--border, var(--color-border, #e2e8f0));
+  border-radius: 12px;
+  padding: 1.25rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+}
+
+[data-theme="dark"] .message-card {
+  background: #1e293b;
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+/* ── FELICITACIONES BODY SECTION & TEMAS NATIVOS ── */
+.felicitaciones-body-section {
+  padding: 3rem 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+  min-height: 65vh;
+  transition: background var(--transition), color var(--transition);
+}
+
+.felicitaciones-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 2.5rem;
+}
+
+.felicitaciones-kpi-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-card);
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast), background var(--transition);
+}
+
+.felicitaciones-kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--color-border-strong);
+}
+
+.felicitaciones-kpi-icon {
+  font-size: 1.8rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.felicitaciones-kpi-title {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 0.25rem;
+}
+
+.felicitaciones-kpi-value {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 1.85rem;
+  font-weight: 800;
+  color: var(--color-primary);
+  line-height: 1.1;
+  margin-bottom: 0.25rem;
+}
+
+.felicitaciones-kpi-sub {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--color-muted);
+}

@@ -8,6 +8,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="crm.css?v=3">
+    <link rel="stylesheet" href="styles.css">
     <script>
         const savedTheme = localStorage.getItem('mac-theme') || 'light';
         document.documentElement.setAttribute('data-theme', savedTheme);
@@ -16,7 +17,7 @@
 <body class="crm-body">
     <aside class="crm-sidebar" id="crmSidebar">
         <div class="sidebar__header">
-            <h2 class="sidebar__brand">MAC Ciudadano</h2>
+            <h2 class="sidebar__brand">Mi MAC</h2>
             <p class="sidebar__user" id="sidebarUser">Usuario</p>
         </div>
 
@@ -25,6 +26,7 @@
             <a href="#" data-section="tickets" class="sidebar__item">🎫 Mis Tickets</a>
             <a href="#" data-section="mensajes" class="sidebar__item">📧 Mensajes <span class="badge-notif" id="badgeNotif" style="display: none;">0</span></a>
             <a href="#" data-section="fidelizacion" class="sidebar__item">⭐ Fidelización</a>
+            <a href="#" data-section="felicitaciones" class="sidebar__item">👏 Panel de Felicitaciones</a>
             <div class="sidebar__divider"></div>
             <a href="index.html" class="sidebar__item">🌐 Volver a la Web</a>
             <div class="sidebar__item-group">
@@ -74,6 +76,7 @@
                             <strong id="userMenuName">Usuario</strong>
                             <span>Información de la cuenta</span>
                         </div>
+                        <a href="#" onclick="navegar('felicitaciones'); toggleUserMenu(); return false;">👏 Panel de Felicitaciones</a>
                         <a href="#" onclick="navegar('perfil'); switchProfileTab('seguridad'); toggleUserMenu(); return false;">⚙️ Configuración</a>
                         <a href="#" onclick="cerrarSesion(); return false;" class="logout-link">🚪 Cerrar sesión</a>
                     </div>
@@ -473,6 +476,163 @@
                     </div>
                 </div>
             </section>
+
+            <!-- ────── SECCIÓN: PANEL DE FELICITACIONES ────── -->
+            <section id="felicitaciones" class="crm-section">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+                <div>
+                  <span style="color: var(--admin-accent, #f59e0b); font-weight: 700; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;">Libro de Felicitaciones Digital</span>
+                  <h2 style="font-size: 1.5rem; font-weight: 700; margin-top: 0.25rem; color: var(--text);">Panel de Felicitaciones</h2>
+                  <p id="felicitacionesLastUpdate" style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.25rem;">Cargando datos...</p>
+                </div>
+                <button type="button" id="btnRefreshFelicitaciones" style="border-radius: 8px; padding: 10px 16px; background: linear-gradient(135deg, #1e3a8a, #0040a8); color: white; border: none; cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 0.5rem; box-shadow: 0 4px 12px rgba(0, 64, 168, 0.2);">
+                  🔄 Actualizar Datos
+                </button>
+              </div>
+
+              <!-- Estado de Carga -->
+              <div id="felicitacionesLoading" style="display: block; text-align: center; padding: 3rem 1rem;">
+                <div class="spinner" style="width: 48px; height: 48px; border: 4px solid var(--border); border-top-color: var(--admin-primary); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 1rem auto;"></div>
+                <p style="color: var(--text-muted); font-weight: 500;">Conectando con Firestore y cargando felicitaciones...</p>
+              </div>
+
+              <!-- Estado de Error -->
+              <div id="felicitacionesError" style="display: none;" class="felicitaciones-alert felicitaciones-alert--error">
+                <div class="alert__icon">⚠️</div>
+                <div class="alert__content">
+                  <strong>Error al obtener felicitaciones</strong>
+                  <p id="felicitacionesErrorMessage">Ocurrió un inconveniente al conectar con el servidor. Por favor intenta nuevamente.</p>
+                </div>
+              </div>
+
+              <!-- Estado Vacío Informativo -->
+              <div id="felicitacionesEmpty" style="display: none;" class="felicitaciones-alert felicitaciones-alert--info">
+                <div class="alert__icon">ℹ️</div>
+                <div class="alert__content">
+                  <strong>Base de datos conectada (0 registros de felicitaciones)</strong>
+                  <p>Conexión exitosa a Firebase Firestore (colección 'felicitaciones'). Los registros enviados por los ciudadanos desde el QR aparecerán aquí en tiempo real.</p>
+                </div>
+              </div>
+
+              <!-- Contenido Principal del Panel (KPIs, Mensajes y Gráficos) -->
+              <div id="felicitacionesContent" style="display: none;">
+                <!-- Grid de KPIs -->
+                <div class="felicitaciones-kpi-grid">
+                  <div class="felicitaciones-kpi-card">
+                    <div class="felicitaciones-kpi-icon">🏆</div>
+                    <div>
+                      <span class="felicitaciones-kpi-title">Total Histórico</span>
+                      <strong class="felicitaciones-kpi-value" id="kpiFelicitacionesTotal">0</strong>
+                      <span class="felicitaciones-kpi-sub">felicitaciones registradas</span>
+                    </div>
+                  </div>
+
+                  <div class="felicitaciones-kpi-card">
+                    <div class="felicitaciones-kpi-icon">⭐</div>
+                    <div>
+                      <span class="felicitaciones-kpi-title">Hoy</span>
+                      <strong class="felicitaciones-kpi-value" id="kpiFelicitacionesHoy">0</strong>
+                      <span class="felicitaciones-kpi-sub">nuevas felicitaciones</span>
+                    </div>
+                  </div>
+
+                  <div class="felicitaciones-kpi-card">
+                    <div class="felicitaciones-kpi-icon">📅</div>
+                    <div>
+                      <span class="felicitaciones-kpi-title">Esta Semana</span>
+                      <strong class="felicitaciones-kpi-value" id="kpiFelicitacionesSemana">0</strong>
+                      <span class="felicitaciones-kpi-sub">en los últimos 7 días</span>
+                    </div>
+                  </div>
+
+                  <div class="felicitaciones-kpi-card">
+                    <div class="felicitaciones-kpi-icon">📊</div>
+                    <div>
+                      <span class="felicitaciones-kpi-title">Este Mes</span>
+                      <strong class="felicitaciones-kpi-value" id="kpiFelicitacionesMes">0</strong>
+                      <span class="felicitaciones-kpi-sub">registradas en el mes actual</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Listado de Mensajes Recientes (Tarjetas) -->
+                <div class="recent-messages-section" style="margin-top: 2.5rem;">
+                  <div class="section-header" style="margin-bottom: 1.5rem;">
+                    <span class="eyebrow">Mensajes de los Ciudadanos</span>
+                    <h3 style="font-family: var(--font-display); font-size: 1.4rem; font-weight: 700; color: var(--text); margin: 0 0 0.35rem 0;">Últimas Felicitaciones Recibidas (Recientes)</h3>
+                    <p style="color: var(--text-muted); margin: 0; font-size: 0.9rem;">Reconocimiento directo de los usuarios sobre la atención en el Centro MAC.</p>
+                  </div>
+
+                  <div id="felicitacionesMessagesList" class="felicitaciones-messages-grid">
+                    <!-- Se poblará dinámicamente -->
+                  </div>
+                </div>
+
+                <!-- Sección de Gráficos Analíticos de Felicitaciones -->
+                <div class="felicitaciones-charts-section" style="margin-top: 3rem;">
+                  <div class="section-header" style="margin-bottom: 1.5rem;">
+                    <span class="eyebrow" style="color: var(--admin-accent, #f59e0b); font-weight: 700; font-size: 0.85rem; text-transform: uppercase;">Analítica Visual</span>
+                    <h3 style="font-family: 'Sora', sans-serif; font-size: 1.4rem; font-weight: 700; color: var(--text, #1e293b); margin: 0.25rem 0 0.35rem 0;">Métricas y Tendencias de Felicitaciones</h3>
+                    <p style="color: var(--text-muted, #64748b); margin: 0; font-size: 0.9rem;">Análisis gráfico en tiempo real sobre la percepción de atención al ciudadano.</p>
+                  </div>
+
+                  <div class="dashboard__charts" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.25rem; margin-top: 1rem;">
+                    <!-- 1. Gráfico de Dona: Distribución por Entidad -->
+                    <div class="chart-card" style="background: var(--surface, #ffffff); border: 1px solid var(--border, #e2e8f0); border-radius: 16px; padding: 1.5rem; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04); display: flex; flex-direction: column; justify-content: space-between; min-height: 380px;">
+                      <div class="chart-card__top" style="margin-bottom: 1rem;">
+                        <div>
+                          <h3 style="font-family: 'Sora', sans-serif; font-size: 1.1rem; font-weight: 700; color: var(--text, #1e293b); margin: 0 0 0.25rem 0;">Distribución por Entidad</h3>
+                          <small class="chart-period" style="color: var(--text-muted, #64748b); font-size: 0.8rem;">Participación porcentual por institución</small>
+                        </div>
+                      </div>
+                      <div style="position: relative; height: 260px; width: 100%;">
+                        <canvas id="chartDonutFelicitacionesEntidad" style="display: block; width: 100%; height: 260px;" aria-label="Gráfico de dona de distribución por entidad" role="img"></canvas>
+                      </div>
+                      <div id="legendDonutFelicitacionesEntidad" class="chart-legend" style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem;"></div>
+                    </div>
+
+                    <!-- 2. Gráfico de Barras Horizontales: Personal Más Felicitado -->
+                    <div class="chart-card" style="background: var(--surface, #ffffff); border: 1px solid var(--border, #e2e8f0); border-radius: 16px; padding: 1.5rem; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04); display: flex; flex-direction: column; justify-content: space-between; min-height: 380px;">
+                      <div class="chart-card__top" style="margin-bottom: 1rem;">
+                        <div>
+                          <h3 style="font-family: 'Sora', sans-serif; font-size: 1.1rem; font-weight: 700; color: var(--text, #1e293b); margin: 0 0 0.25rem 0;">Personal Más Felicitado</h3>
+                          <small class="chart-period" style="color: var(--text-muted, #64748b); font-size: 0.8rem;">Top 10 asesores destacados</small>
+                        </div>
+                      </div>
+                      <div style="position: relative; height: 300px; width: 100%;">
+                        <canvas id="chartHorizontalFelicitacionesAsesor" style="display: block; width: 100%; height: 300px;" aria-label="Gráfico de barras horizontales de personal más felicitado" role="img"></canvas>
+                      </div>
+                    </div>
+
+                    <!-- 3. Gráfico de Barras: Felicitaciones por Módulo -->
+                    <div class="chart-card" style="background: var(--surface, #ffffff); border: 1px solid var(--border, #e2e8f0); border-radius: 16px; padding: 1.5rem; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04); display: flex; flex-direction: column; justify-content: space-between; min-height: 380px;">
+                      <div class="chart-card__top" style="margin-bottom: 1rem;">
+                        <div>
+                          <h3 style="font-family: 'Sora', sans-serif; font-size: 1.1rem; font-weight: 700; color: var(--text, #1e293b); margin: 0 0 0.25rem 0;">Felicitaciones por Módulo</h3>
+                          <small class="chart-period" style="color: var(--text-muted, #64748b); font-size: 0.8rem;">Volumen recibido por módulo</small>
+                        </div>
+                      </div>
+                      <div style="position: relative; height: 300px; width: 100%;">
+                        <canvas id="chartBarFelicitacionesModulo" style="display: block; width: 100%; height: 300px;" aria-label="Gráfico de barras por módulo" role="img"></canvas>
+                      </div>
+                    </div>
+
+                    <!-- 4. Gráfico de Línea: Tendencia de Felicitaciones (últimos 30 días) -->
+                    <div class="chart-card" style="background: var(--surface, #ffffff); border: 1px solid var(--border, #e2e8f0); border-radius: 16px; padding: 1.5rem; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04); display: flex; flex-direction: column; justify-content: space-between; min-height: 380px;">
+                      <div class="chart-card__top" style="margin-bottom: 1rem;">
+                        <div>
+                          <h3 style="font-family: 'Sora', sans-serif; font-size: 1.1rem; font-weight: 700; color: var(--text, #1e293b); margin: 0 0 0.25rem 0;">Tendencia de Felicitaciones</h3>
+                          <small class="chart-period" style="color: var(--text-muted, #64748b); font-size: 0.8rem;">Evolución diaria en los últimos 30 días</small>
+                        </div>
+                      </div>
+                      <div style="position: relative; height: 300px; width: 100%;">
+                        <canvas id="chartLineFelicitacionesTendencia" style="display: block; width: 100%; height: 300px;" aria-label="Gráfico de línea de tendencia de felicitaciones" role="img"></canvas>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
         </div>
     </main>
 
@@ -490,9 +650,13 @@
         <span id="toastMessage">Mensaje de error</span>
     </div>
 
+    <!-- Firebase SDK Compat -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="chart.umd.min.js"></script>
     <script src="dataService.js"></script>
+    <script src="felicitaciones-panel.js"></script>
     <script>
         const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyxijNx193gJTBCvM4ypu5GBS9KTiIQcgKbuhRUkM4OIMwEZZRzI8A_oEkVlnosdU_4/exec';
 
@@ -609,12 +773,14 @@
             tickets: 'Mis Tickets',
             mensajes: 'Mensajes',
             fidelizacion: 'Fidelización',
-            perfil: 'Mi Perfil'
+            perfil: 'Mi Perfil',
+            felicitaciones: 'Panel de Felicitaciones'
         };
 
         function navegar(section) {
             document.querySelectorAll('.crm-section').forEach(s => s.classList.remove('crm-section--active'));
-            document.getElementById(section).classList.add('crm-section--active');
+            const targetSec = document.getElementById(section);
+            if (targetSec) targetSec.classList.add('crm-section--active');
             document.querySelectorAll('.sidebar__item[data-section]').forEach(i => i.classList.remove('sidebar__item--active'));
             const activeLink = document.querySelector(`[data-section="${section}"]`);
             if (activeLink) activeLink.classList.add('sidebar__item--active');
@@ -622,11 +788,22 @@
             const headerTitle = document.getElementById('headerTitle');
             if (headerTitle) headerTitle.textContent = sectionTitles[section] || 'Mi Dashboard';
 
+            if (section === 'felicitaciones') {
+                if (typeof window.initFelicitacionesPage === 'function') {
+                    window.initFelicitacionesPage();
+                }
+            }
+
             // Cerrar menú en móviles
             if (window.innerWidth <= 768) {
                 const sidebar = document.getElementById('crmSidebar');
                 if (sidebar) sidebar.classList.remove('open');
             }
+        }
+
+        // Si la URL contiene hash felicitaciones, abrirla automáticamente
+        if (window.location.hash.includes('felicitaciones')) {
+            navegar('felicitaciones');
         }
 
         let dashboardCharts = {};

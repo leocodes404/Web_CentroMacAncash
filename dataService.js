@@ -30,10 +30,12 @@ function getSesion() {
 
 function setSesion(usuario) {
     localStorage.setItem('mac_sesion', JSON.stringify(usuario));
+    localStorage.setItem('isAuthenticated', 'true');
 }
 
 function cerrarSesion() {
     localStorage.removeItem('mac_sesion');
+    localStorage.removeItem('isAuthenticated');
     localStorage.removeItem('mac_current_section');
     window.location.href = 'login.html';
 }

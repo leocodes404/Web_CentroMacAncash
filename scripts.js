@@ -12,6 +12,7 @@ const ROUTES = {
   'publicaciones': 'page-publicaciones',
   'dashboard': 'page-inicio',
   'turnos': 'page-turnos',
+  'felicitaciones': 'page-felicitaciones',
 };
 
 function getRoute() {
@@ -34,6 +35,14 @@ function renderRoute() {
       window.location.href = 'login.html';
     }
     return;
+  }
+
+  if (route === 'felicitaciones') {
+    const isAuth = localStorage.getItem('isAuthenticated') === 'true' || !!localStorage.getItem('mac_sesion');
+    if (!isAuth) {
+      window.location.href = 'login.html';
+      return;
+    }
   }
 
   const pageId = ROUTES[route] || 'page-inicio';
@@ -98,6 +107,7 @@ function onRouteChange(route) {
   if (route === 'pasaporte') initPasaportePage?.();
   if (route === 'publicaciones') initPublicacionesPage?.();
   if (route === 'turnos') initTurnosPage?.();
+  if (route === 'felicitaciones') window.initFelicitacionesPage?.();
 }
 
 // Event listeners para el router
@@ -1295,6 +1305,7 @@ function updateNavbarAuth() {
     document.getElementById('btnCerrarSesionLanding')?.addEventListener('click', (e) => {
       e.preventDefault();
       localStorage.removeItem('mac_sesion');
+      localStorage.removeItem('isAuthenticated');
       updateNavbarAuth();
       window.location.reload();
     });

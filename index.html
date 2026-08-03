@@ -657,6 +657,166 @@
       </section>
     </div>
 
+    <!-- ── PAGE: FELICITACIONES ────────────────────────────── -->
+    <div data-page="page-felicitaciones" id="page-felicitaciones" aria-hidden="true">
+      <section class="inner-page-hero">
+        <div class="container">
+          <span class="eyebrow">Libro de Felicitaciones Digital</span>
+          <h1>Panel de Felicitaciones</h1>
+          <p id="felicitacionesLastUpdate">Cargando datos...</p>
+          <button type="button" class="btn btn--secondary" id="btnRefreshFelicitaciones" style="margin-top: 1rem; display: inline-flex; align-items: center; gap: 0.5rem; background: rgba(255, 255, 255, 0.15); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.3);">
+            🔄 Actualizar Datos
+          </button>
+        </div>
+      </section>
+
+      <section class="felicitaciones-body-section">
+        <div class="container">
+          <!-- Estado de Carga (Loading Spinner) -->
+          <div id="felicitacionesLoading" style="display: block; text-align: center; padding: 3rem 1rem;">
+            <div class="spinner" style="width: 48px; height: 48px; border: 4px solid var(--color-border); border-top-color: var(--color-primary); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 1rem auto;"></div>
+            <p style="color: var(--color-muted); font-weight: 500;">Conectando con Firestore y cargando felicitaciones...</p>
+          </div>
+
+          <!-- Estado de Error -->
+          <div id="felicitacionesError" style="display: none;" class="felicitaciones-alert felicitaciones-alert--error">
+            <div class="alert__icon">⚠️</div>
+            <div class="alert__content">
+              <strong>Error al obtener felicitaciones</strong>
+              <p id="felicitacionesErrorMessage">Ocurrió un inconveniente al conectar con el servidor. Por favor intenta nuevamente.</p>
+            </div>
+          </div>
+
+          <!-- Estado Vacío Informativo -->
+          <div id="felicitacionesEmpty" style="display: none;" class="felicitaciones-alert felicitaciones-alert--info">
+            <div class="alert__icon">ℹ️</div>
+            <div class="alert__content">
+              <strong>Base de datos conectada (0 registros de felicitaciones)</strong>
+              <p>Conexión exitosa a Firebase Firestore (colección 'felicitaciones'). Los registros enviados por los ciudadanos desde el QR aparecerán aquí en tiempo real.</p>
+            </div>
+          </div>
+
+          <!-- Contenido Principal del Panel (KPIs, Mensajes y Gráficos) -->
+          <div id="felicitacionesContent" style="display: none;">
+            <!-- Grid de KPIs -->
+            <div class="felicitaciones-kpi-grid">
+              <div class="felicitaciones-kpi-card">
+                <div class="felicitaciones-kpi-icon">🏆</div>
+                <div>
+                  <span class="felicitaciones-kpi-title">Total Histórico</span>
+                  <strong class="felicitaciones-kpi-value" id="kpiFelicitacionesTotal">0</strong>
+                  <span class="felicitaciones-kpi-sub">felicitaciones registradas</span>
+                </div>
+              </div>
+
+              <div class="felicitaciones-kpi-card">
+                <div class="felicitaciones-kpi-icon">⭐</div>
+                <div>
+                  <span class="felicitaciones-kpi-title">Hoy</span>
+                  <strong class="felicitaciones-kpi-value" id="kpiFelicitacionesHoy">0</strong>
+                  <span class="felicitaciones-kpi-sub">nuevas felicitaciones</span>
+                </div>
+              </div>
+
+              <div class="felicitaciones-kpi-card">
+                <div class="felicitaciones-kpi-icon">📅</div>
+                <div>
+                  <span class="felicitaciones-kpi-title">Esta Semana</span>
+                  <strong class="felicitaciones-kpi-value" id="kpiFelicitacionesSemana">0</strong>
+                  <span class="felicitaciones-kpi-sub">en los últimos 7 días</span>
+                </div>
+              </div>
+
+              <div class="felicitaciones-kpi-card">
+                <div class="felicitaciones-kpi-icon">📊</div>
+                <div>
+                  <span class="felicitaciones-kpi-title">Este Mes</span>
+                  <strong class="felicitaciones-kpi-value" id="kpiFelicitacionesMes">0</strong>
+                  <span class="felicitaciones-kpi-sub">registradas en el mes actual</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Listado de Mensajes Recientes (Tarjetas) -->
+            <div class="recent-messages-section" style="margin-top: 2.5rem;">
+              <div class="section-header" style="margin-bottom: 1.5rem;">
+                <span class="eyebrow">Mensajes de los Ciudadanos</span>
+                <h3 style="font-family: var(--font-display); font-size: 1.4rem; font-weight: 700; color: var(--color-text); margin: 0 0 0.35rem 0;">Últimas Felicitaciones Recibidas (Recientes)</h3>
+                <p style="color: var(--color-muted); margin: 0; font-size: 0.9rem;">Reconocimiento directo de los usuarios sobre la atención en el Centro MAC.</p>
+              </div>
+
+              <div id="felicitacionesMessagesList" class="felicitaciones-messages-grid">
+                <!-- Se poblará dinámicamente -->
+              </div>
+            </div>
+
+            <!-- Sección de Gráficos Analíticos de Felicitaciones -->
+            <div class="felicitaciones-charts-section" style="margin-top: 3rem;">
+              <div class="section-header" style="margin-bottom: 1.5rem;">
+                <span class="eyebrow">Analítica Visual</span>
+                <h3 style="font-family: var(--font-display); font-size: 1.4rem; font-weight: 700; color: var(--color-text); margin: 0 0 0.35rem 0;">Métricas y Tendencias de Felicitaciones</h3>
+                <p style="color: var(--color-muted); margin: 0; font-size: 0.9rem;">Análisis gráfico en tiempo real sobre la percepción de atención al ciudadano.</p>
+              </div>
+
+              <div class="dashboard__charts">
+                <!-- 1. Gráfico de Dona: Distribución por Entidad -->
+                <div class="chart-card">
+                  <div class="chart-card__top">
+                    <div>
+                      <h3>Distribución por Entidad</h3>
+                      <small class="chart-period">Participación porcentual por institución</small>
+                    </div>
+                  </div>
+                  <div class="chart-container" style="position: relative; height: 280px;">
+                    <canvas id="chartDonutFelicitacionesEntidad" aria-label="Gráfico de dona de distribución por entidad" role="img"></canvas>
+                  </div>
+                  <div id="legendDonutFelicitacionesEntidad" class="chart-legend" style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem;"></div>
+                </div>
+
+                <!-- 2. Gráfico de Barras Horizontales: Personal Más Felicitado -->
+                <div class="chart-card">
+                  <div class="chart-card__top">
+                    <div>
+                      <h3>Personal Más Felicitado</h3>
+                      <small class="chart-period">Top 10 asesores destacados</small>
+                    </div>
+                  </div>
+                  <div class="chart-container" style="position: relative; height: 320px;">
+                    <canvas id="chartHorizontalFelicitacionesAsesor" aria-label="Gráfico de barras horizontales de personal más felicitado" role="img"></canvas>
+                  </div>
+                </div>
+
+                <!-- 3. Gráfico de Barras: Felicitaciones por Módulo -->
+                <div class="chart-card">
+                  <div class="chart-card__top">
+                    <div>
+                      <h3>Felicitaciones por Módulo</h3>
+                      <small class="chart-period">Volumen recibido por módulo</small>
+                    </div>
+                  </div>
+                  <div class="chart-container" style="position: relative; height: 320px;">
+                    <canvas id="chartBarFelicitacionesModulo" aria-label="Gráfico de barras por módulo" role="img"></canvas>
+                  </div>
+                </div>
+
+                <!-- 4. Gráfico de Línea: Tendencia de Felicitaciones (últimos 30 días) -->
+                <div class="chart-card">
+                  <div class="chart-card__top">
+                    <div>
+                      <h3>Tendencia de Felicitaciones</h3>
+                      <small class="chart-period">Evolución diaria en los últimos 30 días</small>
+                    </div>
+                  </div>
+                  <div class="chart-container" style="position: relative; height: 320px;">
+                    <canvas id="chartLineFelicitacionesTendencia" aria-label="Gráfico de línea de tendencia de felicitaciones" role="img"></canvas>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
   </main>
 
   <footer class="footer" data-reveal>
@@ -707,6 +867,10 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   
   <script src="scripts.js?v=8" defer></script>
+  <!-- Firebase Compat SDKs y Panel Felicitaciones -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="felicitaciones-panel.js" defer></script>
   <script>
     // ── Dark/Light Mode Toggle ──────────────────────────
     (function() {
