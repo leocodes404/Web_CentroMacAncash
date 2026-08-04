@@ -16,6 +16,8 @@
   let felicitacionesApp = null;
   let dbFelicitaciones = null;
   
+  let allFelicitacionesDocs = []; // Referencia global para filtros
+  
   // Instancias de gráficos Chart.js
   let donutChartInstance = null;
   let horizontalChartInstance = null;
@@ -126,7 +128,9 @@
           modulo: data.modulo || 'Módulo Sin Asignar',
           asesor: data.asesor || 'No identificado',
           descripcion: data.descripcion || '',
-          timestamp: parseTimestamp(data.timestamp)
+          timestamp: parseTimestamp(data.timestamp),
+          puntuacion: typeof data.puntuacion === 'number' ? data.puntuacion : 5,
+          tipoRegistro: data.tipoRegistro || 'felicitacion'
         });
       });
     }
@@ -604,12 +608,291 @@
     renderLineChartTendencia(docs);
   }
 
+  // --- NUEVA LÓGICA DEL DASHBOARD DE TRABAJADORES ---
+  const trabajadoresPredefinidos = [
+    "Juan Pérez", "María Torres", "Carlos Gómez", "Rosa Benítez", "Ricardo Morales", "Patricia Silva",
+    "Jorge Espinoza", "Carmen Vega", "Elena Castillo", "Roberto Mendoza", "Sofía Guerrero",
+    "Fernando Ríos", "Gabriel Fernández", "Lucía Paredes", "Mariana Alva", "Alberto Quispe",
+    "Teresa Bustamante", "Alejandro Mendoza", "Daniel Herrera", "Ana Ramírez", "Luis Vargas",
+    "Valeria Gutiérrez", "Gustavo Medina", "Diana Solís", "Héctor Palacios", "Camila Navarro",
+    "Oscar Reyes", "Julio Cárdenas", "Pilar Benavides", "Rodrigo Flores", "Vanessa Salazar",
+    "Eduardo Huamán", "Beatriz Zavaleta", "Mateo Córdova", "Natalia Espinoza", "Javier Villegas",
+    "Gonzalo Alarcón", "Milagros Paredes"
+  ];
+
+  let chartTrabVolumenInstance = null;
+  let chartTrabPuntuacionInstance = null;
+  let chartTrabTendenciaInstance = null;
+
+  function initTrabajadoresDashboard(docs) {
+    allFelicitacionesDocs = docs;
+    
+    const selectTrabajador = document.getElementById('filtroTrabajador');
+    if (selectTrabajador) {
+      const trabajadoresDB = new Set(docs.map(d => (d.asesor || 'No identificado').trim()));
+      const todosLosTrabajadores = new Set([...trabajadoresPredefinidos]);
+      trabajadoresDB.forEach(t => todosLosTrabajadores.add(t));
+      
+      const trabajadoresOrdenados = Array.from(todosLosTrabajadores).sort();
+      
+      selectTrabajador.innerHTML = '<option value="">Todos los Trabajadores</option>';
+      trabajadoresOrdenados.forEach(t => {
+        const option = document.createElement('option');
+        option.value = t;
+        option.textContent = t;
+        selectTrabajador.appendChild(option);
+      });
+    }
+
+    const filtros = ['filtroTrabajador', 'filtroFechaTrabajador'];
+    filtros.forEach(id => {
+      const el = document.getElementById(id);
+      if (el && !el.dataset.bound) {
+        el.dataset.bound = 'true';
+        el.addEventListener('change', () => renderTrabajadoresDashboard());
+      }
+    });
+
+    const btnLimpiar = document.getElementById('btnLimpiarFiltrosTrab');
+    if (btnLimpiar && !btnLimpiar.dataset.bound) {
+      btnLimpiar.dataset.bound = 'true';
+      btnLimpiar.addEventListener('click', () => {
+        filtros.forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.value = id === 'filtroFechaTrabajador' ? 'todo' : '';
+        });
+        renderTrabajadoresDashboard();
+      });
+    }
+
+    renderTrabajadoresDashboard();
+  }
+
+  function renderTrabajadoresDashboard() {
+    const trabajador = document.getElementById('filtroTrabajador')?.value || '';
+    const periodo = document.getElementById('filtroFechaTrabajador')?.value || 'todo';
+
+    let filtrados = [...allFelicitacionesDocs];
+    
+    if (trabajador) filtrados = filtrados.filter(d => (d.asesor || 'No identificado').trim() === trabajador);
+    
+    if (periodo !== 'todo') {
+      const now = new Date();
+      const hoyStr = formatDayMonthKey(now);
+      const sevenDaysAgo = new Date(now);
+      sevenDaysAgo.setDate(now.getDate() - 7);
+      
+      filtrados = filtrados.filter(d => {
+        const dKey = formatDayMonthKey(d.timestamp);
+        if (periodo === 'hoy') return dKey === hoyStr;
+        if (periodo === 'semana') return d.timestamp >= sevenDaysAgo && d.timestamp <= now;
+        if (periodo === 'mes') return d.timestamp.getMonth() === now.getMonth() && d.timestamp.getFullYear() === now.getFullYear();
+        return true;
+      });
+    }
+
+    const statsPorTrabajador = {};
+    
+    filtrados.forEach(d => {
+      const ase = (d.asesor || 'No identificado').trim();
+      if (!statsPorTrabajador[ase]) statsPorTrabajador[ase] = { count: 0 };
+      statsPorTrabajador[ase].count++;
+    });
+
+    const arrStats = Object.entries(statsPorTrabajador).map(([nombre, data]) => ({
+      nombre, count: data.count
+    }));
+
+    const totalRegistros = filtrados.length;
+    
+    let masConsultas = { nombre: '-', count: 0 };
+
+    arrStats.forEach(s => {
+      if (s.count > masConsultas.count) masConsultas = s;
+    });
+
+    const elTotal = document.getElementById('kpiTrabTotal');
+    if (elTotal) elTotal.textContent = totalRegistros;
+    
+    const elMasConsultas = document.getElementById('kpiTrabMasConsultas');
+    if (elMasConsultas) {
+      elMasConsultas.textContent = masConsultas.nombre === '-' ? '-' : `${masConsultas.nombre} (${masConsultas.count})`;
+      elMasConsultas.title = masConsultas.nombre === '-' ? '' : `${masConsultas.nombre} (${masConsultas.count})`;
+    }
+    
+    const elContador = document.getElementById('contadorTablaTrab');
+    if (elContador) elContador.textContent = `${totalRegistros} registro${totalRegistros !== 1 ? 's' : ''}`;
+
+    renderChartTrabVolumen(arrStats);
+    renderChartTrabTendencia(filtrados);
+    renderTablaTrabajadores(filtrados);
+  }
+
+  function renderChartTrabVolumen(arrStats) {
+    const canvas = document.getElementById('chartTrabVolumen');
+    if (!canvas) return;
+    const ChartSDK = getChartSDK();
+    if (!ChartSDK) return;
+    const theme = getThemeColors();
+
+    const sorted = [...arrStats].sort((a, b) => b.count - a.count).slice(0, 10);
+    const labels = sorted.map(s => s.nombre);
+    const data = sorted.map(s => s.count);
+
+    if (chartTrabVolumenInstance) { chartTrabVolumenInstance.destroy(); chartTrabVolumenInstance = null; }
+
+    const ctx = canvas.getContext('2d');
+    chartTrabVolumenInstance = new ChartSDK(ctx, {
+      type: 'bar',
+      data: {
+        labels: labels.length ? labels : ['Sin datos'],
+        datasets: [{
+          label: 'Registros',
+          data: data.length ? data : [0],
+          backgroundColor: '#3b82f6',
+          borderRadius: 4
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { ticks: { color: theme.text, font: { family: 'DM Sans', size: 11 } }, grid: { display: false } },
+          y: { beginAtZero: true, ticks: { stepSize: 1, color: theme.text, font: { family: 'DM Sans', size: 11 } }, grid: { color: theme.grid } }
+        }
+      }
+    });
+  }
+
+
+
+  function renderChartTrabTendencia(filtrados) {
+    const canvas = document.getElementById('chartTrabTendencia');
+    if (!canvas) return;
+    const ChartSDK = getChartSDK();
+    if (!ChartSDK) return;
+    const theme = getThemeColors();
+
+    const daysMap = {};
+    const labels = [];
+    const dateKeys = [];
+    const now = new Date();
+
+    for (let i = 29; i >= 0; i--) {
+      const d = new Date(now);
+      d.setDate(now.getDate() - i);
+      const key = formatDayMonthKey(d);
+      const label = formatDayMonthLabel(d);
+      dateKeys.push(key);
+      labels.push(label);
+      daysMap[key] = 0;
+    }
+
+    filtrados.forEach(d => {
+      const key = formatDayMonthKey(d.timestamp);
+      if (daysMap.hasOwnProperty(key)) daysMap[key]++;
+    });
+
+    const dataValues = dateKeys.map(key => daysMap[key]);
+
+    if (chartTrabTendenciaInstance) { chartTrabTendenciaInstance.destroy(); chartTrabTendenciaInstance = null; }
+
+    const ctx = canvas.getContext('2d');
+    chartTrabTendenciaInstance = new ChartSDK(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Registros',
+          data: dataValues,
+          borderColor: '#8b5cf6',
+          backgroundColor: theme.isDark ? 'rgba(139, 92, 246, 0.2)' : 'rgba(139, 92, 246, 0.1)',
+          borderWidth: 2, tension: 0.3, fill: true, pointRadius: 2
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { ticks: { color: theme.text, font: { family: 'DM Sans', size: 11 }, maxTicksLimit: 10 }, grid: { display: false } },
+          y: { beginAtZero: true, ticks: { stepSize: 1, color: theme.text, font: { family: 'DM Sans', size: 11 } }, grid: { color: theme.grid } }
+        }
+      }
+    });
+  }
+
+  function renderTablaTrabajadores(filtrados) {
+    const tbody = document.getElementById('tablaTrabajadoresBody');
+    if (!tbody) return;
+
+    if (filtrados.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: var(--text-muted); padding: 2rem;">No se encontraron registros para los filtros seleccionados.</td></tr>`;
+      return;
+    }
+
+    const sorted = [...filtrados].sort((a, b) => b.timestamp - a.timestamp);
+
+    tbody.innerHTML = sorted.map(d => {
+      return `
+        <tr>
+          <td style="white-space: nowrap; font-size: 0.85rem;">${formatDateTime(d.timestamp)}</td>
+          <td style="font-weight: 600;">${escapeHtml(d.asesor || 'No identificado')}</td>
+          <td style="font-size: 0.85rem; max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${escapeHtml(d.descripcion)}">${escapeHtml(d.descripcion || '-')}</td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  window.exportarTablaTrabajadoresCSV = function() {
+    const trabajador = document.getElementById('filtroTrabajador')?.value || '';
+    const periodo = document.getElementById('filtroFechaTrabajador')?.value || 'todo';
+
+    let exportData = [...allFelicitacionesDocs];
+    if (trabajador) exportData = exportData.filter(d => (d.asesor || 'No identificado').trim() === trabajador);
+    if (periodo !== 'todo') {
+      const now = new Date();
+      const hoyStr = formatDayMonthKey(now);
+      const sevenDaysAgo = new Date(now);
+      sevenDaysAgo.setDate(now.getDate() - 7);
+      exportData = exportData.filter(d => {
+        const dKey = formatDayMonthKey(d.timestamp);
+        if (periodo === 'hoy') return dKey === hoyStr;
+        if (periodo === 'semana') return d.timestamp >= sevenDaysAgo && d.timestamp <= now;
+        if (periodo === 'mes') return d.timestamp.getMonth() === now.getMonth() && d.timestamp.getFullYear() === now.getFullYear();
+        return true;
+      });
+    }
+
+    if (exportData.length === 0) {
+      alert("No hay datos para exportar.");
+      return;
+    }
+
+    let csvContent = "data:text/csv;charset=utf-8,Fecha,Trabajador,Comentario\n";
+    exportData.sort((a, b) => b.timestamp - a.timestamp).forEach(d => {
+      const fecha = formatDateTime(d.timestamp);
+      const trab = escapeHtml(d.asesor || 'No identificado');
+      const coment = escapeHtml(d.descripcion || '').replace(/"/g, '""');
+      csvContent += `"${fecha}","${trab}","${coment}"\n`;
+    });
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `dashboard_trabajadores_${formatDayMonthKey(new Date())}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+
   async function loadFelicitacionesPanel() {
     const lastUpdateEl = document.getElementById('felicitacionesLastUpdate');
     if (lastUpdateEl) lastUpdateEl.textContent = 'Actualizando datos...';
 
     // 1. Mostrar de inmediato la interfaz de contenido con gráficos por defecto (0 retardo)
     renderAllChartsAndKPIs([]);
+    initTrabajadoresDashboard([]);
 
     // 2. Consultar Firestore en segundo plano sin congelar la UI
     try {
@@ -618,6 +901,7 @@
         lastUpdateEl.textContent = `Última actualización: ${formatDateTime(new Date())}`;
       }
       renderAllChartsAndKPIs(docs);
+      initTrabajadoresDashboard(docs);
     } catch (err) {
       console.warn("Conexión Firestore en espera de registros:", err);
       if (lastUpdateEl) {
